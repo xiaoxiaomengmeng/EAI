@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ws 工作区项目梳理</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #5f6b7a;
+      --border: #d8dee9;
+      --accent: #2563eb;
+      --code-bg: #eef2f7;
+      --ok: #0f8a4c;
+      --warn: #b7791f;
+      --alert: #b42318;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.65;
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 40px 20px 64px;
+    }
+
+    header {
+      margin-bottom: 28px;
+      padding: 28px;
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(31, 41, 55, 0.06);
+    }
+
+    h1, h2, h3 {
+      line-height: 1.25;
+      color: #111827;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 2.1rem;
+    }
+
+    h2 {
+      margin: 34px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      font-size: 1.55rem;
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 1.18rem;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code {
+      padding: 0.12rem 0.35rem;
+      background: var(--code-bg);
+      border-radius: 6px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.94em;
+    }
+
+    pre {
+      margin: 12px 0 18px;
+      padding: 16px;
+      overflow-x: auto;
+      background: #111827;
+      color: #f9fafb;
+      border-radius: 12px;
+      line-height: 1.5;
+    }
+
+    pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 24px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    ul {
+      margin: 10px 0 18px;
+      padding-left: 1.25rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .project-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .project-card {
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+    }
+
+    .project-card ul {
+      margin-bottom: 0;
+    }
+
+    .status-ok {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .status-partial {
+      color: var(--warn);
+      font-weight: 700;
+    }
+
+    .status-alert {
+      color: var(--alert);
+      font-weight: 700;
+    }
+
+    .section-card {
+      padding: 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 6px 18px rgba(31, 41, 55, 0.05);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>ws 工作区项目梳理</h1>
+      <p>本目录下每个主要子目录基本都是一个独立 git 仓库，当前机器环境为 <strong>Ubuntu 22.04 + NVIDIA RTX 5090</strong>。本文件用于记录各仓库的大致用途、当前验证情况，以及哪些项目因为显存/算力占用较高暂未做完整验证。</p>
+    </header>
+
+    <section>
+      <h2>状态说明</h2>
+      <ul>
+        <li><strong class="status-ok">✅ 已验证/可运行</strong>：已有本地输出、示例结果，或轻量流程可以直接跑通。</li>
+        <li><strong class="status-partial">🟡 基础可用/部分验证</strong>：核心代码或轻量功能可用，但完整链路依赖模型、数据、硬件或外设。</li>
+        <li><strong class="status-alert">⚠️ 暂未完整验证</strong>：项目本身较重，主要受显存、模型体积、多 GPU 或运行时长限制影响。</li>
+        <li><strong>📦 资料/依赖文件</strong>：不是独立运行项目，主要作为安装包、压缩包或资料留存。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>仓库概览</h2>
+      <p class="muted">以下目录按名称的字母顺序排列，每个项目单独说明用途、当前状态和备注。</p>
+      <div class="project-grid">
+        <article class="project-card">
+          <h3><code>colibri/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：纯 C 的 GLM-5.2 744B MoE 运行时，通过磁盘/RAM/VRAM 分层加载专家。</li>
+            <li><strong>Git 链接</strong>：<code>git@github.com:xiaoxiaomengmeng/colibri.git</code></li>
+            <li><strong>当前分支</strong>：<code>main</code></li>
+            <li><strong>当前状态</strong>：<span class="status-alert">⚠️ 暂未验证</span></li>
+            <li><strong>备注</strong>：代码主体为纯 C 实现；但完整运行依赖 GLM-5.2 MoE 模型/专家文件，磁盘占用较大，当前环境暂未完成验证。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>human_dexterous_teleop/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：人体姿态估计、手势识别、MuJoCo 仿真、Aero Hand/ROS2 灵巧手遥操作方案。</li>
+            <li><strong>Git 链接</strong>：<a href="https://gitee.com/zgrxmm/hand_gesture_recognition.git">https://gitee.com/zgrxmm/hand_gesture_recognition.git</a></li>
+            <li><strong>当前分支</strong>：<code>master</code></li>
+            <li><strong>当前状态</strong>：<span class="status-partial">🟡 基础可用/部分验证</span></li>
+            <li><strong>备注</strong>：MediaPipe/MuJoCo 等轻量模块可跑；完整 ROS2、真实硬件或重型动捕方案需要外设和额外环境。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>lingbot-depth/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：Masked Depth Modeling 深度补全/精修模型，用于空间感知、点云和机器人操作。</li>
+            <li><strong>Git 链接</strong>：<code>git@github.com:Robbyant/lingbot-depth.git</code></li>
+            <li><strong>当前分支</strong>：<code>main</code></li>
+            <li><strong>当前状态</strong>：<span class="status-ok">✅ 已验证/可运行</span></li>
+            <li><strong>备注</strong>：<code>example.py</code> 提供直接推理流程，<code>result/</code> 下已有输出结果；相对适合 RTX 5090 单卡验证。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>lingbot-video/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：面向具身智能的大规模 MoE 视频生成模型，包含 Dense 1.3B 和 MoE 30B-A3B。</li>
+            <li><strong>Git 链接</strong>：<code>git@github.com:xiaoxiaomengmeng/lingbot-video.git</code></li>
+            <li><strong>当前分支</strong>：<code>master</code></li>
+            <li><strong>当前状态</strong>：<span class="status-alert">⚠️ 暂未完整验证</span></li>
+            <li><strong>备注</strong>：视频生成和 MoE 推理显存占用高，完整验证需要更充足 GPU 资源；可优先尝试 Dense/低分辨率/短视频路径。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>lingbot-world-v2/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：14B causal-fast 交互世界模型，支持长时交互视频生成和 KV cache 推理。</li>
+            <li><strong>Git 链接</strong>：<code>git@github.com:xiaoxiaomengmeng/lingbot-world-v2.git</code></li>
+            <li><strong>当前分支</strong>：<code>main</code></li>
+            <li><strong>当前状态</strong>：<span class="status-alert">⚠️ 暂未完整验证</span></li>
+            <li><strong>备注</strong>：模型体积和推理显存较大，完整体验更偏多 GPU/大显存环境；单 RTX 5090 可作为后续低配置尝试对象。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>mujoco_menagerie/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：Google DeepMind 维护的 MuJoCo 机器人模型库，包含机械臂、四足、人形、无人机等 MJCF 模型。</li>
+            <li><strong>Git 链接</strong>：<code>git@gitee.com:eai_2026/mujoco_menagerie.git</code></li>
+            <li><strong>当前分支</strong>：<code>master</code></li>
+            <li><strong>当前状态</strong>：<span class="status-ok">✅ 已验证/可用</span></li>
+            <li><strong>备注</strong>：主要是仿真模型资源库，通常不依赖 GPU；适合离线加载、仿真和算法原型。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>RynnBrain/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：具身基础模型，包含空间理解、目标定位、OCR、轨迹定位、规划、导航等 cookbooks 和验证代码。</li>
+            <li><strong>Git 链接</strong>：<code>git@github.com:xiaoxiaomengmeng/RynnBrain.git</code></li>
+            <li><strong>当前分支</strong>：<code>main</code></li>
+            <li><strong>当前状态</strong>：<span class="status-ok">✅ 已验证/可运行</span></li>
+            <li><strong>备注</strong>：<code>outputs/</code> 下已有多组示例结果图，适合作为具身多模态理解与推理 demo。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>RynnWorld-4D/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：4D embodied world model，用 RGB、Depth、Optical Flow 建模场景演化，并带机器人操控 policy。</li>
+            <li><strong>Git 链接</strong>：<code>git@github.com:Alibaba-DAMO-Academy/RynnWorld-4D</code></li>
+            <li><strong>当前分支</strong>：<code>main</code></li>
+            <li><strong>当前状态</strong>：<span class="status-alert">⚠️ 暂未完整验证</span></li>
+            <li><strong>备注</strong>：依赖 Wan2.2 5B backbone、RynnWorld 权重和可选 Depth-Anything；训练/Policy 闭环较吃 GPU。</li>
+          </ul>
+        </article>
+
+        <article class="project-card">
+          <h3><code>Wan-Dancer/</code></h3>
+          <ul>
+            <li><strong>内容概述</strong>：音乐驱动的长时长舞蹈视频生成，包含 global/local 两阶段视频生成脚本。</li>
+            <li><strong>Git 链接</strong>：<code>git@github.com:xiaoxiaomengmeng/Wan-Dancer.git</code></li>
+            <li><strong>当前分支</strong>：<code>main</code></li>
+            <li><strong>当前状态</strong>：<span class="status-alert">⚠️ 暂无法在单卡 RTX 5090 验证</span></li>
+            <li><strong>备注</strong>：该项目需要 8 卡环境才能正常使用；当前单卡 RTX 5090 环境无法完成有效验证，需等具备 8 卡 GPU 资源后再验证。</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>顶层文件/资料</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>文件</th>
+            <th>说明</th>
+            <th>状态</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>readme.md</code></td>
+            <td>当前工作区总览说明。</td>
+            <td>✅ 本文件</td>
+          </tr>
+          <tr>
+            <td><code>setup_py310_cu128_rtx5090_torch2110.sh</code></td>
+            <td>RTX 5090 + PyTorch 2.11.0 cu128 统一部署脚本。</td>
+            <td>✅ 环境脚本</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="section-card">
+      <h2>RTX 5090 PyTorch 环境提示</h2>
+      <p>RTX 5090 对应 <code>sm_120</code>，部分项目如果使用旧版 PyTorch/CUDA wheel，可能会出现架构不支持或 CUDA 不可用的问题。当前推荐使用统一部署脚本安装 <strong>CUDA 12.8 版本的 PyTorch 2.11.0</strong>，也可按下方命令手动安装。</p>
+
+      <h3>推荐：使用统一部署脚本</h3>
+      <p>顶层已提供统一脚本，便于后续其他仓库复用：</p>
+      <pre><code># 安装到当前已激活的 conda/venv 环境
+bash setup_py310_cu128_rtx5090_torch2110.sh</code></pre>
+      <p>脚本默认读取 <code>~/Downloads/py310-cu128-torch</code> 下的本地 wheel，安装完成后会自动验证 <code>torch.cuda.is_available()</code>、GPU 名称和 <code>sm_120</code> 计算能力。</p>
+
+      <h3>备用：手动安装支持 sm_120 的 PyTorch</h3>
+      <pre><code>cd ~/Downloads/py310-cu128-torch
+pip install \
+torch-2.11.0+cu128-cp310-cp310-manylinux_2_28_x86_64.whl \
+torchvision-0.26.0+cu128-cp310-cp310-manylinux_2_28_x86_64.whl \
+torchaudio-2.11.0+cu128-cp310-cp310-manylinux_2_28_x86_64.whl \
+triton-3.6.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl \
+-f https://mirrors.aliyun.com/pytorch-wheels/ \
+-i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn</code></pre>
+
+      <h3>验证 PyTorch 安装</h3>
+      <pre><code>python -c "import torch; print(f'PyTorch Version: {torch.__version__}'); print(f'CUDA Available: {torch.cuda.is_available()}'); print(f'GPU Name: {torch.cuda.get_device_name(0)}')"</code></pre>
+      <p>期望输出示例：</p>
+      <pre><code>PyTorch Version: 2.11.0+cu128
+CUDA Available: True
+GPU Name: NVIDIA GeForce RTX 5090</code></pre>
+    </section>
+
+    <section>
+      <h2>后续验证建议</h2>
+      <ul>
+        <li><strong>优先验证轻量/确定性项目</strong>：<code>RynnBrain/</code>、<code>lingbot-depth/</code>、<code>mujoco_menagerie/</code>。</li>
+        <li><strong>中等优先级</strong>：<code>human_dexterous_teleop/</code>，重点先跑基础 demo 或 doctor/setup 检查。</li>
+        <li><strong>资源受限项目</strong>：<code>colibri/</code> 代码主体为纯 C，但模型/专家文件磁盘占用较大，当前暂未验证；<code>Wan-Dancer/</code> 需要 8 卡环境，单卡 RTX 5090 暂无法验证。</li>
+        <li><strong>显存压力较大项目</strong>：<code>lingbot-video/</code>、<code>lingbot-world-v2/</code>、<code>RynnWorld-4D/</code>，建议后续按低分辨率、短序列、Dense/小模型、单阶段脚本逐步验证。</li>
+        <li><strong>记录方式</strong>：每次验证后可在本表状态中追加“已跑通命令、输出目录、失败原因或显存占用”。</li>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>
