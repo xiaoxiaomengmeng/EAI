@@ -28,15 +28,15 @@ LIBERO 评测是闭环控制：
 OpenVLA 官方 LIBERO 入口：
 
 ```text
-openvla/experiments/robot/libero/run_libero_eval.py
+repos/openvla/experiments/robot/libero/run_libero_eval.py
 ```
 
 相关工具：
 
 ```text
-openvla/experiments/robot/libero/libero_utils.py
-openvla/experiments/robot/openvla_utils.py
-openvla/experiments/robot/robot_utils.py
+repos/openvla/experiments/robot/libero/libero_utils.py
+repos/openvla/experiments/robot/openvla_utils.py
+repos/openvla/experiments/robot/robot_utils.py
 ```
 
 ## 3. 任务套件
@@ -94,7 +94,7 @@ source .venv/bin/activate
 安装 OpenVLA 源码依赖：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 python -m pip install -r requirements-min.txt
 python -m pip install -e . --no-deps
 ```
@@ -125,10 +125,10 @@ python -m pip install numpy==1.26.4 opencv-python==4.10.0.84
 
 ## 6. LIBERO 源码配置
 
-如果 `/home/creator/ws/openVLA/LIBERO` 已存在：
+如果 `/home/creator/ws/openVLA/repos/LIBERO` 已存在：
 
 ```bash
-cd /home/creator/ws/openVLA/LIBERO
+cd /home/creator/ws/openVLA/repos/LIBERO
 source /home/creator/ws/openVLA/.venv/bin/activate
 python -m pip install -e .
 ```
@@ -139,11 +139,11 @@ python -m pip install -e .
 mkdir -p /home/creator/ws/openVLA/.libero
 
 cat > /home/creator/ws/openVLA/.libero/config.yaml <<'YAML'
-assets: /home/creator/ws/openVLA/LIBERO/libero/libero/assets
-bddl_files: /home/creator/ws/openVLA/LIBERO/libero/libero/bddl_files
-benchmark_root: /home/creator/ws/openVLA/LIBERO/libero/libero
-datasets: /home/creator/ws/openVLA/LIBERO/libero/datasets
-init_states: /home/creator/ws/openVLA/LIBERO/libero/libero/init_files
+assets: /home/creator/ws/openVLA/repos/LIBERO/libero/libero/assets
+bddl_files: /home/creator/ws/openVLA/repos/LIBERO/libero/libero/bddl_files
+benchmark_root: /home/creator/ws/openVLA/repos/LIBERO/libero/libero
+datasets: /home/creator/ws/openVLA/repos/LIBERO/libero/datasets
+init_states: /home/creator/ws/openVLA/repos/LIBERO/libero/libero/init_files
 YAML
 ```
 
@@ -159,7 +159,7 @@ export MUJOCO_GL=egl
 推荐先跑 1 个 trial，避免默认完整评测过久。
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
 export MUJOCO_GL=egl

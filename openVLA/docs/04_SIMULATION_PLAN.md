@@ -155,7 +155,7 @@ timing
 推荐先跑 smoke test：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
 export MUJOCO_GL=egl
@@ -179,7 +179,7 @@ python experiments/robot/libero/run_libero_eval.py \
 入口：
 
 ```text
-openvla/experiments/robot/bridge/run_bridgev2_eval.py
+repos/openvla/experiments/robot/bridge/run_bridgev2_eval.py
 ```
 
 需要：

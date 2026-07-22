@@ -140,14 +140,14 @@ bash /home/creator/ws/setup_py310_cu128_rtx5090_torch2110.sh
 source /home/creator/ws/openVLA/.venv/bin/activate
 python -m pip install modelscope huggingface_hub pillow accelerate sentencepiece
 
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 python -m pip install -r requirements-min.txt
 ```
 
 如需以源码包方式导入 OpenVLA，可执行：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 python -m pip install -e . --no-deps
 ```
 
@@ -460,7 +460,7 @@ PY
 ### 9.1 安装 LIBERO 相关依赖
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 python -m pip install -r experiments/robot/libero/libero_requirements.txt
 ```
@@ -477,7 +477,7 @@ python -m pip install -e .
 ### 9.3 运行最小 LIBERO-Spatial 评测
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 
 python experiments/robot/libero/run_libero_eval.py \

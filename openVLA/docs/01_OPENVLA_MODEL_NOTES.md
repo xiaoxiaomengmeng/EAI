@@ -84,8 +84,8 @@ model = AutoModelForVision2Seq.from_pretrained(
 ```text
 demo_predict_action.py
 openvla_sim/openvla_policy.py
-openvla/experiments/robot/openvla_utils.py
-openvla/experiments/robot/robot_utils.py
+repos/openvla/experiments/robot/openvla_utils.py
+repos/openvla/experiments/robot/robot_utils.py
 ```
 
 ## 5. prompt 与 predict_action
@@ -126,8 +126,8 @@ action token -> 解码 -> 归一化 action -> unnorm_key 反归一化 -> 真实�
 关键代码参考：
 
 ```text
-openvla/prismatic/vla/action_tokenizer.py
-openvla/prismatic/extern/hf/modeling_prismatic.py
+repos/openvla/prismatic/vla/action_tokenizer.py
+repos/openvla/prismatic/extern/hf/modeling_prismatic.py
 ```
 
 ## 7. attention 后端

@@ -30,8 +30,9 @@ openvla-7b base 不应直接当作 LIBERO 微调 checkpoint 使用
 ├── demo_predict_action.py            # OpenVLA 单步动作预测 demo
 ├── docs/                             # 结构化主题文档
 ├── openvla_sim/                      # 自定义 MuJoCo 闭环仿真 demo
-├── openvla/                          # 官方 OpenVLA 源码
-└── LIBERO/                           # LIBERO 源码，如已安装
+├── repos/
+│   ├── openvla/                    # 官方 OpenVLA 源码
+│   └── LIBERO/                     # LIBERO 源码，如已安装
 ```
 
 ## 3. 文档导航
@@ -82,7 +83,7 @@ export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
 安装 `openvla` 源码包时优先使用：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 python -m pip install -e . --no-deps
 ```
@@ -188,7 +189,7 @@ direct  action[:6] 直接映射为关节增量，用于对照
 LIBERO 是标准 MuJoCo / robosuite benchmark。不要直接用 `openvla-7b` base 跑标准 LIBERO，推荐使用 LIBERO 微调 checkpoint。
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
 export MUJOCO_GL=egl
@@ -219,7 +220,7 @@ libero_10      -> openvla/openvla-7b-finetuned-libero-10
 官方入口：
 
 ```text
-openvla/experiments/robot/bridge/run_bridgev2_eval.py
+repos/openvla/experiments/robot/bridge/run_bridgev2_eval.py
 ```
 
 该脚本面向真实 Bridge V2 / WidowX 环境，需要：
@@ -232,7 +233,7 @@ host_ip / port
 真实或兼容机器人控制端
 ```
 
-它不是本地离线仿真，也不能仅靠 `openvla/` 目录完整跑通。详细说明见 [06_BRIDGE_WIDOWX_NOTES.md](docs/06_BRIDGE_WIDOWX_NOTES.md)。
+它不是本地离线仿真，也不能仅靠 `repos/openvla/` 目录完整跑通。详细说明见 [06_BRIDGE_WIDOWX_NOTES.md](docs/06_BRIDGE_WIDOWX_NOTES.md)。
 
 ## 10. 输出位置
 

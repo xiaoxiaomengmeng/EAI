@@ -56,7 +56,7 @@ mujoco_menagerie 中有可用的 trossen_wx250s 模型
 入口文件：
 
 ```text
-openvla/experiments/robot/bridge/run_bridgev2_eval.py
+repos/openvla/experiments/robot/bridge/run_bridgev2_eval.py
 ```
 
 脚本说明中明确写的是：
@@ -83,8 +83,8 @@ host_ip / port 连接配置
 核心依赖位置：
 
 ```text
-openvla/experiments/robot/bridge/bridgev2_utils.py
-openvla/experiments/robot/bridge/widowx_env.py
+repos/openvla/experiments/robot/bridge/bridgev2_utils.py
+repos/openvla/experiments/robot/bridge/widowx_env.py
 ```
 
 其中 `widowx_env.py` 依赖：

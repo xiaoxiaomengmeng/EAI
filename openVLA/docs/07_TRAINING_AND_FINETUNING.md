@@ -21,7 +21,7 @@ RGB 图像 + 语言指令
 官方训练入口：
 
 ```text
-openvla/vla-scripts/train.py
+repos/openvla/vla-scripts/train.py
 ```
 
 作用：使用 Prismatic 训练栈和 PyTorch FSDP 训练 VLA，适合从头训练、继续训练、全量微调或不同冻结策略。
@@ -29,7 +29,7 @@ openvla/vla-scripts/train.py
 LoRA 微调入口：
 
 ```text
-openvla/vla-scripts/finetune.py
+repos/openvla/vla-scripts/finetune.py
 ```
 
 作用：基于 Hugging Face `AutoModelForVision2Seq` 加载 `openvla-7b`，使用 PEFT / LoRA 做参数高效微调。
@@ -37,21 +37,21 @@ openvla/vla-scripts/finetune.py
 数据加载与样本转换：
 
 ```text
-openvla/prismatic/vla/datasets/datasets.py
-openvla/prismatic/vla/materialize.py
-openvla/prismatic/vla/datasets/rlds/oxe/
+repos/openvla/prismatic/vla/datasets/datasets.py
+repos/openvla/prismatic/vla/materialize.py
+repos/openvla/prismatic/vla/datasets/rlds/oxe/
 ```
 
 动作 token 化：
 
 ```text
-openvla/prismatic/vla/action_tokenizer.py
+repos/openvla/prismatic/vla/action_tokenizer.py
 ```
 
 训练配置注册：
 
 ```text
-openvla/prismatic/conf/vla.py
+repos/openvla/prismatic/conf/vla.py
 ```
 
 ## 3. 训练数据格式
@@ -82,6 +82,117 @@ dataset_name     # 样本来源
 Human: What action should the robot take to <language_instruction>?
 Assistant: <action_tokens>
 ```
+
+### 3.1 常见数据集
+
+OpenVLA 训练和评测里常见的数据集可以按来源分成几类：
+
+| 数据集 | 机器人/环境 | 常见用途 | 关键点 |
+|---|---|---|---|
+| `bridge_orig` / BridgeData V2 | WidowX / Bridge 系列真实机器人 | `openvla-7b` base 推理、Bridge/WidowX 风格动作适配 | 当前 base 模型常用 `unnorm_key=bridge_orig` |
+| Open-X Embodiment / OXE mixture | 多机器人、多任务真实数据 | OpenVLA base 预训练 | 包含多个机器人数据集，每个数据集有独立动作统计 |
+| LIBERO | MuJoCo / robosuite 仿真 | 标准仿真评测、LIBERO 微调 checkpoint | 需要 `libero_spatial` 等 LIBERO 专用 `unnorm_key` |
+| DROID | 大规模真实机器人数据 | 微调示例、真实机器人泛化研究 | 常见于 OpenVLA 微调配置示例 |
+| 自定义 MuJoCo 数据 | Franka / WX250S / 其他本地机器人 | 后续自定义场景 LoRA 微调 | 必须明确图像、指令、7D action 和 `norm_stats` |
+
+注意：数据集名称不仅是“来源标签”，还会影响动作统计。模型推理时选择的 `unnorm_key` 必须和 checkpoint 中保存的 `norm_stats` 对齐。
+
+### 3.2 数据格式示例
+
+#### 示例 1：BridgeData / WidowX 风格单步样本
+
+BridgeData / WidowX 风格样本可以抽象为：
+
+```python
+sample = {
+    "observation": {
+        "image_primary": "RGB image, shape=(H, W, 3)",
+        "proprio": [x, y, z, roll, pitch, yaw, gripper],
+    },
+    "task": {
+        "language_instruction": "pick up the red cube",
+    },
+    "action": [dx, dy, dz, droll, dpitch, dyaw, gripper],
+    "dataset_name": "bridge_orig",
+}
+```
+
+其中 `action` 是末端相对动作，不是直接的关节角。推理时如果使用 `bridge_orig`，模型会用 BridgeData V2 原始版动作统计把 action token 反归一化。
+
+#### 示例 2：LIBERO 仿真单步样本
+
+LIBERO 样本来自 MuJoCo / robosuite 仿真环境，抽象结构类似：
+
+```python
+sample = {
+    "observation": {
+        "image_primary": "agentview RGB image, shape=(256, 256, 3)",
+        "state": [eef_x, eef_y, eef_z, eef_axis_angle, gripper_qpos],
+    },
+    "task": {
+        "language_instruction": "put the bowl on the plate",
+    },
+    "action": [dx, dy, dz, droll, dpitch, dyaw, gripper],
+    "dataset_name": "libero_spatial",
+}
+```
+
+LIBERO 官方评测脚本会根据 `task_suite_name` 设置 `unnorm_key`，例如 `libero_spatial`。因此 LIBERO 标准评测应使用 `openvla-7b-finetuned-libero-*`，不能直接混用 base `openvla-7b`。
+
+#### 示例 3：自定义 Franka / WX250S MuJoCo 微调样本
+
+如果后续要把当前 `openvla_sim` 场景采成微调数据，最小样本可以设计成：
+
+```python
+sample = {
+    "observation": {
+        "image_primary": "policy camera RGB image, shape=(224, 224, 3)",
+        "proprio": {
+            "qpos": [q1, q2, q3, q4, q5, q6, q7],
+            "ee_site_pos": [x, y, z],
+            "gripper_state": "open",
+        },
+    },
+    "task": {
+        "language_instruction": "pick up the red cube and lift it",
+    },
+    "action": [dx, dy, dz, droll, dpitch, dyaw, gripper],
+    "dataset_name": "franka_red_cube_sim",
+}
+```
+
+这里最关键的是：专家动作最好仍统一成 OpenVLA 可学习的 7D 末端动作。如果原始控制是关节位置或 MuJoCo actuator ctrl，需要先转换成一致的动作定义，再计算该数据集自己的 `norm_stats`。
+
+#### 示例 4：RLDS episode 结构
+
+OpenVLA 训练管道通常不是只读单个 step，而是按 episode 存储多步轨迹。一个 episode 可以抽象为：
+
+```python
+episode = {
+    "steps": [
+        {
+            "observation": {
+                "image_primary": "RGB image at t0",
+            },
+            "task": {
+                "language_instruction": "open the drawer",
+            },
+            "action": [dx, dy, dz, droll, dpitch, dyaw, gripper],
+        },
+        {
+            "observation": {
+                "image_primary": "RGB image at t1",
+            },
+            "task": {
+                "language_instruction": "open the drawer",
+            },
+            "action": [dx, dy, dz, droll, dpitch, dyaw, gripper],
+        },
+    ]
+}
+```
+
+训练时，每个 step 会被转换成 “图像 + 指令 -> action token” 的监督样本。episode 结构主要用于保留轨迹顺序、任务上下文和数据集统计。
 
 ## 4. ActionTokenizer
 
@@ -153,7 +264,7 @@ LoRA 是当前更实用的低成本微调路线。
 典型命令模板：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
@@ -177,7 +288,7 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
 全量微调使用：
 
 ```text
-openvla/vla-scripts/train.py
+repos/openvla/vla-scripts/train.py
 ```
 
 它通常使用 Prismatic 兼容格式 checkpoint，例如：
@@ -234,7 +345,7 @@ predict_action 使用对应 unnorm_key
 Prismatic 格式模型若要用 Hugging Face AutoClasses 推理，需要转换：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 
 python vla-scripts/extern/convert_openvla_weights_to_hf.py \
@@ -255,7 +366,7 @@ RTX 5090 / sm_120 / CUDA 12.8 / PyTorch 2.11.0+cu128
 安装源码包时优先：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 python -m pip install -e . --no-deps
 ```

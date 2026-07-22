@@ -377,7 +377,7 @@ RGB 图像 + 语言指令
 ### 官方训练入口
 
 ```text
-openvla/vla-scripts/train.py
+repos/openvla/vla-scripts/train.py
 ```
 
 作用：使用 Prismatic 训练栈和 PyTorch FSDP 训练 VLA。适合从头训练、继续训练、全量微调或不同冻结策略的微调。
@@ -385,7 +385,7 @@ openvla/vla-scripts/train.py
 ### LoRA 微调入口
 
 ```text
-openvla/vla-scripts/finetune.py
+repos/openvla/vla-scripts/finetune.py
 ```
 
 作用：基于 Hugging Face `AutoModelForVision2Seq` 加载 `openvla-7b`，使用 PEFT / LoRA 做参数高效微调，可选 4bit 量化。
@@ -393,9 +393,9 @@ openvla/vla-scripts/finetune.py
 ### 数据加载与样本转换
 
 ```text
-openvla/prismatic/vla/datasets/datasets.py
-openvla/prismatic/vla/materialize.py
-openvla/prismatic/vla/datasets/rlds/oxe/
+repos/openvla/prismatic/vla/datasets/datasets.py
+repos/openvla/prismatic/vla/materialize.py
+repos/openvla/prismatic/vla/datasets/rlds/oxe/
 ```
 
 作用：加载 RLDS / Open-X Embodiment 格式数据，统一图像、语言、动作字段，并转成 OpenVLA 训练批次。
@@ -403,7 +403,7 @@ openvla/prismatic/vla/datasets/rlds/oxe/
 ### 动作 token 化
 
 ```text
-openvla/prismatic/vla/action_tokenizer.py
+repos/openvla/prismatic/vla/action_tokenizer.py
 ```
 
 作用：把连续动作离散成 LLM tokenizer 词表末尾的 action token，也可以把 action token 解码回连续归一化动作。
@@ -411,7 +411,7 @@ openvla/prismatic/vla/action_tokenizer.py
 ### 训练配置注册
 
 ```text
-openvla/prismatic/conf/vla.py
+repos/openvla/prismatic/conf/vla.py
 ```
 
 作用：定义不同训练实验配置，包括数据混合、基础 VLM、冻结策略、batch size、学习率、FSDP 策略等。
@@ -506,7 +506,7 @@ unnorm_key = bridge_orig
 LoRA 微调是当前最实用的路线，入口是：
 
 ```text
-openvla/vla-scripts/finetune.py
+repos/openvla/vla-scripts/finetune.py
 ```
 
 它的特点：
@@ -544,7 +544,7 @@ LoRA rank=32, target_modules=all-linear
 典型命令模板：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
@@ -568,7 +568,7 @@ torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
 全量微调使用：
 
 ```text
-openvla/vla-scripts/train.py
+repos/openvla/vla-scripts/train.py
 ```
 
 它不是直接用 HF `openvla-7b` checkpoint，而是使用 Prismatic 兼容格式 checkpoint，例如官方提到的：
@@ -590,7 +590,7 @@ LoRA 适配效果不足
 典型命令模板：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 
 torchrun --standalone --nnodes 1 --nproc-per-node 8 vla-scripts/train.py \
@@ -620,7 +620,7 @@ base_vlm: prism-dinosiglip-224px+7b
 典型配置在：
 
 ```text
-openvla/prismatic/conf/vla.py
+repos/openvla/prismatic/conf/vla.py
 ```
 
 例如：
@@ -709,7 +709,7 @@ predict_action 使用对应 unnorm_key
 全量训练 / Prismatic 格式模型需要转换为 HF 格式：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 
 python vla-scripts/extern/convert_openvla_weights_to_hf.py \
@@ -744,7 +744,7 @@ openvla/openvla-7b-finetuned-libero-10
 因此本工作区不要直接执行会覆盖 PyTorch 的安装命令。安装源码包时优先：
 
 ```bash
-cd /home/creator/ws/openVLA/openvla
+cd /home/creator/ws/openVLA/repos/openvla
 source /home/creator/ws/openVLA/.venv/bin/activate
 python -m pip install -e . --no-deps
 ```
