@@ -235,6 +235,67 @@ python demo_predict_action.py --model-path /home/creator/ws/openVLA/models/openv
 
 注意：base `openvla-7b` 的最小 demo 只验证动作预测链路，不等同于能直接闭环控制 Franka Panda、LIBERO 或其他机械臂。
 
+### 6.4 `unnorm_key` 为什么重要
+
+OpenVLA 推理时并不是主要靠自然语言 prompt 里的机器人名字来选择动作尺度，而是通过 `unnorm_key` 选择模型内对应的数据集动作统计。
+
+简化流程如下：
+
+```text
+7 个 action token
+  -> 根据 unnorm_key 查找 norm_stats
+  -> 反归一化为连续 7DoF action
+  -> 交给具体机器人控制器 / IK / retargeting
+```
+
+当前 base demo 默认：
+
+```text
+unnorm_key = bridge_orig
+```
+
+这表示使用 BridgeData / WidowX 风格的动作分布来解释模型输出。换成 LIBERO 或其他机器人任务时，不能只在 instruction 里写机器人名字；需要使用对应微调 checkpoint、对应 `unnorm_key` / action statistics，以及对应的机器人控制适配层。
+
+`bridge_orig` 不是随意命名的字符串。在 OpenVLA 官方 OXE 数据转换代码中，它对应：
+
+```text
+Original Version of Bridge V2 from Project Website
+```
+
+因此可以把 `bridge_orig` 理解为：**BridgeData V2 原始版数据集的动作统计 key**。BridgeData V2 主要来自 WidowX 系列机器人操作数据，所以它的动作尺度、夹爪语义和相机分布更接近 BridgeData / WidowX，而不是 Franka、UR5 或 LIBERO。
+
+当前本地 ModelScope `openvla-7b` 的 `config.json` 中，`norm_stats` 支持的 key 如下：
+
+```text
+austin_buds_dataset_converted_externally_to_rlds
+austin_sailor_dataset_converted_externally_to_rlds
+austin_sirius_dataset_converted_externally_to_rlds
+bc_z
+berkeley_autolab_ur5
+berkeley_cable_routing
+berkeley_fanuc_manipulation
+bridge_orig
+cmu_stretch
+dlr_edan_shared_control_converted_externally_to_rlds
+dobbe
+fmb_dataset
+fractal20220817_data
+furniture_bench_dataset_converted_externally_to_rlds
+iamlab_cmu_pickup_insert_converted_externally_to_rlds
+jaco_play
+kuka
+nyu_franka_play_dataset_converted_externally_to_rlds
+roboturk
+stanford_hydra_dataset_converted_externally_to_rlds
+taco_play
+toto
+ucsd_kitchen_dataset_converted_externally_to_rlds
+utaustin_mutex
+viola
+```
+
+注意：这些 key 表示当前 checkpoint 内置了对应数据集的动作统计，**不等于模型已经在你的当前机器人/场景上达到可用成功率**。例如虽然列表里有 `nyu_franka_play_dataset_converted_externally_to_rlds`，但它对应的是 NYU Franka Play 数据统计，不等同于当前自定义 MuJoCo Franka 场景；如果要追求稳定抓取，仍需要控制适配、场景对齐，甚至微调。
+
 ## 7. Attention 后端选择
 
 ### 7.1 推荐默认使用 `sdpa`

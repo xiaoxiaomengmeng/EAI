@@ -1,2 +1,44 @@
-.venv
-openVLA/.venv
+# Python virtual environments
+.venv/
+venv/
+env/
+*/.venv/
+
+# Python cache and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+build/
+dist/
+*.egg-info/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+.DS_Store
+
+# IDE/editor local state
+.vscode/
+.idea/
+
+# OpenVLA local environment and generated artifacts
+openVLA/.venv/
+openVLA/.libero/
+openVLA/outputs/
+openVLA/models/
+openVLA/LIBERO/
+openVLA/openvla/experiments/logs/
+openVLA/openvla/rollouts/
+openVLA/openvla/cache/
+
+# Large local model/checkpoint artifacts
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+*.bin
