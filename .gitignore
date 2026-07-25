@@ -27,14 +27,16 @@ dist/
 .idea/
 
 # OpenVLA local environment and generated artifacts
-openVLA/.venv/
-openVLA/.libero/
-openVLA/outputs/
-openVLA/models/
-openVLA/LIBERO/
-openVLA/openvla/experiments/logs/
-openVLA/openvla/rollouts/
-openVLA/openvla/cache/
+10_openVLA/.venv/
+10_openVLA/.libero/
+10_openVLA/outputs/
+10_openVLA/models/
+10_openVLA/LIBERO/
+10_openVLA/openvla/experiments/logs/
+10_openVLA/openvla/rollouts/
+10_openVLA/openvla/cache/
+
+20_unitreerobotics/outputs/
 
 # Large local model/checkpoint artifacts
 *.ckpt
