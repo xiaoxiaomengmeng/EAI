@@ -222,14 +222,19 @@ modelscope --version
 方案二（4090 机）与方案三（5090 机）步骤完全相同，仅机器不同。目标：验证 py3.12 + lerobot main（v0.6.x）+ torch cu128 的新栈路线（5090 机最终将落地方案三）。
 
 ```bash
-# 1. 安装 Python 3.12（22.04 系统源自带 3.10，需 deadsnakes PPA）
-sudo add-apt-repository ppa:deadsnakes/ppa -y
-sudo apt update && sudo apt install -y python3.12 python3.12-venv
+# 1. 安装 Python 3.12（22.04 系统源自带 3.10，需 deadsnakes PPA）✅ 已完成
+sudo apt update
+sudo apt install -y software-properties-common   # add-apt-repository 命令依赖此包
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install -y python3.12 python3.12-venv python3.12-dev  # dev 包是后续编译类依赖的前提
+python3.12 --version    # 应输出 Python 3.12.x
 
-# 2. 建独立虚拟环境（不覆盖方案一的 venv，便于对照回退）
+# 2. 建独立虚拟环境（不覆盖方案一的 venv，便于对照回退）✅ 已完成
 python3.12 -m venv ~/xmm_ws/pi0/venv312
-source ~/xmm_ws/pi0/venv312/bin/activate
-pip install -U pip
+source ~/xmm_ws/pi0/venv312/bin/activate   # 激活（提示符前出现 (venv312)）
+pip install -U pip                         # 升级 pip，避免新格式 wheel 安装失败
+python --version                           # 验证环境内为 Python 3.12.x
 
 # 3. 预装 torch cu128（5090 机必需；4090 机用 cu128 同样可行）
 pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
