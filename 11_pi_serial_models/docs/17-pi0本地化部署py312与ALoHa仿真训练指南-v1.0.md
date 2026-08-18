@@ -84,9 +84,9 @@ Python 3.12.13
 | torch 安装与 GPU 验证 | ✅ 已完成（实测 2.11.0+cu130，RTX 5090 识别正常） |
 | lerobot main 克隆 | ✅ 已完成（repos/lerobot-main，实测 v0.6.2） |
 | lerobot-main editable 安装 | ✅ 基础安装完成（[pi]+[aloha] extra，lerobot-train --help 已通过），⏳ 待补装 wandb/accelerate/peft（[training,peft]，第二节 2.3） |
-| modelscope CLI / 数据集下载 | ⏳ 待执行（第二、四节） |
+| modelscope CLI / 数据集下载 | ✅ 数据集已下载并通过 LeRobotDataset 加载验证（v3.0，50 episodes/20000 帧，见 scripts/test_dataset.py） |
 | ALoHa 仿真环境安装与冒烟测试 | ✅ 已完成（[aloha] extra；冒烟 351 FPS，见第六节） |
-| 训练 / rollout 评估 | ⏳ 待执行（第五、七节） |
+| 训练脚本 / rollout 评估 | 脚本已就绪并经 v0.6.2 参数校验（scripts/train_pi0.sh），⏳ 训练待执行（第五、七节） |
 
 ---
 
@@ -549,8 +549,8 @@ policy.eval()
 □ venv312 内 torch 安装与 GPU 验证通过 → ✅ 已完成（实测 2.11.0+cu130；识别到 NVIDIA GeForce RTX 5090，bf16 matmul 冒烟通过）
 ✅ lerobot main 源码克隆完成（repos/lerobot-main，v0.6.2）
 □ lerobot-main[training,peft] + modelscope 安装完成 → 部分完成：[pi]+[aloha] 已装、pip check 通过、lerobot-train --help 通过；⏳ 还差 wandb/accelerate（[training]）与 peft（LoRA 必需）
-□ 数据集下载完成并通过 LeRobotDataset 加载验证
-□ 数据集格式确认（v3.0，预期与 lerobot main 匹配，无需转换）
+□ 数据集下载完成并通过 LeRobotDataset 加载验证 → ✅ 已完成（v3.0，50 episodes/20000 帧，scripts/test_dataset.py 实测输出正常）
+□ 数据集格式确认（v3.0，预期与 lerobot main 匹配，无需转换） → ✅ 已确认（v0.6.2 直接加载无报错）
 □ 冒烟测试：仿真环境随机动作跑通 → ✅ 已完成（EGL，351 FPS，见第六节 6.4）
 □ 训练完成，checkpoint 生成
 □ 25 轮 rollout 成功率统计 + 视频验收
