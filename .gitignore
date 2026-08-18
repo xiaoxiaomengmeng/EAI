@@ -36,6 +36,9 @@ dist/
 10_openVLA/openvla/rollouts/
 10_openVLA/openvla/cache/
 
+11_pi_serial_models/.venv312
+11_pi_serial_models/data
+
 20_unitreerobotics/outputs/
 
 # 23_video: ComfyUI 作为 git submodule 管理（.venv / models / output 仍由 ComfyUI 自身 .gitignore 排除）

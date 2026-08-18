@@ -442,11 +442,11 @@ export MUJOCO_GL=egl
 
 **6.4 冒烟测试（训练前必做）**
 
-先用随机动作验证环境能正常跑通，排除渲染/依赖问题。已封装为 [`smoke_test_env.py`](./smoke_test_env.py)（含观测/动作空间断言与帧率统计）：
+先用随机动作验证环境能正常跑通，排除渲染/依赖问题。已封装为 [`smoke_test_env.py`](./scripts/smoke_test_env.py)（含观测/动作空间断言与帧率统计）：
 
 ```bash
-python smoke_test_env.py                      # 台式机带显示器：默认 glfw 渲染
-MUJOCO_GL=egl python smoke_test_env.py        # 无头/SSH：EGL GPU 渲染
+python scripts/smoke_test_env.py                      # 台式机带显示器：默认 glfw 渲染
+MUJOCO_GL=egl python scripts/smoke_test_env.py        # 无头/SSH：EGL GPU 渲染
 ```
 
 实测输出（EGL，4090 机）：`obs keys: ['top']`（480×640×3 uint8）、`action 空间: Box(-1.0, 1.0, (14,))`、`冒烟测试 OK | 步数: 100 | 帧率: 241 FPS`。
