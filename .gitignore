@@ -38,6 +38,7 @@ dist/
 
 11_pi_serial_models/.venv312/
 11_pi_serial_models/data/
+11_pi_serial_models/outputs/
 
 20_unitreerobotics/outputs/
 

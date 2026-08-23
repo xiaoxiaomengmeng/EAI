@@ -1,6 +1,6 @@
 # π₀ 本地化部署与 ALoHa 仿真训练指南（5090 机 · py3.12 · LeRobot main 专版）
 
-> 版本 v1.0 · 2026-08-18 · 目标硬件：5090 台式机（RTX 5090 32GB，Ubuntu 22.04）· 技术路线：Python 3.12（deadsnakes）+ LeRobot main（v0.6.x）+ torch cu128 + ModelScope 国内直连
+> 版本 v1.0 · 2026-08-18 · 目标硬件：5090 台式机（RTX 5090 32GB，Ubuntu 22.04）· 技术路线：Python 3.12（deadsnakes）+ LeRobot main（v0.6.x）+ torch cu128 及以上（实测 cu130）+ ModelScope 国内直连
 >
 > 本文档从《17-pi0本地化部署py310与ALoHa仿真训练指南-v1.0.md》（4090 机 + py3.10 + lerobot v0.4.4，✅ 已实测）拆分而来，**单独记录 py3.12 + lerobot main 新栈路线**（py310 文档中的"方案三"）。py3.10 路线内容以该文档为准，本文不再重复。
 
@@ -8,14 +8,14 @@
 
 ## 〇、总览
 
-**目标**：在 5090 台式机（RTX 5090 32GB）上，使用 Python 3.12 + LeRobot main（v0.6.x）+ torch cu128 环境，完成 π₀（pi0）VLA 模型的下载、微调训练与 ALoHa 仿真（MuJoCo）闭环验证——在 `lerobot/aloha_sim_transfer_cube_human` 数据集上微调 `lerobot/pi0_base` 基座模型，然后在 ALoHa 仿真双臂环境中 rollout 推理，统计抓取搬运成功率。
+**目标**：在 5090 台式机（RTX 5090 32GB）上，使用 Python 3.12 + LeRobot main（v0.6.x）+ torch（cu128 及以上，实测 cu130）环境，完成 π₀（pi0）VLA 模型的下载、微调训练与 ALoHa 仿真（MuJoCo）闭环验证——在 `lerobot/aloha_sim_transfer_cube_human` 数据集上微调 `lerobot/pi0_base` 基座模型，然后在 ALoHa 仿真双臂环境中 rollout 推理，统计抓取搬运成功率。
 
 **端到端 Pipeline：**
 
 ```
 ① 系统与驱动准备（驱动 ≥570，nvidia-smi 实测 580.173.02）
       ↓
-② Python 环境（Python 3.12 deadsnakes + venv312 + torch cu128 + LeRobot main + modelscope）
+② Python 环境（Python 3.12 deadsnakes + venv312 + torch cu130 + LeRobot main + modelscope）
       ↓
 ③ 下载 π₀ 模型（ModelScope: lerobot/pi0_base，约 14GB）
       ↓
@@ -35,7 +35,7 @@
 | 操作系统 | Ubuntu 22.04 | 已满足（实测 22.04.5 LTS） |
 | GPU | RTX 5090（32GB） | Blackwell sm_120，实测 32607MiB |
 | NVIDIA 驱动 | ≥ 570 | 实测 580.173.02（`nvidia-smi` 显示 CUDA Version 13.0 为驱动支持上限） |
-| CUDA | ≥ 12.8 | PyTorch 自带 cu128 运行时即可，无需单独装 CUDA Toolkit |
+| CUDA | ≥ 12.8 | PyTorch 自带 cu128 及以上运行时即可（实测 cu130），无需单独装 CUDA Toolkit |
 | Python | **3.12（deadsnakes PPA）** | ✅ 已装 3.12.13；22.04 系统自带 3.10 不满足 LeRobot ≥v0.5.0 要求 |
 | LeRobot | main 分支（v0.6.x） | v0.5.0 起要求 Python ≥3.12（官方 PR #3023） |
 | 内存 | ≥ 32GB（建议 64GB） | 加载 14GB F32 权重峰值约 21-29GB，注意 RAM OOM（见排错表） |
@@ -62,7 +62,7 @@ Python 3.12.13
 1. **5090（sm_120）必须用 cu128 及以上构建的 PyTorch**：cu126 及以下会报 `no kernel image is available for execution on the device`。本机实测 torch 2.11.0+cu130（清华源 PyPI 默认构建）在 5090 上 `torch.cuda.is_available()=True` 且 bf16 matmul 正常（arch list 含 sm_120）；若需固定 cu128 构建，可用阿里云 `pytorch-wheels/cu128` 镜像（见 2.2）。
 2. **LeRobot ≥v0.5.0 要求 Python ≥3.12**（官方 PR #3023）：22.04 系统 Python 是 3.10，故本环境用 deadsnakes PPA 装 Python 3.12 + 独立 `venv312`，**不动系统默认 python3**。lerobot main（v0.6.x）的 CLI 参数、数据集接口与 v0.4.4 有差异（如官方已移除 pi 安装说明、升级 transformers v5），本环境内一切以 `--help` 实测为准，验证后回填本文档。
 3. **单机显存装不下全参数微调**：π₀ 约 3.5B 参数（PaliGemma 3B VLM + 300M Action Expert），全参数 AdamW 微调需约 50-56GB 显存。5090 机 32GB 必须走 **LoRA 微调**（首选）或**仅训练 Action Expert**（备选）路线（见第五节决策表）。
-4. **数据集格式版本**：ModelScope 上该数据集当前已是 LeRobot **v3.0** 格式（py310 v0.4.4 环境已实测），预期与 lerobot main 原生匹配，无需转换；若不匹配时用官方转换脚本转换（见第四节）。
+4. **数据集格式版本**：ModelScope 上该数据集当前已是 LeRobot **v3.0** 格式（✅ 已实测：v0.6.2 直接加载无报错，见 4.3），无需转换；若不匹配时用官方转换脚本转换（见第四节）。
 
 **模型与数据资源（ModelScope）：**
 
@@ -237,12 +237,14 @@ python -c "from lerobot.policies.pi0.modeling_pi0 import PI0Policy; print('OK')"
 lerobot-train --help 2>/dev/null | head -20  # ✅ 已通过（[aloha] 连带 [dataset] 后 datasets 就位；注意训练前仍需补装 wandb/accelerate/peft）
 ```
 
-**2.4 安装 ModelScope CLI（⏳ 待执行）**
+**2.4 安装 ModelScope CLI（⏳ 本 venv 内未装，非阻塞）**
 
 ```bash
 pip install modelscope
 modelscope --version
 ```
+
+> 说明：本机数据集与 pi0_base 权重均已下载就绪（见第三、四节），modelscope CLI 仅在重新下载/更新资源时需要；若当时是在其他环境（如系统 Python）下载的，本 venv 内可不装。
 
 ---
 
@@ -294,8 +296,8 @@ modelscope download --dataset lerobot/aloha_sim_transfer_cube_human \
 **4.3 本地加载验证**
 
 ```python
-# test_dataset.py（在 venv312 内运行）
-from lerobot.datasets.lerobot_dataset import LeRobotDataset   # ⚠️ main 分支的导入路径以实际源码为准（v0.4.4 路径无 .common，main 可能不同）
+# test_dataset.py（在 venv312 内运行；✅ 已存为 scripts/test_dataset.py，v0.6.2 实测通过）
+from lerobot.datasets.lerobot_dataset import LeRobotDataset   # v0.6.2：导入路径与 v0.4.4 相同
 
 dataset = LeRobotDataset(
     repo_id="aloha_sim_transfer_cube_human",
@@ -310,10 +312,10 @@ print("image shape:", sample["observation.images.top"].shape)
 ```
 
 ```bash
-python test_dataset.py
+python scripts/test_dataset.py
 ```
 
-预期输出（参照 py310 v0.4.4 环境实测，main 分支待回填）：`episodes: 50`、`frames: 20000`、`action shape: torch.Size([14])`、`image shape: torch.Size([3, 480, 640])`（CHW、float32，已归一化）。
+✅ v0.6.2 实测输出：`episodes: 50`、`frames: 20000`、`action shape: torch.Size([14])`、`image shape: torch.Size([3, 480, 640])`（CHW）；keys 含 `observation.images.top`/`observation.state`/`action`/`task` 等（另有一条无害告警 `Unknown fields in DatasetInfo: ['files_size_in_mb']`，可忽略）。
 
 **4.4 格式版本兼容说明**
 
@@ -336,13 +338,13 @@ ModelScope 上该数据集当前版本已是 **v3.0**，预期与 lerobot main �
 | **仅训练 Action Expert**（冻结 VLM） | 300M | ≈ 15-20GB | ✅ 备选 |
 | **LoRA 微调**（peft） | ~1-5% | ≈ 12-18GB | ✅ 推荐首选 |
 
-**推荐策略**：首选 LoRA；若 lerobot main 的训练入口未内置 LoRA 开关（以 `lerobot-train --help` 实测为准），可退而选"冻结 VLM、只训练 Action Expert"。两者在 50 条演示的小数据集上效果差异通常不大。
+**推荐策略**：首选 LoRA（✅ v0.6.2 实测内置 `--peft.method_type=LORA` 开关，无需退路）；备选"冻结 VLM、只训练 Action Expert"（`--policy.train_expert_only=true`，官方 pi0.mdx 提供）。两者在 50 条演示的小数据集上效果差异通常不大。
 
 > 训练前先关闭占用显存的桌面程序（桌面环境约占用 2GB 显存）。
 
 **5.2 训练命令（lerobot-train）**
 
-以下命令为 py310 v0.4.4 环境的实测模板（ModelScope 官方微调模板 + 针对本数据集的必要适配），**lerobot main 的参数名可能有差异（如 v0.5.0 起官方接口有调整、升级 transformers v5），执行前先对照 `lerobot-train --help` 逐项核对并回填本节**：
+以下命令已经 **v0.6.2 逐项实测校验**（全部参数名有效，已同步到 `scripts/train_pi0.sh`；注意 `--policy.type + --policy.pretrained_path` 组合与 `--policy.path` **互斥**，二选一）：
 
 ```bash
 lerobot-train \
@@ -355,6 +357,7 @@ lerobot-train \
   --policy.dtype=bfloat16 \
   --policy.device=cuda \
   --policy.push_to_hub=false \
+  --wandb.enable=false \
   --rename_map='{"observation.images.top":"observation.images.base_0_rgb"}' \
   --peft.method_type=LORA \
   --peft.r=16 \
@@ -362,38 +365,69 @@ lerobot-train \
   --batch_size=4        # 5090 机 32GB 可用 4，OOM 降 2
 ```
 
-> 建议封装为启动脚本 [`scripts/train_pi0.sh`](./scripts/train_pi0.sh)：含训练前自检（权重/数据集/CLI/GPU）、日志落盘 `logs/`、支持 `STEPS`/`BATCH_SIZE` 环境变量覆盖（如 `STEPS=200 bash scripts/train_pi0.sh` 先做冒烟测试）。
+> 已封装为启动脚本 [`scripts/train_pi0.sh`](../scripts/train_pi0.sh)（✅ 已创建并经 v0.6.2 校验）：含训练前自检（权重/数据集/CLI/GPU/RAM）、日志落盘 `logs/`、支持 `STEPS`/`BATCH_SIZE` 环境变量覆盖（如 `STEPS=200 bash scripts/train_pi0.sh` 先做冒烟测试）。
 
-参数说明（语义以 py310 v0.4.4 实测为基准，main 分支待核对）：
+参数说明（✅ 均已按 v0.6.2 实测核对）：
 
 | 参数 | 含义 |
 |------|------|
 | `--dataset.repo_id` + `--dataset.root` | 本地数据集（**root 必须指向数据集目录本身**，即含 `meta/info.json` 的目录，见 4.3 踩坑说明） |
-| `--policy.type=pi0` | 选择 π₀ 策略（v0.4.4 支持 pi0/pi0_fast/pi05/act/smolvla 等 14 种，必填） |
-| `--policy.pretrained_path` | 本地 π₀ 基座权重目录（即第三节软链位置；不传则从头训练） |
+| `--policy.type=pi0` | 选择 π₀ 策略（v0.6.2 支持 pi0/pi0_fast/pi05/act/smolvla 等 17 种，必填；与 `--policy.path` 互斥） |
+| `--policy.pretrained_path` | 本地 π₀ 基座权重目录（即第三节软链位置；不传则从头训练）。v0.4.4 格式的基座 checkpoint 实测可被 v0.6.2 加载器读入（向后兼容） |
 | `--policy.dtype=bfloat16` | F32 权重加载后转 bf16，显存减半 |
-| `--policy.push_to_hub=false` | ⚠️ **必加**：基座 config.json 里 `push_to_hub=true`，不关会在保存 checkpoint 时尝试上传 HF Hub（未登录会报错） |
-| `--rename_map='{"observation.images.top":"observation.images.base_0_rgb"}'` | ⚠️ **必加**：基座期望相机键名 `base_0_rgb`，本数据集只有 `top`；v0.4.4 通过 `rename_observations_processor` 做映射（JSON 字符串语法实测可用；基座声明的其余相机键缺失时自动用空图适配）。state/action 14 维也会自动 pad 到基座的 32 维，无需处理；main 分支的映射机制待实测确认 |
+| `--policy.push_to_hub=false` | ⚠️ **必加**：v0.6.2 默认推 Hub，缺失 `policy.repo_id` 时 validate 阶段报 `'repo_id' argument missing`（实测） |
+| `--wandb.enable=false` | ⚠️ 建议加：关闭 wandb 实验跟踪，避免训练时尝试联网登录 |
+| `--rename_map='{"observation.images.top":"observation.images.base_0_rgb"}'` | ⚠️ **必加**：基座期望相机键名 `base_0_rgb`（已实测读入基座 config 确认），本数据集只有 `top`；v0.6.2 要求 rename_map 必须配合 pretrained_path 使用（本命令已满足）。state/action 14 维会自动 pad 到基座的 32 维，无需处理 |
 | `--peft.method_type=LORA` + `--peft.r=16` | 启用 LoRA（按 5.1 决策表的首选路线）。π₀ 自带官方默认 target_modules（Action Expert 的 q/v 投影 + state/action 投影层），无需手填；不传 `--peft.*` 则走全参数（本机显存不可行） |
 | `--steps` / `--batch_size` | 训练步数与批大小 |
 
-> 以上参数名与语法均已按 py310 v0.4.4 源码/`lerobot-train --help`/draccus 解析实测核对（注意是 `pretrained_path`；旧资料常见的 `--policy.path` 在该版本不存在）。**main 分支以本环境 `lerobot-train --help` 实测为准，核对后回填**。`--policy.chunk_size`、`--policy.gradient_checkpointing=true`（显存再紧时开启）等策略参数可按需追加。
+> 以上参数名与语法均已按 v0.6.2 的 `lerobot-train --help`/源码/实际解析实测核对。显存再紧时可追加 `--policy.gradient_checkpointing=true`（官方 pi0.mdx 推荐）；中断后续训用 `--resume=true --config_path=<output_dir>/checkpoints/<step>/train_config.json`（v0.6.2 默认沿用 checkpoint 内配置）。
 
-**5.3 超参数建议**
+**5.3 两段式训练设计（冒烟测试 → 正式训练）**
+
+`scripts/train_pi0.sh` 通过环境变量覆盖实现两段式训练（脚本默认 `STEPS=20000`、`BATCH_SIZE=2`）：
+
+```bash
+# 阶段一：冒烟测试（约 12 秒，实测）
+STEPS=200 BATCH_SIZE=1 bash scripts/train_pi0.sh
+
+# 阶段二：正式训练（约 20 分钟；冒烟成功后先清理残留输出目录，否则 FileExistsError）
+rm -rf ~/ws/11_pi_serial_models/outputs/pi0_aloha_cube
+BATCH_SIZE=8 bash scripts/train_pi0.sh
+```
+
+两者对比（实测数据）：
+
+| | 冒烟测试 `STEPS=200 BATCH_SIZE=1` | 正式训练 `BATCH_SIZE=8`（STEPS 取默认 20000） |
+|---|---|---|
+| 总步数 / 批量 | 200 步 / batch 1 | 20000 步 / batch 8 |
+| 看过的数据量 | 200 帧 ≈ 0.01 个 epoch | 160000 帧 ≈ 8 个 epoch |
+| 显存占用 | 9.2GB（实测 mem_gb） | 约 15GB（估算） |
+| 耗时 | ~12 秒（稳态 23 step/s） | ~20 分钟 |
+| 目的 | 验证流程通，不关心学习效果 | 真正学出策略 |
+
+为什么这么设计：
+
+1. **先冒烟、后正式**：完整训练链路环节多（rename_map 字段对齐、基座权重格式兼容、tokenizer 缓存、显存、checkpoint 目录），任何一处出错都可能跑了几十分钟才暴露。200 步把整条链路（数据加载 → 模型构建 → PEFT 包装 → 前反向 → checkpoint 保存）全走一遍，用 12 秒买断风险。本项目正是靠冒烟测试提前暴露了 paligemma tokenizer 的 HF 超时问题（见第八节排错表）；
+2. **两档 batch 各有考量**：冒烟用 batch 1——显存峰值最低、只为验证"能不能跑"；正式用 batch 8——梯度估计更稳（batch 1 噪声极大）、peak_lr（2.5e-5）利用率更高，且 batch 1 只用 9.2/32GB 显存属严重浪费算力；
+3. **环境变量而非改脚本**：冒烟与正式跑走完全同一条代码路径与同一套自检逻辑，保证"冒烟验证的就是正式要跑的"；
+4. **调度器自适应**：v0.6.2 的 LR 调度器按总步数自动缩放 warmup/decay（实测日志：200 步时 `Scaling warmup: 1000 → 6`），冒烟无需手动调学习率配置。
+
+**5.4 超参数建议**
 
 | 超参数 | 建议值 | 说明 |
 |--------|--------|------|
-| steps | 10,000-20,000 | 50 条演示数据，20k 步 × batch4 ≈ 4 个 epoch |
-| batch_size | 4（OOM 降 2；LoRA 模式下可上探 4-8） | 32GB 显存余量较足 |
+| steps | 10,000-20,000 | 50 条演示数据，20k 步 × batch8 ≈ 8 个 epoch |
+| batch_size | 4（冒烟实测 batch 1 仅占 9.2GB，32GB 余量充足，正式训练可上探 8） | 大 batch 梯度更稳，吞吐更高 |
 | dtype | bfloat16 | Blackwell 原生支持 bf16 |
 | chunk_size | 默认（50） | π₀ 动作块长度，小数据集不必改 |
 | 学习率 | 默认（约 1e-5 量级） | 微调不必调大 |
 
-**5.4 训练监控与产物**
+**5.5 训练监控与产物**
 
 - 训练日志与 checkpoint 写入 `~/ws/11_pi_serial_models/outputs/pi0_aloha_cube/checkpoints/`；
-- loss 应在前几百步明显下降后进入平台期；
-- 预计耗时：20k 步约 **3-8 小时**（取决于数据加载与 chunk 配置，暂未实测）；
+- loss 应在前几百步明显下降后进入平台期（π₀ flow matching loss 初始约 1.0，冒烟 200 步后仍约 0.99 属正常——0.01 个 epoch 学不到东西，正式训练应降至 0.1 以下）；
+- 实测耗时：冒烟 200 步（batch 1）12 秒、稳态 23 step/s；LoRA（可训参数仅 1.4M/4B）下 20k 步预计 batch 1 约 15 分钟、batch 8 约 20 分钟（纠正早期 3-8 小时的粗估）；
 - 最终用于推理的是 `checkpoints/last/` 下的策略权重目录。
 
 ---
@@ -437,7 +471,7 @@ export MUJOCO_GL=egl
 
 **6.4 冒烟测试（训练前必做）**
 
-先用随机动作验证环境能正常跑通，排除渲染/依赖问题。已封装为 [`scripts/smoke_test_env.py`](./scripts/smoke_test_env.py)（✅ 已创建；含观测/动作空间断言与帧率统计，支持 `--env-id`/`--steps`/`--render` 参数）：
+先用随机动作验证环境能正常跑通，排除渲染/依赖问题。已封装为 [`scripts/smoke_test_env.py`](../scripts/smoke_test_env.py)（✅ 已创建；含观测/动作空间断言与帧率统计，支持 `--env-id`/`--steps`/`--render` 参数）：
 
 ```bash
 python scripts/smoke_test_env.py                      # 台式机带显示器：默认 glfw 渲染
@@ -478,22 +512,24 @@ env.close()
 
 ```bash
 lerobot-eval \
-  --policy.type=pi0 \
-  --policy.pretrained_path=~/ws/11_pi_serial_models/outputs/pi0_aloha_cube/checkpoints/last/pretrained_model \
-  --env.name=gym_aloha \
+  --policy.path=~/ws/11_pi_serial_models/outputs/pi0_aloha_cube/checkpoints/last/pretrained_model \
+  --env.type=aloha \
   --env.task=AlohaTransferCube-v0 \
-  --eval.n_episodes=25
+  --eval.n_episodes=25 \
+  --rename_map='{"observation.images.top":"observation.images.base_0_rgb"}'
 ```
 
-> 参数名已按 py310 v0.4.4 的 `lerobot-eval --help` 实测核对；**main 分支以本环境 `lerobot-eval --help` 为准，核对后回填**；可加视频保存参数（如 `--eval.save_video=true`，视版本而定）。
+> 已封装为评估脚本 [`../scripts/eval_pi0.sh`](../scripts/eval_pi0.sh)：含评估前自检（checkpoint/CLI/GPU）、默认无头 EGL 渲染（`RENDER=glfw` 切换窗口渲染）、日志落盘 `logs/`、支持 `N_EPISODES` 环境变量覆盖（如 `N_EPISODES=5 bash scripts/eval_pi0.sh` 先做快速验证）。
+
+> ✅ 参数名已按 v0.6.2 的 `lerobot-eval --help` 实测核对，与 v0.4.4 差异：① 评估本地 checkpoint 用 **`--policy.path`**（与 `--policy.type` 互斥，类型从 checkpoint 的 config 自动识别）；② 环境选择改为 **`--env.type=aloha`**（v0.4.4 的 `--env.name=gym_aloha` 已不存在，v0.6.2 支持 aloha/pusht/libero/metaworld 等 11 种）；③ 任务名用 `--env.task`；④ **`--rename_map` 必带**（实测）：环境产出 `observation.images.top` 而基座 config 期望 `base_0_rgb`，不加会在 `validate_visual_features_consistency` 报 Feature mismatch。无头环境记得 `export MUJOCO_GL=egl`；每轮 rollout 视频默认自动保存到 `--output_dir` 下的 `videos/aloha_*/eval_episode_N.mp4`（`--eval.recording=true` 是另把 rollout 录成 LeRobot 数据集）。
 
 **7.2 独立推理代码（理解原理用）**
 
-ModelScope 模型页给出的推理接口：
+ModelScope 模型页给出的推理接口（✅ 已实测：v0.6.2 中 `PI0Policy` 导入路径不变；预处理/后处理模块改名为 `processor_pi0`）：
 
 ```python
-from lerobot.policies.pi0.modeling_pi0 import PI0Policy   # ⚠️ main 分支导入路径以实际源码为准
-# from lerobot.policies.pi0.processing_pi0 import preprocess, postprocess
+from lerobot.policies.pi0.modeling_pi0 import PI0Policy      # ✅ v0.6.2 实测可导入
+# from lerobot.policies.pi0.processor_pi0 import ...          # v0.6.2：processor_pi0.py（v0.4.4 为 processing_pi0）
 
 policy = PI0Policy.from_pretrained(
     "/home/creator/ws/11_pi_serial_models/outputs/pi0_aloha_cube/checkpoints/last/pretrained_model"
@@ -528,6 +564,7 @@ policy.eval()
 | 训练启动即 CUDA OOM | 全参数微调超显存 | 改 LoRA 或仅训 Action Expert；batch 降到 1-2；开梯度检查点；关闭桌面程序释放约 2GB |
 | 模型加载阶段 OOM | F32 权重直接载入 | 确认 `--policy.dtype=bfloat16` |
 | `lerobot-train` 报 `ImportError: 'datasets' is required` | v0.6.2 细粒度 extra 设计，`[pi]` 不含训练依赖（实测踩坑） | 补装 `pip install -e "./lerobot-main[training,peft]"`（见 2.3） |
+| 训练启动后反复 `'timed out' thrown while requesting HEAD https://huggingface.co/google/paligemma-3b-pt-224/...` 并重试 | pi0 的 processor 需从 HF 加载 paligemma tokenizer（`processor_pi0.py` 硬编码 `tokenizer_name="google/paligemma-3b-pt-224"`，只要 tokenizer 小文件不要权重）；该仓库为 Gemma 许可 **gated** 仓库，国内直连超时、hf-mirror 也返回 403 需授权（实测） | 从 ModelScope（文件列表公开无需授权）下载 8 个 tokenizer/配置小文件注入 HF 缓存，并以伪造 commit hash 目录 + refs/main 指向它（新版 huggingface_hub 的 `local_files_only` 不查 refs、只认 commit hash 快捷路径），然后 `export HF_HUB_OFFLINE=1` 再训练；scripts/train_pi0.sh 已内置该环境变量与缓存自检（实测 tokenizer vocab 257153、SiglipImageProcessor 离线加载成功） |
 | 安装 lerobot 报 `./lerobot-main[pi] is not a valid editable requirement` | 未在 `repos/` 目录下执行，`./lerobot-main` 路径不存在（实测踩坑） | 先 `cd ~/ws/11_pi_serial_models/repos` 再执行 `pip install -e`，或改用完整路径 |
 | 安装 lerobot 报 `requires a different Python: 3.10.x not in '>=3.12'` | 当前终端用的是系统 Python 3.10（未激活 .venv312）；LeRobot ≥v0.5.0 要求 Python ≥3.12（官方 PR #3023） | 先 `source ~/ws/11_pi_serial_models/.venv312/bin/activate` 并用 `python --version` 确认为 3.12.x 后重装（第二节 2.1） |
 | `codebase_version` 不匹配报错 | 数据集 v2.0 旧格式 vs LeRobot 期望 v3.0（当前 ModelScope 数据集已是 v3.0，正常不会遇到） | 用官方转换脚本升级数据集（第四节 4.4） |
@@ -545,14 +582,15 @@ policy.eval()
 ```
 ✅ 驱动 ≥570，nvidia-smi 可见 RTX 5090（32GB），CUDA ≥ 12.8
 ✅ Python 3.12（deadsnakes，实测 3.12.13）+ venv312（~/ws/11_pi_serial_models/.venv312）
-✅ π₀ 基座模型就绪（models/pi0_base 软链，约 14GB）
-□ venv312 内 torch 安装与 GPU 验证通过 → ✅ 已完成（实测 2.11.0+cu130；识别到 NVIDIA GeForce RTX 5090，bf16 matmul 冒烟通过）
+✅ π₀ 基座模型就绪（models/pi0_base 软链，约 14GB；v0.4.4 格式 checkpoint 实测可被 v0.6.2 加载）
+✅ venv312 内 torch 安装与 GPU 验证通过（实测 2.11.0+cu130；识别到 NVIDIA GeForce RTX 5090，bf16 matmul 冒烟通过）
 ✅ lerobot main 源码克隆完成（repos/lerobot-main，v0.6.2）
-□ lerobot-main[training,peft] + modelscope 安装完成 → 部分完成：[pi]+[aloha] 已装、pip check 通过、lerobot-train --help 通过；⏳ 还差 wandb/accelerate（[training]）与 peft（LoRA 必需）
-□ 数据集下载完成并通过 LeRobotDataset 加载验证 → ✅ 已完成（v3.0，50 episodes/20000 帧，scripts/test_dataset.py 实测输出正常）
-□ 数据集格式确认（v3.0，预期与 lerobot main 匹配，无需转换） → ✅ 已确认（v0.6.2 直接加载无报错）
-□ 冒烟测试：仿真环境随机动作跑通 → ✅ 已完成（EGL，351 FPS，见第六节 6.4）
-□ 训练完成，checkpoint 生成
+✅ lerobot-main[training,peft] 安装完成（训练日志实测 PEFT LoRA 包装成功，wandb/accelerate/peft 已就位）
+✅ 数据集下载完成并通过 LeRobotDataset 加载验证（v3.0，50 episodes/20000 帧，scripts/test_dataset.py 实测输出正常，无需格式转换）
+✅ 冒烟测试：仿真环境随机动作跑通（EGL，351 FPS，见第六节 6.4）
+✅ 训练脚本就绪并经 v0.6.2 参数校验（scripts/train_pi0.sh，已内置 HF_HUB_OFFLINE=1）
+✅ paligemma tokenizer 已从 ModelScope 下载注入 HF 缓存，离线加载验证通过
+⏳ 训练完成，checkpoint 生成（训练已能启动至 PEFT 包装，修复 HF 超时后可重跑）
 □ 25 轮 rollout 成功率统计 + 视频验收
 ```
 
@@ -568,7 +606,7 @@ policy.eval()
 ├── data/aloha_sim_transfer_cube_human/
 │   ├── meta/                      (info.json, episodes.jsonl, tasks.jsonl)
 │   └── data/ | videos/            (chunk 数据)
-├── scripts/                       ← train_pi0.sh、smoke_test_env.py 等
+├── scripts/                       ← train_pi0.sh、smoke_test_env.py、test_dataset.py
 ├── docs/                          ← 学习笔记与补充文档
 └── outputs/pi0_aloha_cube/
     └── checkpoints/
@@ -588,4 +626,4 @@ policy.eval()
 
 ---
 
-*文档版本 v1.0 · 2026-08-18：从 py310 文档拆分出专版，专门记录 5090 机 + Python 3.12（deadsnakes，实测 3.12.13）+ lerobot main（v0.6.x）+ torch cu128 新栈路线（⏳ 验证中）；venv312（~/ws/11_pi_serial_models/.venv312）与 pi0_base 权重已就绪 · 配套 py310 版：17-pi0本地化部署py310与ALoHa仿真训练指南-v1.0.md*
+*文档版本 v1.0 · 2026-08-18：从 py310 文档拆分出专版，专门记录 5090 机 + Python 3.12（deadsnakes，实测 3.12.13）+ lerobot main（实测 v0.6.2）+ torch 2.11.0+cu130 新栈路线；环境搭建/数据集/仿真冒烟均已实测通过，仅剩 [training,peft] 补装与训练/rollout 执行 · 本文档位于 docs/ 目录，脚本链接均为相对 ../scripts/ · 配套 py310 版：17-pi0本地化部署py310与ALoHa仿真训练指南-v1.0.md*
