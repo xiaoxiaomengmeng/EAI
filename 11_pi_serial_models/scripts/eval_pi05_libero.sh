@@ -21,16 +21,47 @@
 # =============================================================================
 set -euo pipefail
 
-# ---------- 离线模式：与训练脚本一致，paligemma tokenizer 已注入 HF 缓存 ----------
+# ---------- 路径（最先定义，供下面所有自检函数使用）----------
+PI05_HOME="$HOME/ws/11_pi_serial_models"
+
+# ---------- 离线模式：paligemma tokenizer 已注入 HF 缓存（与训练脚本一致）
+# 注意：libero 仿真 env 启动时会尝试从 HuggingFace 下载 assets（场景 XML / STL），
+# 所以必须保证 ~/.libero/assets 已从 ModelScope 预先下载好，
+# 并在 venv 的 libero/libero/ 里建好软链，使 libero/__init__.py 优先命中本地
+# （否则会因 HF_HUB_OFFLINE=1 下载失败 → FileNotFoundError）----------
 export HF_HUB_OFFLINE=1
+
+# ---------- LIBERO assets 自检（防止 HF 下载被阻挡 + venv assets 缺失）----------
+LIBERO_VENV_PATH="$PI05_HOME/.venv312/lib/python3.12/site-packages/libero/libero"
+LIBERO_USER_ASSETS="$HOME/.libero/assets"
+LIBERO_ASSETS_KEY_FILE="scenes/libero_tabletop_base_style.xml"
+ensure_libero_assets() {
+  # 优先级：venv 本地 assets（软链或实目录）→ ~/.libero/assets 软链过去
+  if [[ -f "$LIBERO_VENV_PATH/assets/$LIBERO_ASSETS_KEY_FILE" ]]; then
+    return 0
+  fi
+  # 没有就从 ~/.libero/assets（modelscope download dataset lerobot/libero-assets）软链过去
+  if [[ -f "$LIBERO_USER_ASSETS/$LIBERO_ASSETS_KEY_FILE" ]]; then
+    ln -sfn "$LIBERO_USER_ASSETS" "$LIBERO_VENV_PATH/assets"
+    echo "✓ 建立 venv libero assets 软链 → $LIBERO_USER_ASSETS"
+    return 0
+  fi
+  # 都没有就报 actionable 错误
+  echo "✗ 缺少 LIBERO 仿真 assets（场景 XML / STL），libero env reset() 会 FileNotFoundError"
+  echo "  一键修复（下载 dataset lerobot/libero-assets 并软链）："
+  echo "    source $PI05_HOME/.venv312/bin/activate"
+  echo "    mkdir -p ~/.libero"
+  echo "    modelscope download --dataset lerobot/libero-assets --local_dir ~/.libero/assets"
+  exit 1
+}
+ensure_libero_assets
 
 # ---------- 渲染方式：无头/SSH 用 EGL GPU 渲染（默认）；带显示器可 RENDER=glfw ----------
 if [[ "${RENDER:-egl}" == "egl" ]]; then
   export MUJOCO_GL=egl
 fi
 
-# ---------- 路径与可调参数 ----------
-PI05_HOME="$HOME/ws/11_pi_serial_models"
+# ---------- 路径与可调参数（PI05_HOME 已在脚本首部定义）----------
 TRAIN_MODE="${TRAIN_MODE:-lora}"       # lora（默认）| expert
 LIBERO_TASK="${LIBERO_TASK:-libero_spatial}"  # libero_spatial（默认）/ libero_object / libero_goal / libero_10
 

@@ -15,28 +15,6 @@
 #   - --policy.gradient_checkpointing=true：LIBERO 数据量大（273k 帧），建议开
 #
 # 用法：
-
-
-
-# 冒烟测试（21 秒）
-STEPS=200 BATCH_SIZE=1 bash scripts/train_pi05_libero.sh
-
-# 正式训练（默认 30k 步、batch 4、LoRA r=16）
-bash scripts/train_pi05_libero.sh
-
-# 加大 LoRA rank + wandb
-LORA_R=32 STEPS=60000 WANDB_ENABLE=true bash scripts/train_pi05_libero.sh
-
-# 冒烟测试
-TRAIN_MODE=expert STEPS=200 BATCH_SIZE=1 bash scripts/train_pi05_libero.sh
-
-# 正式训练（冻结 PaliGemma，训 300M Expert + proj）
-TRAIN_MODE=expert bash scripts/train_pi05_libero.sh              # 默认 STEPS=30000 BATCH_SIZE=2
-
-# 更激进 batch 4（接近 OOM）
-TRAIN_MODE=expert BATCH_SIZE=4 bash scripts/train_pi05_libero.sh
-
-
 #   bash scripts/train_pi05_libero.sh                            # 默认 LoRA r=16、30k 步、batch 4
 #   TRAIN_MODE=expert bash scripts/train_pi05_libero.sh          # 切到 Action Expert 全参微调
 #   STEPS=200 BATCH_SIZE=1 bash scripts/train_pi05_libero.sh     # 冒烟测试：200 步验证链路
@@ -46,31 +24,56 @@ TRAIN_MODE=expert BATCH_SIZE=4 bash scripts/train_pi05_libero.sh
 # =============================================================================
 set -euo pipefail
 
+# ---------- 路径（最先定义，供 LIBERO assets 自检使用）----------
+PI05_HOME="$HOME/ws/11_pi_serial_models"
+
 # ---------- 离线模式：paligemma tokenizer 已注入 HF 缓存（与 pi0 同款 trick）
-# pi05 用同一个 google/paligemma-3b-pt-224 gated tokenizer，国内必须离线 ----------
+# pi05 用同一个 google/paligemma-3b-pt-224 gated tokenizer，国内必须离线
+# 注意：虽然训练流程不直接依赖仿真 env，但 LIBERO assets 缺省时，
+# lerobot 数据加载流程可能隐式触发 libero/__init__.py 资产查找，
+# 为保险起见训练脚本也做同款自检与软链 ----------
 export HF_HUB_OFFLINE=1
 
-# ---------- 路径与可调参数 ----------
-PI05_HOME="$HOME/ws/11_pi_serial_models"
+# ---------- LIBERO assets 自检（与 eval_pi05_libero.sh 同款逻辑）----------
+LIBERO_VENV_PATH="$PI05_HOME/.venv312/lib/python3.12/site-packages/libero/libero"
+LIBERO_USER_ASSETS="$HOME/.libero/assets"
+LIBERO_ASSETS_KEY_FILE="scenes/libero_tabletop_base_style.xml"
+ensure_libero_assets() {
+  if [[ -f "$LIBERO_VENV_PATH/assets/$LIBERO_ASSETS_KEY_FILE" ]]; then return 0; fi
+  if [[ -f "$LIBERO_USER_ASSETS/$LIBERO_ASSETS_KEY_FILE" ]]; then
+    ln -sfn "$LIBERO_USER_ASSETS" "$LIBERO_VENV_PATH/assets"
+    echo "✓ 建立 venv libero assets 软链 → $LIBERO_USER_ASSETS"
+    return 0
+  fi
+  echo "✗ 缺少 LIBERO 仿真 assets，一键修复："
+  echo "    source $PI05_HOME/.venv312/bin/activate"
+  echo "    mkdir -p ~/.libero"
+  echo "    modelscope download --dataset lerobot/libero-assets --local_dir ~/.libero/assets"
+  exit 1
+}
+ensure_libero_assets
+
+# ---------- 路径与可调参数（PI05_HOME 已在首部定义）----------
 DATASET_DIR="$PI05_HOME/data/libero"                          # LIBERO 数据集（v3.0，1693 episodes）
 BASE_MODEL="${BASE_MODEL:-pi05_libero_base}"                  # 默认 LIBERO 微调基座（benchmark 路线），可选 pi05_base
 MODEL_DIR="$PI05_HOME/models/$BASE_MODEL"                     # π₀.₅ 基座权重（~14GB F32）
 TRAIN_MODE="${TRAIN_MODE:-lora}"                              # lora（默认）| expert
 STEPS="${STEPS:-30000}"            # 30k 步 × batch 4 ÷ 273465 帧 ≈ 0.44 epoch（LIBERO 数据大）
-BATCH_SIZE="${BATCH_SIZE:-4}"      # 5090(32GB) LoRA 可用 4；expert 模式建议降 2
+BATCH_SIZE="${BATCH_SIZE:-}"       # 不设默认值，由 TRAIN_MODE 分支决定（lora=4 / expert=2）
 LORA_R="${LORA_R:-16}"             # LoRA 秩，默认 16，可调 32/64
 WANDB_ENABLE="${WANDB_ENABLE:-false}"
 
-# ---------- 根据 TRAIN_MODE 推导 OUTPUT_DIR 和 JOB_NAME（避免覆盖） ----------
+# ---------- 根据 TRAIN_MODE 推导 OUTPUT_DIR、JOB_NAME、BATCH_SIZE（避免覆盖） ----------
 case "$TRAIN_MODE" in
   lora)
     OUTPUT_DIR="$PI05_HOME/outputs/pi05_libero_lora"
     JOB_NAME="pi05_libero_lora"
+    BATCH_SIZE="${BATCH_SIZE:-4}"   # LoRA 只训 2.8M，5090(32GB) 可用 batch 4
     ;;
   expert)
     OUTPUT_DIR="$PI05_HOME/outputs/pi05_libero_expert"
     JOB_NAME="pi05_libero_expert"
-    # expert 模式 batch 默认降到 2（300M 全参 + AdamW 显存吃紧）
+    # expert 模式训 300M 全参 + AdamW，显存吃紧，默认 batch 2
     BATCH_SIZE="${BATCH_SIZE:-2}"
     ;;
   *)
