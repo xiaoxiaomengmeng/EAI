@@ -47,7 +47,7 @@
 参考 [10_openVLA/DAMO_README.md#L113-146](file:///home/creator/ws/10_openVLA/DAMO_README.md#L113-L146) 的结构：
 
 ```bash
-cd /home/creator/ws/23_video/miniMax/ComfyUI
+cd /home/creator/ws/23_video/ComfyUI
 python3.10 -m venv --clear .venv
 source .venv/bin/activate
 python -m pip install -U pip
@@ -58,7 +58,7 @@ python -m pip install -U pip
 **不要用教程里的 CUDA 12.4**。本机 RTX 5090 Blackwell sm_120 需要 cu128，直接复用顶层部署脚本：
 
 ```bash
-cd /home/creator/ws/23_video/miniMax/ComfyUI
+cd /home/creator/ws/23_video/ComfyUI
 source .venv/bin/activate
 bash /home/creator/ws/scripts/setup_py310_cu128_rtx5090_torch2110.sh
 ```
@@ -88,12 +88,12 @@ capability: (12, 0)
 ### 3.3 安装 ComfyUI 基础依赖
 
 ```bash
-source /home/creator/ws/23_video/miniMax/ComfyUI/.venv/bin/activate
-cd /home/creator/ws/23_video/miniMax/ComfyUI
+source /home/creator/ws/23_video/ComfyUI/.venv/bin/activate
+cd /home/creator/ws/23_video/ComfyUI
 pip install -r requirements.txt
 ```
 
-> 说明：本仓库 ComfyUI **已内置** MiniMax H3 节点（见 [comfy_extras/nodes_minimax_h3.py](file:///home/creator/ws/23_video/miniMax/ComfyUI/comfy_extras/nodes_minimax_h3.py)），无需额外安装 `comfyui-minimax-h3` custom_nodes 插件。
+> 说明：本仓库 ComfyUI **已内置** MiniMax H3 节点（见 [comfy_extras/nodes_minimax_h3.py](file:///home/creator/ws/23_video/ComfyUI/comfy_extras/nodes_minimax_h3.py)），无需额外安装 `comfyui-minimax-h3` custom_nodes 插件。
 
 ---
 
@@ -126,7 +126,7 @@ pip install -r requirements.txt
 ### 4.3 ModelScope SDK 下载方式（备查）
 
 ```bash
-source /home/creator/ws/23_video/miniMax/ComfyUI/.venv/bin/activate
+source /home/creator/ws/23_video/ComfyUI/.venv/bin/activate
 pip install modelscope
 
 # 一次性下载所有量化变体
@@ -155,7 +155,7 @@ PY
 
 ```bash
 CACHE_DIR=~/.cache/modelscope/models/MiniMax--MiniMax-H3/snapshots/master
-COMFYUI_DIR=/home/creator/ws/23_video/miniMax/ComfyUI
+COMFYUI_DIR=/home/creator/ws/23_video/ComfyUI
 
 mkdir -p "$COMFYUI_DIR/models/diffusion_models"
 mkdir -p "$COMFYUI_DIR/models/text_encoders"
@@ -188,7 +188,7 @@ ls -lh "$COMFYUI_DIR/models/vae/"
 ### 5.1 环境变量（显存优化必设）
 
 ```bash
-source /home/creator/ws/23_video/miniMax/ComfyUI/.venv/bin/activate
+source /home/creator/ws/23_video/ComfyUI/.venv/bin/activate
 export HF_XET_HIGH_PERFORMANCE=1
 export PYTHONUNBUFFERED=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
@@ -197,7 +197,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 ### 5.2 启动服务
 
 ```bash
-cd /home/creator/ws/23_video/miniMax/ComfyUI
+cd /home/creator/ws/23_video/ComfyUI
 python main.py --listen 0.0.0.0 --port 8188
 ```
 

@@ -24,7 +24,7 @@
 ### 1.2 已验证 demo 命令
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 python demo_predict_action.py
 ```
@@ -44,7 +44,7 @@ Predicted action: [ 0.00337 ... 0. ]
 ## 2. 项目目录
 
 ```text
-/home/creator/ws/openVLA
+/home/creator/ws/10_openVLA
 ├── README.md                 # 本说明文档
 ├── demo_predict_action.py    # 最小动作预测 demo
 ├── .venv/                    # Python 3.10 虚拟环境
@@ -54,7 +54,7 @@ Predicted action: [ 0.00337 ... 0. ]
 如果 `openvla/` 源码目录不存在，可执行：
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 git clone https://github.com/xiaoxiaomengmeng/openvla.git
 ```
 
@@ -63,7 +63,7 @@ git clone https://github.com/xiaoxiaomengmeng/openvla.git
 ### 3.1 激活虚拟环境
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 ```
 
@@ -118,7 +118,7 @@ python demo_predict_action.py \
 ### 4.1 创建 Python 3.10 虚拟环境
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 python3.10 -m venv --clear .venv
 source .venv/bin/activate
 python -m pip install -U pip
@@ -129,7 +129,7 @@ python -m pip install -U pip
 优先复用工作区顶层部署脚本：
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 bash /home/creator/ws/scripts/setup_py310_cu128_rtx5090_torch2110.sh
 ```
@@ -137,17 +137,17 @@ bash /home/creator/ws/scripts/setup_py310_cu128_rtx5090_torch2110.sh
 ### 4.3 安装基础依赖
 
 ```bash
-source /home/creator/ws/openVLA/.venv/bin/activate
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 python -m pip install modelscope huggingface_hub pillow accelerate sentencepiece
 
-cd /home/creator/ws/openVLA/repos/openvla
+cd /home/creator/ws/10_openVLA/repos/openvla
 python -m pip install -r requirements-min.txt
 ```
 
 如需以源码包方式导入 OpenVLA，可执行：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
+cd /home/creator/ws/10_openVLA/repos/openvla
 python -m pip install -e . --no-deps
 ```
 
@@ -156,7 +156,7 @@ python -m pip install -e . --no-deps
 ### 5.1 使用 ModelScope 下载
 
 ```bash
-source /home/creator/ws/openVLA/.venv/bin/activate
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 modelscope download --model zixiaoBios/openvla-7b
 ```
 
@@ -198,13 +198,13 @@ tokenizer.model
 如需在项目目录内固定一份模型副本，可手动复制或同步到：
 
 ```text
-/home/creator/ws/openVLA/models/openvla-7b
+/home/creator/ws/10_openVLA/models/openvla-7b
 ```
 
 然后运行时显式指定：
 
 ```bash
-python demo_predict_action.py --model-path /home/creator/ws/openVLA/models/openvla-7b
+python demo_predict_action.py --model-path /home/creator/ws/10_openVLA/models/openvla-7b
 ```
 
 ## 6. Demo 脚本说明
@@ -212,7 +212,7 @@ python demo_predict_action.py --model-path /home/creator/ws/openVLA/models/openv
 ### 6.1 脚本入口
 
 ```text
-/home/creator/ws/openVLA/demo_predict_action.py
+/home/creator/ws/10_openVLA/demo_predict_action.py
 ```
 
 ### 6.2 常用参数
@@ -412,7 +412,7 @@ nvcc --version
 RTX 5090 是 `sm_120` 架构，不能直接使用不含 `sm_120` 的预编译 wheel。必须使用 CUDA 12.8 从源码编译，并设置 `TORCH_CUDA_ARCH_LIST="12.0"`。
 
 ```bash
-source /home/creator/ws/openVLA/.venv/bin/activate
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 
 pip uninstall -y flash-attn flash_attn
 rm -rf ~/.cache/pip ~/.cache/torch_extensions
@@ -460,15 +460,15 @@ PY
 ### 9.1 安装 LIBERO 相关依赖
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 python -m pip install -r experiments/robot/libero/libero_requirements.txt
 ```
 
 ### 9.2 安装 LIBERO 源码
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
 cd LIBERO
 python -m pip install -e .
@@ -477,8 +477,8 @@ python -m pip install -e .
 ### 9.3 运行最小 LIBERO-Spatial 评测
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 
 python experiments/robot/libero/run_libero_eval.py \
   --model_family openvla \
