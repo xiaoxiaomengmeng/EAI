@@ -22,7 +22,9 @@ ws/
 ├── mujoco_menagerie/            # MuJoCo 机器人模型库
 ├── Wan-Dancer/                  # 音乐驱动舞蹈视频生成
 ├── README.md                    # 本文件
-└── setup_py310_cu128_rtx5090_torch2110.sh  # PyTorch 统一部署脚本
+└── scripts/                     # 统一部署脚本
+    ├── setup_py310_cu128_rtx5090_torch2110.sh  # py3.10 版（旧项目）
+    └── setup_py312_cu128_rtx5090_torch.sh      # py3.12 版（lerobot v0.6.2+ 等新项目）
 ```
 
 ## 仓库概览
@@ -111,7 +113,8 @@ ws/
 | 文件 | 说明 |
 | --- | --- |
 | `README.md` | 当前工作区总览说明（本文件） |
-| `setup_py310_cu128_rtx5090_torch2110.sh` | RTX 5090 + PyTorch 2.11.0 cu128 统一部署脚本 |
+| `scripts/setup_py310_cu128_rtx5090_torch2110.sh` | RTX 5090 + PyTorch cu128 统一部署脚本（py3.10 版） |
+| `scripts/setup_py312_cu128_rtx5090_torch.sh` | RTX 5090 + PyTorch cu128 统一部署脚本（py3.12 版） |
 | `embodied_ai_model_test_catalog.md` | 具身智能模型测试目录 |
 
 ## RTX 5090 PyTorch 环境提示
@@ -119,8 +122,9 @@ ws/
 RTX 5090 对应 `sm_120`，部分项目如果使用旧版 PyTorch/CUDA wheel，可能会出现架构不支持或 CUDA 不可用的问题。当前推荐使用统一部署脚本安装 **CUDA 12.8 版本的 PyTorch 2.11.0**。
 
 ```bash
-# 安装到当前已激活的 conda/venv 环境
-bash setup_py310_cu128_rtx5090_torch2110.sh
+# 安装到当前已激活的 conda/venv 环境（按项目 Python 版本选择对应脚本）
+bash scripts/setup_py310_cu128_rtx5090_torch2110.sh   # py3.10 环境
+bash scripts/setup_py312_cu128_rtx5090_torch.sh       # py3.12 环境（lerobot v0.6.2+ 等）
 ```
 
 脚本默认读取 `~/Downloads/py310-cu128-torch` 下的本地 wheel，安装完成后会自动验证 `torch.cuda.is_available()`、GPU 名称和 `sm_120` 计算能力。

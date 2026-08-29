@@ -60,7 +60,7 @@ python -m pip install -U pip
 ```bash
 cd /home/creator/ws/23_video/miniMax/ComfyUI
 source .venv/bin/activate
-bash /home/creator/ws/setup_py310_cu128_rtx5090_torch2110.sh
+bash /home/creator/ws/scripts/setup_py310_cu128_rtx5090_torch2110.sh
 ```
 
 验证：

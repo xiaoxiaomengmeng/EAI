@@ -131,7 +131,7 @@ python -m pip install -U pip
 ```bash
 cd /home/creator/ws/openVLA
 source .venv/bin/activate
-bash /home/creator/ws/setup_py310_cu128_rtx5090_torch2110.sh
+bash /home/creator/ws/scripts/setup_py310_cu128_rtx5090_torch2110.sh
 ```
 
 ### 4.3 安装基础依赖
