@@ -14,7 +14,7 @@
 ws/
 ├── 09_human_dexterous_teleop/   # 人体姿态/手势/灵巧手遥操作
 ├── 10_openVLA/                  # OpenVLA 视觉-语言-动作模型
-├── 11_pi_serial_models/         # Pi 系列模型（Pi0 等）
+├── 11_pi_serial_models/         # Pi 系列（Pi0 / Pi0.5）与 ACT 训练评估（lerobot）
 ├── 20_unitreerobotics/          # 宇树 UnifoLM-WMA 世界模型
 ├── 21_demo/                     # 演示项目（RynnBrain、RynnWorld-4D）
 ├── 22_lingbot/                  # Lingbot 系列（depth、video、world-v2）
@@ -49,11 +49,11 @@ ws/
 
 ### `11_pi_serial_models/`
 
-- **内容概述**：Pi 系列模型（Pi0 等）本地推理学习，基于 JAX/Flax，含 MuJoCo 仿真验证。
-- **Git 链接**：上游 `https://github.com/Physical-Intelligence/openpi`
+- **内容概述**：Pi 系列（Pi0 / Pi0.5）与 ACT 策略模型的本地训练与仿真评估，基于 lerobot-main v0.6.2（PyTorch）；含 ALOHA 双臂（MuJoCo）与 LIBERO 两条评测链路。
+- **Git 链接**：上游 `https://github.com/Physical-Intelligence/openpi`（pi 系列）、`https://github.com/huggingface/lerobot`（训练框架）
 - **当前分支**：—
-- **当前状态**：🟡 基础可用/部分验证。
-- **备注**：JAX 环境与 PyTorch 生态隔离；模型推理可跑，MuJoCo 闭环验证进行中。
+- **当前状态**：✅ 已验证/可运行（ACT 全链路；Pi 系列部分验证）。
+- **备注**：ACT 从零训练（100k 步 ≈ 46 分钟，500 轮评估成功率 79%，官方基线 83%）；pi0 LoRA 微调与 pi0.5 LIBERO 后训练链路可用；脚本已按阶段编号（预检/下载/训练/评估/可视化），详见 `11_pi_serial_models/README.md` 与 `docs/17~25`。
 
 ### `20_unitreerobotics/`
 

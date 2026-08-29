@@ -4,11 +4,11 @@
 # 全部 CLI 参数已经 v0.6.2 实测校验（--policy.type + --policy.pretrained_path 组合有效；
 # 注意与 --policy.path 互斥）；模型 checkpoint 为 v0.4.4 格式，v0.6.2 加载器实测向后兼容
 # 用法：
-#   bash scripts/train_pi0.sh                 # 默认 20000 步、batch 2
-#   STEPS=200 BATCH_SIZE=1 bash scripts/train_pi0.sh   # 冒烟测试：先跑 200 步验证流程
-#   BATCH_SIZE=4 bash scripts/train_pi0.sh    # 5090(32GB) LoRA 可用 4，OOM 降 2/1
-#   LORA_R=32 STEPS=160000 BATCH_SIZE=4 bash scripts/train_pi0.sh  # 160k 步、batch 4、LoRA R=32
-#   WANDB_ENABLE=true LORA_R=32 STEPS=160000 BATCH_SIZE=4 bash scripts/train_pi0.sh  # 同上 + wandb 可视化
+#   bash scripts/22_train_pi0.sh                 # 默认 20000 步、batch 2
+#   STEPS=200 BATCH_SIZE=1 bash scripts/22_train_pi0.sh   # 冒烟测试：先跑 200 步验证流程
+#   BATCH_SIZE=4 bash scripts/22_train_pi0.sh    # 5090(32GB) LoRA 可用 4，OOM 降 2/1
+#   LORA_R=32 STEPS=160000 BATCH_SIZE=4 bash scripts/22_train_pi0.sh  # 160k 步、batch 4、LoRA R=32
+#   WANDB_ENABLE=true LORA_R=32 STEPS=160000 BATCH_SIZE=4 bash scripts/22_train_pi0.sh  # 同上 + wandb 可视化
 # =============================================================================
 set -euo pipefail
 
@@ -27,7 +27,7 @@ BATCH_SIZE="${BATCH_SIZE:-2}"    # 5090(32GB) LoRA 建议 2 起步，富余可�
 # ---------- wandb 实验跟踪（loss 曲线可视化） ----------
 # wandb 是机器学习实验跟踪平台，开启后自动画 loss/学习率/梯度等曲线图。
 # 国内连不上 wandb.ai 时用离线模式：设 WANDB_MODE=offline，生成本地 HTML 报告，不联网。
-# 开启方式：WANDB_ENABLE=true bash scripts/train_pi0.sh
+# 开启方式：WANDB_ENABLE=true bash scripts/22_train_pi0.sh
 WANDB_ENABLE="${WANDB_ENABLE:-false}"
 if [[ "$WANDB_ENABLE" == "true" ]]; then
   export WANDB_MODE="${WANDB_MODE:-offline}"   # 默认离线模式，不需要联网

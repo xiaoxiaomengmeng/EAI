@@ -5,13 +5,13 @@
 # 不需要 rename_map / pretrained_path（策略结构直接从数据集特征构建）。
 # 全部 CLI 参数已按 v0.6.2 --help 实测校验（--policy.type=act + --steps/--batch_size 顶层参数）。
 # 用法：
-#   bash scripts/train_act.sh                          # 默认 100000 步、batch 8
-#   STEPS=200 bash scripts/train_act.sh                # 冒烟测试：先跑 200 步验证流程
-#   STEPS=80000 bash scripts/train_act.sh              # 官方发布模型对应的 checkpoint 步数（官方实际训练为 100k 步，见官方 train_config.json）
-#   BATCH_SIZE=16 bash scripts/train_act.sh            # 32GB 显存富余可上探（80M 参数模型压力很小）
-#   WANDB_ENABLE=true bash scripts/train_act.sh        # 开启 wandb 离线记录（国内查看不便，推荐用离线画曲线方案）
+#   bash scripts/21_train_act.sh                          # 默认 100000 步、batch 8
+#   STEPS=200 bash scripts/21_train_act.sh                # 冒烟测试：先跑 200 步验证流程
+#   STEPS=80000 bash scripts/21_train_act.sh              # 官方发布模型对应的 checkpoint 步数（官方实际训练为 100k 步，见官方 train_config.json）
+#   BATCH_SIZE=16 bash scripts/21_train_act.sh            # 32GB 显存富余可上探（80M 参数模型压力很小）
+#   WANDB_ENABLE=true bash scripts/21_train_act.sh        # 开启 wandb 离线记录（国内查看不便，推荐用离线画曲线方案）
 # 训练后画 loss 曲线（离线方案，不依赖 wandb）：
-#   python scripts/plot_train_log.py                   # 自动解析最新 train_act 日志 → PNG
+#   python scripts/41_plot_train_log.py                   # 自动解析最新 train_act 日志 → PNG
 # =============================================================================
 set -euo pipefail
 
@@ -41,7 +41,7 @@ KL_WEIGHT="${KL_WEIGHT:-10.0}"    # KL 损失权重（默认 10.0，与官方一
 LOG_FREQ="${LOG_FREQ:-100}"       # 日志指标行频率（lerobot 默认 200 太稀疏，画曲线建议 ≤100）
 
 # ---------- wandb 实验跟踪（loss 曲线可视化） ----------
-# 开启方式：WANDB_ENABLE=true bash scripts/train_act.sh
+# 开启方式：WANDB_ENABLE=true bash scripts/21_train_act.sh
 # 国内连不上 wandb.ai 时默认离线模式：生成本地报告，不联网。
 WANDB_ENABLE="${WANDB_ENABLE:-false}"
 if [[ "$WANDB_ENABLE" == "true" ]]; then
@@ -56,7 +56,7 @@ fi
 
 # ---------- 训练前自检 ----------
 echo "===== 训练前自检 ====="
-[[ -f "$DATASET_DIR/meta/info.json" ]] || { echo "✗ 缺少数据集元信息 $DATASET_DIR/meta/info.json（可先运行 scripts/download_act_assets.sh）"; exit 1; }
+[[ -f "$DATASET_DIR/meta/info.json" ]] || { echo "✗ 缺少数据集元信息 $DATASET_DIR/meta/info.json（可先运行 scripts/11_download_act_assets.sh）"; exit 1; }
 command -v lerobot-train >/dev/null     || { echo "✗ 未找到 lerobot-train，请先 source $ACT_HOME/.venv312/bin/activate"; exit 1; }
 nvidia-smi --query-gpu=name,memory.total,memory.used --format=csv || { echo "✗ nvidia-smi 失败，检查驱动"; exit 1; }
 if [[ -d "$OUTPUT_DIR" ]]; then
@@ -90,9 +90,9 @@ lerobot-train \
 
 # 注：
 # - loss 曲线：本脚本不默认开 wandb（离线 run 国内无法直接查看）；曲线走离线方案：
-#   指标行已按 --log_freq 落盘到 $LOG_FILE，训练后运行 python scripts/plot_train_log.py 出 PNG
+#   指标行已按 --log_freq 落盘到 $LOG_FILE，训练后运行 python scripts/41_plot_train_log.py 出 PNG
 # - --policy.push_to_hub=false 必带：v0.6.2 默认推 Hub，缺失 repo_id 时 validate 阶段报
-#   "'repo_id' argument missing"（与 train_pi0.sh 同一实测结论）
+#   "'repo_id' argument missing"（与 22_train_pi0.sh 同一实测结论）
 # - ACT 从零训练：不需要 --policy.pretrained_path 与 --rename_map（pi0 才需要基座对齐）
 # - 首次训练会下载 ResNet-18 ImageNet 骨干（~45MB，脚本开头已预下载；实测 pytorch.org 可达）；
 #   网络不通时可改 --policy.pretrained_backbone_weights=null 从随机初始化训练

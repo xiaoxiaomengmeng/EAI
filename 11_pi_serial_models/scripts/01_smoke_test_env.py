@@ -4,8 +4,8 @@
 训练前必做，用于排除渲染/依赖问题。包含观测/动作空间断言与帧率统计。
 
 用法：
-    python scripts/smoke_test_env.py                # 台式机带显示器：默认 glfw 渲染
-    MUJOCO_GL=egl python scripts/smoke_test_env.py  # 无头/SSH：EGL GPU 渲染
+    python scripts/01_smoke_test_env.py                # 台式机带显示器：默认 glfw 渲染
+    MUJOCO_GL=egl python scripts/01_smoke_test_env.py  # 无头/SSH：EGL GPU 渲染
 
 参照 py310 环境实测输出（EGL）：
     obs keys: ['top']（480x640x3 uint8）、action 空间: Box(-1.0, 1.0, (14,))、

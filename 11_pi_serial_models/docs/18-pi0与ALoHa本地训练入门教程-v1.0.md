@@ -1,5 +1,8 @@
 # π₀ + ALoHa 本地训练入门教程：从零到仿真里机械臂搬运方块
 
+
+> **脚本更名提示（2026-08-29 起）**：`scripts/` 目录脚本已按阶段加数字序号前缀，本文中的命令对应关系：`smoke_test_env.py`→`01_smoke_test_env.py`、`test_dataset.py`→`02_test_dataset.py`、`test_pi0_io.py`→`03_test_pi0_io.py`（移入 scripts/）、`download_act_assets.sh`→`11_download_act_assets.sh`、`train_act.sh`→`21_train_act.sh`、`train_pi0.sh`→`22_train_pi0.sh`、`train_pi0_full.sh`→`23_train_pi0_full.sh`、`train_pi05_libero.sh`→`24_train_pi05_libero.sh`、`eval_act.sh`→`31_eval_act.sh`、`eval_pi0.sh`→`32_eval_pi0.sh`、`eval_pi05_libero.sh`→`33_eval_pi05_libero.sh`、`plot_train_log.py`→`41_plot_train_log.py`。
+
 > **文档性质**：面向**完全零基础**初学者的原理 + 实操教程。
 > **配套文档**：环境搭建、版本踩坑与排错细节请看 [《17-pi0本地化部署py312与ALoHa仿真训练指南-v1.0.md》](./17-pi0本地化部署py312与ALoHa仿真训练指南-v1.0.md)（下称"部署指南"），本教程只讲"为什么"和"全流程怎么走"，具体安装命令不重复。
 > **实测环境**：RTX 5090（32GB）+ Python 3.12 + lerobot v0.6.2 + torch 2.11.0+cu130，文中所有数字均为本机实测。

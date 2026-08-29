@@ -36,9 +36,9 @@
 **一键下载脚本**（本指南配套）：
 
 ```bash
-bash scripts/download_act_assets.sh                          # 仅主数据集（已存在则跳过）
-ALL_DATASETS=true bash scripts/download_act_assets.sh        # 全部 5 个数据集
-PRETRAINED=true bash scripts/download_act_assets.sh          # 额外下载官方预训练 ACT 模型
+bash scripts/11_download_act_assets.sh                          # 仅主数据集（已存在则跳过）
+ALL_DATASETS=true bash scripts/11_download_act_assets.sh        # 全部 5 个数据集
+PRETRAINED=true bash scripts/11_download_act_assets.sh          # 额外下载官方预训练 ACT 模型
 ```
 
 ---
@@ -106,7 +106,7 @@ PRETRAINED=true bash scripts/download_act_assets.sh          # 额外下载官�
 
 ### 2.2 其他可选数据集
 
-全部可从 ModelScope 镜像下载（见〇节资源表与 `scripts/download_act_assets.sh`）。对应仿真评估任务：
+全部可从 ModelScope 镜像下载（见〇节资源表与 `scripts/11_download_act_assets.sh`）。对应仿真评估任务：
 
 | 数据集 | 评估环境任务 |
 |--------|-------------|
@@ -118,20 +118,20 @@ PRETRAINED=true bash scripts/download_act_assets.sh          # 额外下载官�
 
 ```bash
 source .venv312/bin/activate
-python scripts/test_dataset.py   # 或运行 download_act_assets.sh 末尾的自动验证
+python scripts/02_test_dataset.py   # 或运行 11_download_act_assets.sh 末尾的自动验证
 ```
 
 ---
 
 ## 三、训练方法
 
-### 3.1 训练命令（推荐直接用配套脚本 `scripts/train_act.sh`，已实测）
+### 3.1 训练命令（推荐直接用配套脚本 `scripts/21_train_act.sh`，已实测）
 
 ```bash
 source .venv312/bin/activate
-bash scripts/train_act.sh                          # 默认 100000 步、batch 8（含训练前自检/日志落盘）
-STEPS=200 bash scripts/train_act.sh                # 冒烟测试（已实测通过：5 步链路无报错）
-STEPS=80000 BATCH_SIZE=16 bash scripts/train_act.sh  # 官方步数 + 大 batch（32GB 显存可上探）
+bash scripts/21_train_act.sh                          # 默认 100000 步、batch 8（含训练前自检/日志落盘）
+STEPS=200 bash scripts/21_train_act.sh                # 冒烟测试（已实测通过：5 步链路无报错）
+STEPS=80000 BATCH_SIZE=16 bash scripts/21_train_act.sh  # 官方步数 + 大 batch（32GB 显存可上探）
 ```
 
 手动执行时的等价命令（ACT **从零训练**，不需要基座权重，也不需要 `HF_HUB_OFFLINE` 之类的外部模型缓存）：
@@ -151,7 +151,7 @@ lerobot-train \
 
 | 参数 | 说明 |
 |------|------|
-| `--dataset.root` | 本地数据集目录（含 `meta/info.json`），与 `train_pi0.sh` 一致，不触网 |
+| `--dataset.root` | 本地数据集目录（含 `meta/info.json`），与 `22_train_pi0.sh` 一致，不触网 |
 | `--policy.type=act` | 选用 ACT 策略（零预训练权重） |
 | `--steps` | 训练总步数（v0.6.2 为顶层参数），默认 100,000，与官方 train_config.json 完全一致（官方发布模型取的是 80k 步 checkpoint） |
 | `--batch_size` | 默认 8，与官方一致；32GB 显存可上探 16~32（会偏离官方配置） |
@@ -178,10 +178,10 @@ outputs/act_aloha_cube/
 
 ### 3.4 Loss 曲线（离线方案，已实测）
 
-脚本默认不开 wandb（离线 run 在国内无法直接查看）。`train_act.sh` 已把指标行按 `--log_freq`（`LOG_FREQ` 环境变量，默认 100）落盘到 `logs/train_act_<时间戳>.log`，训练后运行配套画图脚本即可：
+脚本默认不开 wandb（离线 run 在国内无法直接查看）。`21_train_act.sh` 已把指标行按 `--log_freq`（`LOG_FREQ` 环境变量，默认 100）落盘到 `logs/train_act_<时间戳>.log`，训练后运行配套画图脚本即可：
 
 ```bash
-python scripts/plot_train_log.py        # 自动解析最新 train_act 日志 → logs/<日志名>_loss_curve.png
+python scripts/41_plot_train_log.py        # 自动解析最新 train_act 日志 → logs/<日志名>_loss_curve.png
 ```
 
 输出含 `loss` / `l1_loss`（重建）/ `kld_loss` 三条曲线。冒烟实测：200 步内 loss 41.7 → 3.7，下降正常。
@@ -201,17 +201,17 @@ python scripts/plot_train_log.py        # 自动解析最新 train_act 日志 �
 
 ### 4.1 评估环境
 
-仿真环境为 **gym-aloha**（MuJoCo）：✅ 本项目 `.venv312` 已安装 `[aloha]` extra 并做过冒烟测试（实测 351 FPS），无需再装。**推荐直接用配套脚本 `scripts/eval_act.sh`（已实测）**：
+仿真环境为 **gym-aloha**（MuJoCo）：✅ 本项目 `.venv312` 已安装 `[aloha]` extra 并做过冒烟测试（实测 351 FPS），无需再装。**推荐直接用配套脚本 `scripts/31_eval_act.sh`（已实测）**：
 
 ```bash
 source .venv312/bin/activate
-bash scripts/eval_act.sh                       # 默认 25 轮，无头 EGL 渲染
-N_EPISODES=5 bash scripts/eval_act.sh          # 快速验证
-N_EPISODES=500 EVAL_BATCH=16 bash scripts/eval_act.sh   # 官方模型卡配置
-POLICY_DIR=models/act_aloha_sim_transfer_cube_human bash scripts/eval_act.sh  # 评估官方预训练模型
+bash scripts/31_eval_act.sh                       # 默认 25 轮，无头 EGL 渲染
+N_EPISODES=5 bash scripts/31_eval_act.sh          # 快速验证
+N_EPISODES=500 EVAL_BATCH=16 bash scripts/31_eval_act.sh   # 官方模型卡配置
+POLICY_DIR=models/act_aloha_sim_transfer_cube_human bash scripts/31_eval_act.sh  # 评估官方预训练模型
 ```
 
-等价手动命令（评估入口 `lerobot-eval`，v0.6.2 实测参数，与 `eval_pi0.sh` 同源）：
+等价手动命令（评估入口 `lerobot-eval`，v0.6.2 实测参数，与 `32_eval_pi0.sh` 同源）：
 
 ```bash
 source .venv312/bin/activate
@@ -227,7 +227,7 @@ lerobot-eval \
   --job_name=eval_act_aloha_cube
 ```
 
-参数要点（与 `eval_pi0.sh` 对齐）：
+参数要点（与 `32_eval_pi0.sh` 对齐）：
 
 - `--policy.path` 评估本地 checkpoint，策略类型从 checkpoint 的 `config.json` 自动识别（与 `--policy.type` 互斥）；
 - `--env.type=aloha` + `--env.task=AlohaTransferCube-v0`：v0.6.2 新写法（v0.4.4 的 `--env.name` 已废弃）；
@@ -256,7 +256,7 @@ lerobot-eval \
 
 ### 4.4 本机 500 轮验收实测记录（2026-08-29）
 
-对 100k 步从零训练的产物执行 `N_EPISODES=500 EVAL_BATCH=16 bash scripts/eval_act.sh`，
+对 100k 步从零训练的产物执行 `N_EPISODES=500 EVAL_BATCH=16 bash scripts/31_eval_act.sh`，
 日志：`logs/eval_act_20260829_201746.log`。评估结果总览：
 
 | 项目 | 数值 |
@@ -284,15 +284,15 @@ cd ~/ws/11_pi_serial_models
 source .venv312/bin/activate
 
 # ① 数据（本地已有；需要更多数据集/官方预训练模型时执行）
-bash scripts/download_act_assets.sh                    # ALL_DATASETS=true / PRETRAINED=true 可选
+bash scripts/11_download_act_assets.sh                    # ALL_DATASETS=true / PRETRAINED=true 可选
 
 # ② 训练（从零训练，默认 100k 步；推荐用配套脚本，等价手动命令见第三节）
-bash scripts/train_act.sh
+bash scripts/21_train_act.sh
 
 # ③ 评估（25 轮，无头 EGL；推荐用配套脚本，等价手动命令见第四节）
-bash scripts/eval_act.sh
+bash scripts/31_eval_act.sh
 # 正式验收（500 轮官方口径，约 22 分钟；本机实测成功率 79%，见 4.4 节）
-N_EPISODES=500 EVAL_BATCH=16 bash scripts/eval_act.sh
+N_EPISODES=500 EVAL_BATCH=16 bash scripts/31_eval_act.sh
 ```
 
 ---

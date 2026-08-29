@@ -7,13 +7,13 @@
 # 依赖：modelscope CLI（实测 1.38.1，位于 ~/.local/bin/modelscope）；
 #       若未安装：pip install modelscope
 # 用法：
-#   bash scripts/download_act_assets.sh
+#   bash scripts/11_download_act_assets.sh
 #       默认仅下载 aloha_sim_transfer_cube_human（若本地已存在则跳过）
-#   ALL_DATASETS=true bash scripts/download_act_assets.sh
+#   ALL_DATASETS=true bash scripts/11_download_act_assets.sh
 #       下载全部 5 个数据集（transfer_cube human/scripted + insertion human/scripted + pusht）
-#   PRETRAINED=true bash scripts/download_act_assets.sh
+#   PRETRAINED=true bash scripts/11_download_act_assets.sh
 #       额外下载官方预训练 ACT 模型到 models/act_aloha_sim_transfer_cube_human
-#   ALL_DATASETS=true PRETRAINED=true bash scripts/download_act_assets.sh
+#   ALL_DATASETS=true PRETRAINED=true bash scripts/11_download_act_assets.sh
 # =============================================================================
 set -euo pipefail
 
@@ -83,7 +83,7 @@ print(f"✓ 数据集加载成功：{len(ds)} 帧，{ds.num_episodes} episodes�
 print(f"  特征：{list(ds.features.keys())}")
 EOF
 else
-  echo "⚠ 未找到 $VENV_PY，跳过加载验证（可后续手动运行 scripts/test_dataset.py）"
+  echo "⚠ 未找到 $VENV_PY，跳过加载验证（可后续手动运行 scripts/02_test_dataset.py）"
 fi
 
 echo "===== 全部完成 ====="

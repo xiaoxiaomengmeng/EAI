@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # =============================================================================
 # π₀ LoRA checkpoint Rollout 评估脚本（5090 机 + py3.12 + lerobot main v0.6.2）
-# 配套 scripts/train_pi0.sh 训练产物：outputs/pi0_aloha_cube/checkpoints/last/pretrained_model
+# 配套 scripts/22_train_pi0.sh 训练产物：outputs/pi0_aloha_cube/checkpoints/last/pretrained_model
 # CLI 参数已按 v0.6.2 实测校验：
 #   - --policy.path 评估本地 checkpoint（与 --policy.type 互斥，类型从 checkpoint config 自动识别）
 #   - --env.type=aloha + --env.task=AlohaTransferCube-v0（v0.4.4 的 --env.name 已不存在）
 # 用法：
-#   bash scripts/eval_pi0.sh                    # 默认 25 轮，无头 EGL 渲染
-#   N_EPISODES=5 bash scripts/eval_pi0.sh       # 快速验证：先跑 5 轮
-#   RENDER=glfw bash scripts/eval_pi0.sh        # 台式机带显示器：glfw 窗口渲染
+#   bash scripts/32_eval_pi0.sh                    # 默认 25 轮，无头 EGL 渲染
+#   N_EPISODES=5 bash scripts/32_eval_pi0.sh       # 快速验证：先跑 5 轮
+#   RENDER=glfw bash scripts/32_eval_pi0.sh        # 台式机带显示器：glfw 窗口渲染
 # =============================================================================
 set -euo pipefail
 
@@ -29,7 +29,7 @@ BATCH_SIZE="${BATCH_SIZE:-1}"     # 单环境串行，显存/CPU 压力最小，
 
 # ---------- 评估前自检 ----------
 echo "===== 评估前自检 ====="
-[[ -f "$POLICY_DIR/config.json" ]] || { echo "✗ 缺少 checkpoint 配置 $POLICY_DIR/config.json，请先完成训练（scripts/train_pi0.sh）"; exit 1; }
+[[ -f "$POLICY_DIR/config.json" ]] || { echo "✗ 缺少 checkpoint 配置 $POLICY_DIR/config.json，请先完成训练（scripts/22_train_pi0.sh）"; exit 1; }
 command -v lerobot-eval >/dev/null || { echo "✗ 未找到 lerobot-eval，请先 source $PI0_HOME/.venv312/bin/activate"; exit 1; }
 nvidia-smi --query-gpu=name,memory.used --format=csv || { echo "✗ nvidia-smi 失败，检查驱动"; exit 1; }
 echo "✓ 自检通过（MUJOCO_GL=${MUJOCO_GL:-默认 glfw}，N_EPISODES=$N_EPISODES）"

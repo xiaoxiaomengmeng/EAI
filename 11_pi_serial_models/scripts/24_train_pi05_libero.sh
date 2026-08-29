@@ -6,7 +6,7 @@
 #   1. TRAIN_MODE=lora    （默认）LoRA 参数高效微调（~2.8M 可训参数，r=16 默认）
 #   2. TRAIN_MODE=expert         仅训练 Action Expert（冻结 PaliGemma，训 300M Expert + proj）
 #
-# 与 train_pi0.sh / train_pi0_full.sh 的关键区别：
+# 与 22_train_pi0.sh / 23_train_pi0_full.sh 的关键区别：
 #   - --policy.type=pi05（不是 pi0）
 #   - --policy.normalization_mapping：LIBERO 数据集无 q01/q99，强制 MEAN_STD 绕开 quantile 缺失
 #   - --policy.n_action_steps=10：pi05 默认 action chunk 长度
@@ -15,12 +15,12 @@
 #   - --policy.gradient_checkpointing=true：LIBERO 数据量大（273k 帧），建议开
 #
 # 用法：
-#   bash scripts/train_pi05_libero.sh                            # 默认 LoRA r=16、30k 步、batch 4
-#   TRAIN_MODE=expert bash scripts/train_pi05_libero.sh          # 切到 Action Expert 全参微调
-#   STEPS=200 BATCH_SIZE=1 bash scripts/train_pi05_libero.sh     # 冒烟测试：200 步验证链路
-#   LORA_R=32 STEPS=60000 bash scripts/train_pi05_libero.sh      # LoRA r=32、60k 步
-#   BASE_MODEL=pi05_base bash scripts/train_pi05_libero.sh       # 改用通用基座（非 LIBERO 预训练版）
-#   WANDB_ENABLE=true bash scripts/train_pi05_libero.sh          # 开启 wandb 离线可视化
+#   bash scripts/24_train_pi05_libero.sh                            # 默认 LoRA r=16、30k 步、batch 4
+#   TRAIN_MODE=expert bash scripts/24_train_pi05_libero.sh          # 切到 Action Expert 全参微调
+#   STEPS=200 BATCH_SIZE=1 bash scripts/24_train_pi05_libero.sh     # 冒烟测试：200 步验证链路
+#   LORA_R=32 STEPS=60000 bash scripts/24_train_pi05_libero.sh      # LoRA r=32、60k 步
+#   BASE_MODEL=pi05_base bash scripts/24_train_pi05_libero.sh       # 改用通用基座（非 LIBERO 预训练版）
+#   WANDB_ENABLE=true bash scripts/24_train_pi05_libero.sh          # 开启 wandb 离线可视化
 # =============================================================================
 set -euo pipefail
 
@@ -34,7 +34,7 @@ PI05_HOME="$HOME/ws/11_pi_serial_models"
 # 为保险起见训练脚本也做同款自检与软链 ----------
 export HF_HUB_OFFLINE=1
 
-# ---------- LIBERO assets 自检（与 eval_pi05_libero.sh 同款逻辑）----------
+# ---------- LIBERO assets 自检（与 33_eval_pi05_libero.sh 同款逻辑）----------
 LIBERO_VENV_PATH="$PI05_HOME/.venv312/lib/python3.12/site-packages/libero/libero"
 LIBERO_USER_ASSETS="$HOME/.libero/assets"
 LIBERO_ASSETS_KEY_FILE="scenes/libero_tabletop_base_style.xml"
@@ -106,7 +106,7 @@ if [[ $AVAIL_MEM_MB -lt 18000 ]]; then
   read -r -p "仍要继续吗？[y/N] " ans; [[ "$ans" == "y" || "$ans" == "Y" ]] || exit 1
 fi
 
-# expert 模式显存警告（与 train_pi0_full.sh 同款）
+# expert 模式显存警告（与 23_train_pi0_full.sh 同款）
 GPU_MEM_MB=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits | head -1 | tr -d ' ')
 if [[ "$TRAIN_MODE" == "expert" && $GPU_MEM_MB -lt 30000 ]]; then
   echo "⚠ expert 模式（Action Expert 全参 ~300M）+ GPU 显存 ${GPU_MEM_MB}MB < 30GB，可能 OOM。"
@@ -176,5 +176,5 @@ lerobot-train \
 #   pi05 基座期望匹配（pi05.mdx 原文：No --rename_map is needed here — the keys already match）
 # - LoRA 模式不开 gradient_checkpointing：5090 32GB LoRA 显存充裕，开了反而训练变慢
 # - expert 模式必开 gradient_checkpointing：300M 全参 + AdamW 优化器显存吃紧
-# - 评估：POLICY_DIR=$OUTPUT_DIR/checkpoints/last/pretrained_model bash scripts/eval_pi0.sh
+# - 评估：POLICY_DIR=$OUTPUT_DIR/checkpoints/last/pretrained_model bash scripts/32_eval_pi0.sh
 #   （eval 脚本 pi05 复用同款，只需改 POLICY_DIR 指向 pi05 训练输出）

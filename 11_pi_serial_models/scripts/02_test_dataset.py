@@ -1,4 +1,4 @@
-# test_dataset.py
+# 02_test_dataset.py
 # 验证本机数据集可被 LeRobotDataset 正常加载（v0.6.2 实测通过：50 episodes / 20000 帧，v3.0 格式）
 from lerobot.datasets.lerobot_dataset import LeRobotDataset   # v0.6.2：导入路径与 v0.4.4 相同
 

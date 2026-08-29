@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 # π₀.₅ LIBERO checkpoint Rollout 评估脚本（5090 机 + py3.12 + lerobot main v0.6.2）
-# 配套 scripts/train_pi05_libero.sh 训练产物：
+# 配套 scripts/24_train_pi05_libero.sh 训练产物：
 #   - LoRA 模式：outputs/pi05_libero_lora/checkpoints/last/pretrained_model
 #   - Expert 模式：outputs/pi05_libero_expert/checkpoints/last/pretrained_model
 #
@@ -12,12 +12,12 @@
 #   - libero_10       (max 520 steps / episode，最难，官方默认)
 #
 # 用法：
-#   bash scripts/eval_pi05_libero.sh                            # 默认：LoRA checkpoint + libero_spatial + 50 轮
-#   TRAIN_MODE=expert bash scripts/eval_pi05_libero.sh          # 切到 expert checkpoint
-#   LIBERO_TASK=libero_10 bash scripts/eval_pi05_libero.sh      # 换 LIBERO-10 子集（最难）
-#   N_EPISODES=10 bash scripts/eval_pi05_libero.sh              # 快速验证：先跑 10 轮
-#   RENDER=glfw bash scripts/eval_pi05_libero.sh                # 台式机带显示器：glfw 窗口渲染
-#   TRAIN_MODE=expert LIBERO_TASK=libero_goal bash scripts/eval_pi05_libero.sh   # 组合用
+#   bash scripts/33_eval_pi05_libero.sh                            # 默认：LoRA checkpoint + libero_spatial + 50 轮
+#   TRAIN_MODE=expert bash scripts/33_eval_pi05_libero.sh          # 切到 expert checkpoint
+#   LIBERO_TASK=libero_10 bash scripts/33_eval_pi05_libero.sh      # 换 LIBERO-10 子集（最难）
+#   N_EPISODES=10 bash scripts/33_eval_pi05_libero.sh              # 快速验证：先跑 10 轮
+#   RENDER=glfw bash scripts/33_eval_pi05_libero.sh                # 台式机带显示器：glfw 窗口渲染
+#   TRAIN_MODE=expert LIBERO_TASK=libero_goal bash scripts/33_eval_pi05_libero.sh   # 组合用
 # =============================================================================
 set -euo pipefail
 
@@ -88,7 +88,7 @@ BATCH_SIZE="${BATCH_SIZE:-1}"      # 单环境串行，显存/CPU 压力最小�
 echo "===== 评估前自检（π₀.₅ LIBERO） ====="
 [[ -f "$POLICY_DIR/config.json" ]] || {
   echo "✗ 缺少 checkpoint 配置 $POLICY_DIR/config.json"
-  echo "  请先完成训练：TRAIN_MODE=$TRAIN_MODE bash scripts/train_pi05_libero.sh"
+  echo "  请先完成训练：TRAIN_MODE=$TRAIN_MODE bash scripts/24_train_pi05_libero.sh"
   exit 1
 }
 command -v lerobot-eval >/dev/null || { echo "✗ 未找到 lerobot-eval，请先 source $PI05_HOME/.venv312/bin/activate"; exit 1; }
@@ -128,5 +128,5 @@ lerobot-eval \
 # - 验收标准（对标官方 97.5%）：libero_spatial 97% / libero_object 99% / libero_goal 98% / libero_10 96%
 # - 4 子集跑全流程示例：
 #   for task in libero_spatial libero_object libero_goal libero_10; do
-#     LIBERO_TASK=$task bash scripts/eval_pi05_libero.sh
+#     LIBERO_TASK=$task bash scripts/33_eval_pi05_libero.sh
 #   done

@@ -2,18 +2,18 @@
 # =============================================================================
 # ACT Rollout 评估脚本（5090 机 + py3.12 + lerobot main v0.6.2 + gym-aloha）
 # 在 ALOHA 仿真双臂环境（AlohaTransferCube-v0）中闭环 rollout，统计搬方块交接成功率。
-# CLI 参数已按 v0.6.2 实测校验（与 eval_pi0.sh 同源；ACT 无需 rename_map——
+# CLI 参数已按 v0.6.2 实测校验（与 32_eval_pi0.sh 同源；ACT 无需 rename_map——
 # 策略从零训练，特征名直接来自数据集 observation.images.top，与 gym-aloha 环境输出一致）。
 # 用法：
-#   bash scripts/eval_act.sh                          # 默认 25 轮，无头 EGL 渲染
-#   N_EPISODES=5 bash scripts/eval_act.sh             # 快速验证：先跑 5 轮
-#   N_EPISODES=500 EVAL_BATCH=16 bash scripts/eval_act.sh   # 官方模型卡配置（500 轮，参考成功率 83%；本机实测约 22 分钟）
-#   RENDER=glfw bash scripts/eval_act.sh              # 台式机带显示器：glfw 窗口渲染
-#   POLICY_DIR=models/act_aloha_sim_transfer_cube_human bash scripts/eval_act.sh
+#   bash scripts/31_eval_act.sh                          # 默认 25 轮，无头 EGL 渲染
+#   N_EPISODES=5 bash scripts/31_eval_act.sh             # 快速验证：先跑 5 轮
+#   N_EPISODES=500 EVAL_BATCH=16 bash scripts/31_eval_act.sh   # 官方模型卡配置（500 轮，参考成功率 83%；本机实测约 22 分钟）
+#   RENDER=glfw bash scripts/31_eval_act.sh              # 台式机带显示器：glfw 窗口渲染
+#   POLICY_DIR=models/act_aloha_sim_transfer_cube_human bash scripts/31_eval_act.sh
 #                                                     # 评估 ModelScope 下载的官方预训练模型（需先 PRETRAINED=true 下载）
 #   ENV_TASK=AlohaInsertion-v0 POLICY_DIR=outputs/act_aloha_insertion/checkpoints/last/pretrained_model \
-#     bash scripts/eval_act.sh                        # 插入任务（需先在插入数据集上训练，见下条）
-#   换任务训练：DATASET_NAME=aloha_sim_insertion_human OUTPUT_DIR=outputs/act_aloha_insertion bash scripts/train_act.sh
+#     bash scripts/31_eval_act.sh                        # 插入任务（需先在插入数据集上训练，见下条）
+#   换任务训练：DATASET_NAME=aloha_sim_insertion_human OUTPUT_DIR=outputs/act_aloha_insertion bash scripts/21_train_act.sh
 # =============================================================================
 set -euo pipefail
 
@@ -33,7 +33,7 @@ EVAL_BATCH="${EVAL_BATCH:-1}"       # 并行环境数；显存/CPU 富余可上�
 
 # ---------- 评估前自检 ----------
 echo "===== 评估前自检 ====="
-[[ -f "$POLICY_DIR/config.json" ]] || { echo "✗ 缺少 checkpoint 配置 $POLICY_DIR/config.json，请先完成训练（scripts/train_act.sh）或下载官方模型（PRETRAINED=true scripts/download_act_assets.sh）"; exit 1; }
+[[ -f "$POLICY_DIR/config.json" ]] || { echo "✗ 缺少 checkpoint 配置 $POLICY_DIR/config.json，请先完成训练（scripts/21_train_act.sh）或下载官方模型（PRETRAINED=true scripts/11_download_act_assets.sh）"; exit 1; }
 command -v lerobot-eval >/dev/null || { echo "✗ 未找到 lerobot-eval，请先 source $ACT_HOME/.venv312/bin/activate"; exit 1; }
 nvidia-smi --query-gpu=name,memory.used --format=csv || { echo "✗ nvidia-smi 失败，检查驱动"; exit 1; }
 echo "✓ 自检通过（MUJOCO_GL=${MUJOCO_GL:-默认 glfw}，N_EPISODES=$N_EPISODES，POLICY_DIR=$POLICY_DIR）"
@@ -63,4 +63,4 @@ lerobot-eval \
 #   单轮成功判定：方块被一只臂抓起并交到另一只臂（gym-aloha 内置判定）
 # - 每轮视频默认自动保存到 $OUTPUT_DIR/videos/aloha_*/eval_episode_N.mp4，人工抽检交接动作
 # - 官方参考成绩：LeRobot 版 ACT 500 轮 83% 成功率（原 ACT 仓库实现 68%）
-# - 与 eval_pi0.sh 的差异：ACT 不需要 --rename_map（pi0 基座期望 base_0_rgb，ACT 直接用 top）
+# - 与 32_eval_pi0.sh 的差异：ACT 不需要 --rename_map（pi0 基座期望 base_0_rgb，ACT 直接用 top）

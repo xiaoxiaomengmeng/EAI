@@ -137,7 +137,7 @@ def main() -> None:
     parser.add_argument("--dump-json", default=None, help="Write summary JSON to this path.")
     args = parser.parse_args()
 
-    root = Path(__file__).resolve().parent
+    root = Path(__file__).resolve().parent.parent  # 本脚本位于 scripts/，项目根在上一级
     model_dir = resolve_model_dir(root, args.model_name, args.model_dir)
 
     print("=== Pi0 IO Smoke Test ===")

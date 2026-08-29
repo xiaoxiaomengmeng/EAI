@@ -1,5 +1,8 @@
 # π₀ 本地化部署与 ALoHa 仿真训练指南
 
+
+> **脚本更名提示（2026-08-29 起）**：`scripts/` 目录脚本已按阶段加数字序号前缀，本文中的命令对应关系：`smoke_test_env.py`→`01_smoke_test_env.py`、`test_dataset.py`→`02_test_dataset.py`、`test_pi0_io.py`→`03_test_pi0_io.py`（移入 scripts/）、`download_act_assets.sh`→`11_download_act_assets.sh`、`train_act.sh`→`21_train_act.sh`、`train_pi0.sh`→`22_train_pi0.sh`、`train_pi0_full.sh`→`23_train_pi0_full.sh`、`train_pi05_libero.sh`→`24_train_pi05_libero.sh`、`eval_act.sh`→`31_eval_act.sh`、`eval_pi0.sh`→`32_eval_pi0.sh`、`eval_pi05_libero.sh`→`33_eval_pi05_libero.sh`、`plot_train_log.py`→`41_plot_train_log.py`。
+
 > 版本 v1.2 · 2026-08-18 · 目标硬件：两台台式机（均 Ubuntu 22.04）——5090 机（RTX 5090 32GB）与 4090 机（RTX 4090 24GB），本指南同一份适用于两台机器（三种部署方案见 2.2 矩阵）· 技术路线：LeRobot（PyTorch）+ ModelScope 国内直连
 
 ---

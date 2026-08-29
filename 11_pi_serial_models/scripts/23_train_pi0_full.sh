@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
 # π₀ 全参微调脚本（5090 32GB + py3.12 + lerobot main v0.6.2 + torch cu130）
-# 与 train_pi0.sh（LoRA）的核心区别：
+# 与 22_train_pi0.sh（LoRA）的核心区别：
 #   1. 不用 PEFT/LoRA，训练全部 2.3B 参数（PaliGemma 2B + Gemma Expert 300M）
 #   2. 开启 gradient_checkpointing 节省显存（用计算换显存）
 #   3. 默认 batch_size=2（LoRA 脚本默认 4），显存峰值 ~30GB 刚好不 OOM
@@ -15,19 +15,19 @@
 #   合计:                 ~30-32 GB（紧凑但可行）
 #
 # 如果 OOM：
-#   1. 降 batch: BATCH_SIZE=1 bash scripts/train_pi0_full.sh
-#   2. 冻结视觉编码器: FREEZE_VISION=true bash scripts/train_pi0_full.sh（省 ~1GB）
+#   1. 降 batch: BATCH_SIZE=1 bash scripts/23_train_pi0_full.sh
+#   2. 冻结视觉编码器: FREEZE_VISION=true bash scripts/23_train_pi0_full.sh（省 ~1GB）
 #   3. 只训 Expert: TRAIN_EXPERT_ONLY=true（冻结 PaliGemma，只训 300M Expert，省 ~16GB）
 #
 # 用法：
-#   bash scripts/train_pi0_full.sh                            # 默认 200k 步、batch 2
-#   BATCH_SIZE=1 bash scripts/train_pi0_full.sh              # OOM 时降 batch
-#   STEPS=100000 bash scripts/train_pi0_full.sh              # 快速试跑
-#   WANDB_ENABLE=true bash scripts/train_pi0_full.sh         # 开启 wandb 可视化
+#   bash scripts/23_train_pi0_full.sh                            # 默认 200k 步、batch 2
+#   BATCH_SIZE=1 bash scripts/23_train_pi0_full.sh              # OOM 时降 batch
+#   STEPS=100000 bash scripts/23_train_pi0_full.sh              # 快速试跑
+#   WANDB_ENABLE=true bash scripts/23_train_pi0_full.sh         # 开启 wandb 可视化
 # =============================================================================
 set -euo pipefail
 
-# ---------- 离线模式：与 train_pi0.sh 一致 ----------
+# ---------- 离线模式：与 22_train_pi0.sh 一致 ----------
 export HF_HUB_OFFLINE=1
 
 # ---------- 路径与可调参数 ----------
@@ -118,4 +118,4 @@ lerobot-train \
 # - 不传 --peft.method_type: 不做 PEFT，与 --policy.use_peft=false 双保险
 # - 全参 checkpoint 体积 ~4.6GB（vs LoRA 5.5MB），save_freq 默认 20000 不变
 # - 评估时 POLICY_DIR 指向 outputs/pi0_aloha_cube_full/checkpoints/last/pretrained_model
-#   示例: POLICY_DIR=outputs/pi0_aloha_cube_full/checkpoints/last/pretrained_model bash scripts/eval_pi0.sh
+#   示例: POLICY_DIR=outputs/pi0_aloha_cube_full/checkpoints/last/pretrained_model bash scripts/32_eval_pi0.sh

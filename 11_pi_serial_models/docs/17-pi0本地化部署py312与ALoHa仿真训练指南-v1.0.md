@@ -1,5 +1,8 @@
 # π₀ 本地化部署与 ALoHa 仿真训练指南（5090 机 · py3.12 · LeRobot main 专版）
 
+
+> **脚本更名提示（2026-08-29 起）**：`scripts/` 目录脚本已按阶段加数字序号前缀，本文中的命令对应关系：`smoke_test_env.py`→`01_smoke_test_env.py`、`test_dataset.py`→`02_test_dataset.py`、`test_pi0_io.py`→`03_test_pi0_io.py`（移入 scripts/）、`download_act_assets.sh`→`11_download_act_assets.sh`、`train_act.sh`→`21_train_act.sh`、`train_pi0.sh`→`22_train_pi0.sh`、`train_pi0_full.sh`→`23_train_pi0_full.sh`、`train_pi05_libero.sh`→`24_train_pi05_libero.sh`、`eval_act.sh`→`31_eval_act.sh`、`eval_pi0.sh`→`32_eval_pi0.sh`、`eval_pi05_libero.sh`→`33_eval_pi05_libero.sh`、`plot_train_log.py`→`41_plot_train_log.py`。
+
 > 版本 v1.0 · 2026-08-18 · 目标硬件：5090 台式机（RTX 5090 32GB，Ubuntu 22.04）· 技术路线：Python 3.12（deadsnakes）+ LeRobot main（v0.6.x）+ torch cu128 及以上（实测 cu130）+ ModelScope 国内直连
 >
 > 本文档从《17-pi0本地化部署py310与ALoHa仿真训练指南-v1.0.md》（4090 机 + py3.10 + lerobot v0.4.4，✅ 已实测）拆分而来，**单独记录 py3.12 + lerobot main 新栈路线**（py310 文档中的"方案三"）。py3.10 路线内容以该文档为准，本文不再重复。

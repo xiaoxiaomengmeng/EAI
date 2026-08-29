@@ -13,11 +13,11 @@
 因 loss 量级约为 l1_loss 的 10 倍以上，单轴画会把 l1/kld 压扁，故用三子图分别展示。
 
 用法：
-  python scripts/plot_train_log.py                                   # 自动找最新 train_act_*.log
-  python scripts/plot_train_log.py logs/train_act_20260829_172156.log
-  python scripts/plot_train_log.py <日志路径> -o out.png             # 指定输出文件
+  python scripts/41_plot_train_log.py                                   # 自动找最新 train_act_*.log
+  python scripts/41_plot_train_log.py logs/train_act_20260829_172156.log
+  python scripts/41_plot_train_log.py <日志路径> -o out.png             # 指定输出文件
 
-注意：曲线密度取决于训练时的 --log_freq（train_act.sh 用 LOG_FREQ 环境变量控制，默认 100）。
+注意：曲线密度取决于训练时的 --log_freq（21_train_act.sh 用 LOG_FREQ 环境变量控制，默认 100）。
 """
 
 import argparse
