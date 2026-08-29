@@ -233,7 +233,7 @@ lerobot-eval \
 - `--env.type=aloha` + `--env.task=AlohaTransferCube-v0`：v0.6.2 新写法（v0.4.4 的 `--env.name` 已废弃）；
 - **ACT 不需要 `--rename_map`**（pi0 才需要）：ACT 从零训练，视觉特征名直接取自数据集 `observation.images.top`，与 gym-aloha 环境输出一致；
 - **`--eval.use_async_envs=false` 必带**（实测坑）：gym_aloha 0.1.4 无 gymnasium entry_points 注册，环境注册仅靠主进程 `import gym_aloha`；batch>1 默认启用 AsyncVectorEnv，其 forkserver 子进程不继承该 import，报 `NamespaceNotFound: gym_aloha`。改 Sync 后在主进程建环境，实测 batch 16 约 2.6s/轮（500 轮约 22 分钟）；
-- 本机实测：100k 步训练产物 rollout 成功率 **56~60%**（5 轮 3/5、16 轮 9/16，样本小有波动，官方 500 轮为 83%）。
+- 本机实测：100k 步训练产物 **500 轮官方口径成功率 79.0%**（395/500，耗时 22.8 分钟 ≈ 2.73s/轮；小样本 5/16 轮时的 56~60% 偏差属采样噪声，官方 500 轮为 83%）。
 
 ### 4.2 成功判定与验收标准
 
@@ -254,6 +254,27 @@ lerobot-eval \
   --output_dir=outputs/eval_act_aloha_cube_500
 ```
 
+### 4.4 本机 500 轮验收实测记录（2026-08-29）
+
+对 100k 步从零训练的产物执行 `N_EPISODES=500 EVAL_BATCH=16 bash scripts/eval_act.sh`，
+日志：`logs/eval_act_20260829_201746.log`。评估结果总览：
+
+| 项目 | 数值 |
+|---|---|
+| **成功率 `pc_success`** | **79.0%**（395/500 成功） |
+| 平均累计奖励 `avg_sum_reward` | 217.99（满分 400，每步最高 +1） |
+| 平均单轮最高奖励 `avg_max_reward` | 3.466（>3 说明交接+放置环节大多完成） |
+| 总耗时 `eval_s` | 1367.4 秒 ≈ **22.8 分钟** |
+| 单轮耗时 | 2.73s/轮 |
+| 配置 | `batch_size=16`、`n_episodes=500`、`use_async_envs=False`（修复后生效）、每轮上限 400 步、480×640 像素观测 |
+| 视频 | 500 个 `eval_episode_N.mp4` 已保存至 `outputs/eval_act_aloha_cube/videos/aloha_0/` |
+
+结论：
+
+1. **与官方基线基本对齐**：官方 500 轮 83.0%，本机 100k 步从零训练产物 **79.0%**，差 4 个百分点属正常波动（单卡数值差异、随机种子、官方发布模型取 80k checkpoint），属验收通过水平；
+2. **小样本是采样噪声**：5 轮 60%、16 轮 56.25% 样本太小，500 轮才是官方口径，这也印证模型卡必须用 500 轮报告；
+3. **日志无异常**：全程无 ERROR/Traceback，仅一条无害警告（`The environment does not have 'task_description'`——ACT 不用语言指令，可忽略），进度条末尾成功率与最终汇总一致。
+
 ---
 
 ## 五、快速上手流程（TL;DR）
@@ -270,6 +291,8 @@ bash scripts/train_act.sh
 
 # ③ 评估（25 轮，无头 EGL；推荐用配套脚本，等价手动命令见第四节）
 bash scripts/eval_act.sh
+# 正式验收（500 轮官方口径，约 22 分钟；本机实测成功率 79%，见 4.4 节）
+N_EPISODES=500 EVAL_BATCH=16 bash scripts/eval_act.sh
 ```
 
 ---
