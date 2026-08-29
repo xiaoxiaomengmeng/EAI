@@ -2,7 +2,6 @@
 .venv/
 venv/
 env/
-*/.venv/
 
 # Python cache and build artifacts
 __pycache__/
@@ -27,11 +26,9 @@ dist/
 .idea/
 
 # OpenVLA local environment and generated artifacts
-10_openVLA/.venv/
 10_openVLA/.libero/
 10_openVLA/outputs/
 10_openVLA/models/
-10_openVLA/LIBERO/
 10_openVLA/openvla/experiments/logs/
 10_openVLA/openvla/rollouts/
 10_openVLA/openvla/cache/
@@ -51,3 +48,9 @@ dist/
 *.pth
 *.safetensors
 *.bin
+
+# Preventive: training/download byproducts not present yet
+nohup.out
+*.whl
+wandb/
+MUJOCO_LOG.TXT

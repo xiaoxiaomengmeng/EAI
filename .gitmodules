@@ -13,3 +13,27 @@
 [submodule "22_lingbot/lingbot-world-v2"]
 	path = 22_lingbot/lingbot-world-v2
 	url = https://github.com/xiaoxiaomengmeng/lingbot-world-v2.git
+[submodule "10_openVLA/repos/LIBERO"]
+	path = 10_openVLA/repos/LIBERO
+	url = https://github.com/Lifelong-Robot-Learning/LIBERO.git
+[submodule "10_openVLA/repos/openvla"]
+	path = 10_openVLA/repos/openvla
+	url = https://github.com/xiaoxiaomengmeng/openvla.git
+[submodule "11_pi_serial_models/repos/lerobot-main"]
+	path = 11_pi_serial_models/repos/lerobot-main
+	url = https://github.com/huggingface/lerobot.git
+[submodule "20_unitreerobotics/repos/unifolm-world-model-action"]
+	path = 20_unitreerobotics/repos/unifolm-world-model-action
+	url = https://github.com/xiaoxiaomengmeng/unifolm-world-model-action.git
+[submodule "21_demo/RynnWorld-4D"]
+	path = 21_demo/RynnWorld-4D
+	url = https://github.com/Alibaba-DAMO-Academy/RynnWorld-4D.git
+[submodule "22_lingbot/lingbot-video"]
+	path = 22_lingbot/lingbot-video
+	url = https://github.com/xiaoxiaomengmeng/lingbot-video.git
+[submodule "colibri"]
+	path = colibri
+	url = https://github.com/xiaoxiaomengmeng/colibri.git
+[submodule "mujoco_menagerie"]
+	path = mujoco_menagerie
+	url = https://gitee.com/eai_2026/mujoco_menagerie.git
