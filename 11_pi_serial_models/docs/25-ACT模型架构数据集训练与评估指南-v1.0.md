@@ -185,6 +185,14 @@ python scripts/plot_train_log.py        # 自动解析最新 train_act 日志 �
 ```
 
 输出含 `loss` / `l1_loss`（重建）/ `kld_loss` 三条曲线。冒烟实测：200 步内 loss 41.7 → 3.7，下降正常。
+
+三个指标的含义（ACT 损失 = `l1_loss + kl_weight × kld_loss`，`kl_weight=10.0`）：
+
+| 指标 | 含义 | 怎么看 |
+|------|------|--------|
+| `l1_loss` | 重建损失：预测动作块与演示动作的 L1 距离（归一化空间） | **核心指标**，越小模仿越准；100k 步实测 0.68 → 0.046 |
+| `kld_loss` | KL 散度：CVAE 潜变量 `z` 分布与标准正态的距离（正则项） | 训练初期大、后期趋近 0 属正常 |
+| `loss` | 总损失 = `l1_loss + 10 × kld_loss` | 量级约为 l1 的 10 倍以上，故画图用三子图分开看 |
 若需要交互式实验跟踪，仍可 `WANDB_ENABLE=true`（默认 `WANDB_MODE=offline`，后续需 `wandb sync` 才能查看，国内不便）。
 
 ---
@@ -193,7 +201,17 @@ python scripts/plot_train_log.py        # 自动解析最新 train_act 日志 �
 
 ### 4.1 评估环境
 
-仿真环境为 **gym-aloha**（MuJoCo）：✅ 本项目 `.venv312` 已安装 `[aloha]` extra 并做过冒烟测试（实测 351 FPS），无需再装。评估入口为 `lerobot-eval`（v0.6.2 实测参数，与 `eval_pi0.sh` 同源）：
+仿真环境为 **gym-aloha**（MuJoCo）：✅ 本项目 `.venv312` 已安装 `[aloha]` extra 并做过冒烟测试（实测 351 FPS），无需再装。**推荐直接用配套脚本 `scripts/eval_act.sh`（已实测）**：
+
+```bash
+source .venv312/bin/activate
+bash scripts/eval_act.sh                       # 默认 25 轮，无头 EGL 渲染
+N_EPISODES=5 bash scripts/eval_act.sh          # 快速验证
+N_EPISODES=500 EVAL_BATCH=16 bash scripts/eval_act.sh   # 官方模型卡配置
+POLICY_DIR=models/act_aloha_sim_transfer_cube_human bash scripts/eval_act.sh  # 评估官方预训练模型
+```
+
+等价手动命令（评估入口 `lerobot-eval`，v0.6.2 实测参数，与 `eval_pi0.sh` 同源）：
 
 ```bash
 source .venv312/bin/activate
@@ -213,8 +231,9 @@ lerobot-eval \
 
 - `--policy.path` 评估本地 checkpoint，策略类型从 checkpoint 的 `config.json` 自动识别（与 `--policy.type` 互斥）；
 - `--env.type=aloha` + `--env.task=AlohaTransferCube-v0`：v0.6.2 新写法（v0.4.4 的 `--env.name` 已废弃）；
-- 若报视觉特征不匹配（`Feature mismatch`），按 pi0 评估经验追加
-  `--rename_map='{"observation.images.top":"observation.images.base_0_rgb"}'` 对齐命名。
+- **ACT 不需要 `--rename_map`**（pi0 才需要）：ACT 从零训练，视觉特征名直接取自数据集 `observation.images.top`，与 gym-aloha 环境输出一致；
+- **`--eval.use_async_envs=false` 必带**（实测坑）：gym_aloha 0.1.4 无 gymnasium entry_points 注册，环境注册仅靠主进程 `import gym_aloha`；batch>1 默认启用 AsyncVectorEnv，其 forkserver 子进程不继承该 import，报 `NamespaceNotFound: gym_aloha`。改 Sync 后在主进程建环境，实测 batch 16 约 2.6s/轮（500 轮约 22 分钟）；
+- 本机实测：100k 步训练产物 rollout 成功率 **56~60%**（5 轮 3/5、16 轮 9/16，样本小有波动，官方 500 轮为 83%）。
 
 ### 4.2 成功判定与验收标准
 
@@ -249,13 +268,8 @@ bash scripts/download_act_assets.sh                    # ALL_DATASETS=true / PRE
 # ② 训练（从零训练，默认 100k 步；推荐用配套脚本，等价手动命令见第三节）
 bash scripts/train_act.sh
 
-# ③ 评估（25 轮，无头 EGL）
-export MUJOCO_GL=egl
-lerobot-eval \
-  --policy.path=outputs/act_aloha_cube/checkpoints/last/pretrained_model \
-  --env.type=aloha --env.task=AlohaTransferCube-v0 \
-  --eval.n_episodes=25 --eval.batch_size=1 \
-  --output_dir=outputs/eval_act_aloha_cube --job_name=eval_act_aloha_cube
+# ③ 评估（25 轮，无头 EGL；推荐用配套脚本，等价手动命令见第四节）
+bash scripts/eval_act.sh
 ```
 
 ---

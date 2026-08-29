@@ -31,8 +31,9 @@ fi
 
 # ---------- 路径与可调参数（可用环境变量覆盖） ----------
 ACT_HOME="$HOME/ws/11_pi_serial_models"
-DATASET_DIR="$ACT_HOME/data/aloha_sim_transfer_cube_human"   # 数据集目录本身（含 meta/info.json），不是父目录
-OUTPUT_DIR="$ACT_HOME/outputs/act_aloha_cube"                # checkpoint 与日志输出目录（非 resume 时若已存在会报 FileExistsError，需先删或改名）
+DATASET_NAME="${DATASET_NAME:-aloha_sim_transfer_cube_human}"     # 数据集名；插入任务用 aloha_sim_insertion_human
+DATASET_DIR="$ACT_HOME/data/$DATASET_NAME"                        # 数据集目录本身（含 meta/info.json），不是父目录
+OUTPUT_DIR="${OUTPUT_DIR:-$ACT_HOME/outputs/act_aloha_cube}"      # checkpoint 与日志输出目录（非 resume 时若已存在会报 FileExistsError，需先删或改名）
 STEPS="${STEPS:-100000}"          # 总训练步数：默认 100k，与官方 train_config.json 一致（官方发布的模型取 80k 步 checkpoint）；50 episodes × 400 帧，100k 步 × batch8 ≈ 40 epoch
 BATCH_SIZE="${BATCH_SIZE:-8}"     # lerobot 默认 8；ACT 仅 ~52M 可学习参数，32GB 显存可上探 16~32
 CHUNK_SIZE="${CHUNK_SIZE:-100}"   # 动作块长度（默认 100，与官方一致）
@@ -72,7 +73,7 @@ mkdir -p "$ACT_HOME/logs"
 
 echo "===== 启动训练（日志: $LOG_FILE） ====="
 lerobot-train \
-  --dataset.repo_id=aloha_sim_transfer_cube_human \
+  --dataset.repo_id="$DATASET_NAME" \
   --dataset.root="$DATASET_DIR" \
   --output_dir="$OUTPUT_DIR" \
   --job_name=act_aloha_cube \
