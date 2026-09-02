@@ -2,7 +2,7 @@
 
 > 版本 v1.0 · 2026-08-29 · 目标硬件：5090 台式机（RTX 5090 32GB，Ubuntu 22.04）· 技术路线：复用本项目 `.venv312` + `repos/lerobot-main`（实测 v0.6.2），**无需新建目录、无需下载基座权重**
 >
-> ACT（Action Chunking with Transformers）是 LeRobot 官方推荐的**入门首选策略**：训练快、参数量小（约 80M）、50 条演示即可达到高成功率。本文介绍其模型架构、数据集、训练方法与测评方法，所有资源下载均走 **ModelScope 国内镜像**（本机无法直连 huggingface.co，ModelScope 链接均于 2026-08 实测可访问）。
+> ACT（Action Chunking with Transformers）是 LeRobot 官方推荐的**入门首选策略**：训练快、参数量小（约 52M）、50 条演示即可达到高成功率。本文介绍其模型架构、数据集、训练方法与测评方法，所有资源下载均走 **ModelScope 国内镜像**（本机无法直连 huggingface.co，ModelScope 链接均于 2026-08 实测可访问）。
 
 ---
 
@@ -14,7 +14,7 @@
 
 | 维度 | pi0（已有文档 17/18/24） | ACT（本文） |
 |------|------------------------|------------|
-| 模型规模 | 约 3.5B（PaliGemma 3B + Action Expert） | 约 80M |
+| 模型规模 | 约 3.5B（PaliGemma 3B + Action Expert） | 约 52M |
 | 权重来源 | 需下载 14GB 基座权重（ModelScope `lerobot/pi0_base`） | **从零训练，无需任何预训练权重** |
 | 训练方式 | LoRA / Action Expert 微调 | 全参数直接训练 |
 | 训练耗时 | 长（小时级～天级） | 单卡数小时内（官方 80k 步 A100 约 1h45m） |
@@ -58,7 +58,7 @@ PRETRAINED=true bash scripts/11_download_act_assets.sh          # 额外下载�
 ```
 输入：多路相机图像（如 observation.images.top）+ 机器人关节状态（observation.state, 14 维）
 
-① 视觉骨干  torchvision ResNet-18（FrozenBatchNorm2d，取 layer4 特征图）
+① 视觉骨干  torchvision ResNet-18（ImageNet 预训练权重，FrozenBatchNorm2d，取 layer4 特征图）
              —— 每路相机独立提取，类 DETR 的 IntermediateLayerGetter
 
 ② VAE 编码器（仅训练时用）
@@ -302,6 +302,10 @@ N_EPISODES=500 EVAL_BATCH=16 bash scripts/31_eval_act.sh
 | 缩写/术语 | 全称与含义 |
 |-----------|-----------|
 | ACT | Action Chunking with Transformers，动作分块 Transformer 策略 |
+| ALOHA | ACT 的出处论文与双臂硬件平台；ACT 就是为 ALOHA 低成本双臂精细操作设计的策略 |
+| ResNet | 残差网络，带残差跳连的 CNN 图像骨干；跳连让深达上百层的卷积网络也能稳定训练 |
+| ResNet-18 | ResNet 的 18 层版本，参数约 11.7M；ACT 的默认视觉骨干，加载 ImageNet 预训练权重，卷积参与训练、BN 统计量冻结 |
+| DETR | Detection Transformer，目标检测模型；ACT 解码器的可学习查询 object queries 与 encoder-decoder 结构源自它 |
 | CVAE | Conditional Variational Auto-Encoder，条件变分自编码器；ACT 用它编码演示风格潜变量 `z` |
 | Action Chunking | 一次预测未来若干步动作（默认 100 步）并按块执行的机制 |
 | z / latent | 风格潜变量（默认 32 维）：训练时由未来动作编码得到，推理时置零 |
@@ -312,3 +316,32 @@ N_EPISODES=500 EVAL_BATCH=16 bash scripts/31_eval_act.sh
 | rollout | 策略在仿真环境中闭环执行一整轮并统计成败的评估方式 |
 | episode | 一轮完整的任务演示/评估轨迹（本数据集每轮 400 帧 @ 50fps） |
 | ModelScope | 魔搭社区，国内模型/数据集托管平台，本项目所有下载的首选镜像 |
+
+### 200 字摘要
+
+ACT即Action Chunking with Transformers，源自ALOHA论文，面向低成本硬件的双臂精细操作。核心是Encoder-Decoder结构的Transformer：ResNet-18提取各相机图像特征，与关节状态及风格潜变量z拼接送入编码器，解码器用chunk_size个可学习查询一次性预测未来100步动作，即动作分块，消除逐帧预测的累积抖动；训练引入CVAE把整段未来动作编码为风格变量z并加KL散度约束，建模同一场景多种正确操作的演示多模态，推理时z置零输出平均意义动作；重叠预测块可用Temporal Ensembling按指数加权平均进一步平滑。ACT从零训练无需预训练权重，可训参数约52M，本机5090训练100k步约46分钟，在gym-aloha搬方块任务500轮评估成功率79.0%，与官方83.0%基线基本对齐，是入门机器人模仿学习性价比最高的策略。和PI0相比，ACT是小模型、从零训练、无语言的专才。
+
+
+ACT的本质是解决模仿学习两大痛点：人类演示天然抖动，且同一场景存在多种合理操作。它放弃逐帧闭环预测，让解码器一次并行回归未来100步动作，策略学的是轨迹的时序结构而非单步反应，误差不再累积，动作自然连贯；再用CVAE把整段动作编码成风格变量z建模演示多模态，推理时置零取平均走法。架构是DETR式encoder-decoder加ImageNet预训练的ResNet-18视觉骨干，总参仅52M。5090从零训100k步约46分钟，搬方块500轮79.0%贴近官方83.0%——50条演示加单卡一小时，就能换来流畅的双臂精细操作策略。和PI0相比，ACT是小模型、从零训练、无语言的专才。
+
+### 视频号字幕版
+
+ACT源自ALOHA论文，解决模仿学习两大痛点：人类演示天然抖动，同一场景又有多种合理操作。ACT放弃逐帧闭环预测，让解码器一次并行回归未来100步动作，策略学的是整段轨迹的时序结构，误差不再累积，动作自然连贯；再用CVAE风格变量z建模演示多模态，推理时z置零，输出平均走法。骨架是DETR式encoder-decoder，视觉端挂ImageNet预训练的ResNet-18，全部参数仅52M。单张5090从零训练100k步只要46分钟，搬方块任务500轮成功率79.0%，贴近官方的83.0%。50条演示，单卡一小时，就能换来流畅的双臂精细操作。和PI0相比，ACT是小模型、从零训练、无语言的专才。
+
+
+### ACT 与 PI0 / PI0.5 的最大区别
+
+| 维度 | ACT | PI0 | PI0.5 |
+|------|-----|-----|-------|
+| 定位 | 单任务模仿学习入门策略 | 通用 VLA 基座 | 通用 VLA 泛化升级版 |
+| 总参数 | 约 52M（ResNet-18 约 11M + Transformer 约 40M） | 约 3.5B（PaliGemma 2B + Expert 300M） | 约 4.14B（PaliGemma 3B + Expert 300M） |
+| 预训练依赖 | 策略部分从零训练，仅 ResNet-18 加载 ImageNet 骨干 | 需下载 14GB 大规模真机数据预训练基座 | 异构 6 类数据 co-training 底座（约 168k 条） |
+| 微调方式 | 全参直接训练 | LoRA 或冻结 PaliGemma 只训 Expert | 同 PI0（LoRA / Expert-only） |
+| 动作生成 | 单次前向直接回归 100 步动作块 | Flow Matching 去噪出 50 步块 | Flow Matching 出 10 步块 + deque 队列消费 |
+| 多模态演示建模 | CVAE 风格变量 z，推理时置零 | Flow Matching 概率分布天然建模 | 同 PI0 |
+| 语言条件 | **无**（不吃任务指令，评估时有无害警告可忽略） | 48 token 任务描述 | 200 token 长指令 + subtask 预测 |
+| 本机训练成本（5090） | 100k 步约 46 分钟 | LoRA 160k 步 4.5 小时；Expert 200k 步 10 小时 | 30k 步（LoRA / Expert 均数小时级） |
+| 本机成功率 | 搬方块 500 轮 79.0%（官方 83.0%） | ALOHA 搬方块 25 轮 16%（Expert 全参） | LIBERO spatial 500 集 98.4% |
+| 适用场景 | 小数据单任务、快速跑通链路 | 语言跟随 + 多任务泛化 | out-of-the-box 跨本体跨环境泛化 |
+
+一句话总结最大区别：**ACT 是「小模型 + 从零训练 + 无语言」的专才**，50 条 demo 就能在单一任务上训出可用策略；**PI0 / PI0.5 是「大模型 + 预训练底座 + 语言条件」的通才**，靠 VLA 架构和 Flow Matching 吃语言指令、做多任务泛化，PI0.5 再用异构 co-training 把泛化做到开箱即用。学原理、验链路用 ACT；要语言理解、跨任务泛化就上 PI 系列。

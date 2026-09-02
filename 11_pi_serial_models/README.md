@@ -84,6 +84,11 @@ rollout 视频在 `outputs/eval_*/videos/`。
 
 **建议的学习顺序**：① Diffusion Policy（与 ACT 同数据集从零训练，可直接复用 `21_train_act.sh` 的脚本框架改 `--policy.type=diffusion`，一两天即可出对照实验）→ ② pi0-FAST（pi0 的自然延伸）→ ③ SmolVLA（轻量 VLA 对照）→ ④ 其余按兴趣。所有策略的训练/评估入口不变（`lerobot-train` / `lerobot-eval`），只需换 `--policy.type` 与配套数据集。
 
+**可验证性分级（按 `repos/lerobot-main` 源码核实）**：所有策略均已注册于 `policies/__init__.py`，但“能验证”分三档——
+① **立即可验（从零训练，无需基座权重、无需额外依赖）**：TD-MPC、VQ-BeT、Gaussian Actor，现有 aloha 数据集 + 当前 `.venv312` 即可；
+② **装一个轻量依赖即可（从零训练）**：Diffusion Policy（需 `pip install -e ".[diffusion]"` 补 diffusers）、Multi-Task DiT（同需 diffusers）；
+③ **代码就绪但依赖外部基座权重（PreTrainedPolicy 封装）**：pi0-FAST/SmolVLA/GR00T/MolmoAct2/Wall-X/xVLA/LingBot-VA/EO1/FastWAM/EVO-1/VLA-JEPA——仓库内只有适配代码，权重在 HF（多数未上 ModelScope，国内网络是主要门槛），且需先装对应 extras（如 `[groot]` 需 dm-tree/timm/decord、`[wallx]` 需 torchdiffeq/qwen-vl-utils，当前均未装）。
+
 ## 脚本导航
 
 `scripts/` 下脚本**十位数字 = 阶段，个位留空可扩展**（新增按 `25_`/`34_` 顺延），

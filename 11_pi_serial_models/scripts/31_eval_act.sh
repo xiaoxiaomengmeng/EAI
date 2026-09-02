@@ -11,8 +11,22 @@
 #   RENDER=glfw bash scripts/31_eval_act.sh              # 台式机带显示器：glfw 窗口渲染
 #   POLICY_DIR=models/act_aloha_sim_transfer_cube_human bash scripts/31_eval_act.sh
 #                                                     # 评估 ModelScope 下载的官方预训练模型（需先 PRETRAINED=true 下载）
+#
+# 支持测评的任务共 3 个（ENV_TYPE x ENV_TASK 组合，策略必须与该任务数据集的训练产物匹配）：
+# ① 搬方块交接（默认，本脚本即为此配置）
+#   bash scripts/31_eval_act.sh
+#   # 等价：ENV_TYPE=aloha ENV_TASK=AlohaTransferCube-v0 POLICY_DIR=outputs/act_aloha_cube/checkpoints/last/pretrained_model \
+#   #       OUTPUT_DIR=outputs/eval_act_aloha_cube bash scripts/31_eval_act.sh
+#   # 策略来源：21_train_act.sh 默认产物，或官方预训练模型 models/act_aloha_sim_transfer_cube_human
+# ② 插孔装配（aloha 套件）
 #   ENV_TASK=AlohaInsertion-v0 POLICY_DIR=outputs/act_aloha_insertion/checkpoints/last/pretrained_model \
-#     bash scripts/31_eval_act.sh                        # 插入任务（需先在插入数据集上训练，见下条）
+#     OUTPUT_DIR=outputs/eval_act_aloha_insertion bash scripts/31_eval_act.sh
+#   # 策略来源：需先换任务训练，见本注释块末行
+# ③ 推块 PushT（单臂轻量任务，pusht 套件）
+#   ENV_TYPE=pusht ENV_TASK=PushT-v0 POLICY_DIR=outputs/act_pusht/checkpoints/last/pretrained_model \
+#     OUTPUT_DIR=outputs/eval_act_pusht bash scripts/31_eval_act.sh
+#   # 策略来源：需先训练 DATASET_NAME=pusht OUTPUT_DIR=outputs/act_pusht bash scripts/21_train_act.sh
+#
 #   换任务训练：DATASET_NAME=aloha_sim_insertion_human OUTPUT_DIR=outputs/act_aloha_insertion bash scripts/21_train_act.sh
 # =============================================================================
 set -euo pipefail
