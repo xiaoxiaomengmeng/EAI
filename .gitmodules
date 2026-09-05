@@ -40,3 +40,6 @@
 [submodule "100-microduck/microduck"]
 	path = 100-microduck/microduck
 	url = https://github.com/pollen-robotics/microduck.git
+[submodule "100-microduck/microduck_rl"]
+	path = 100-microduck/microduck_rl
+	url = https://github.com/pollen-robotics/microduck_rl.git

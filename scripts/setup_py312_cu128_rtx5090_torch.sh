@@ -1,21 +1,21 @@
 #!/usr/bin/env bash
-# Setup PyTorch 2.11.0 + CUDA 12.8 for Python 3.10 on RTX 5090 (sm_120).
+# Setup PyTorch 2.11.0 + CUDA 12.8 for Python 3.12 on RTX 5090 (sm_120).
 # Default behavior: install into the currently active Python environment.
 
 set -euo pipefail
 
 SCRIPT_NAME="$(basename "$0")"
-WHEEL_DIR="$HOME/Downloads/py310-cu128-torch"
+WHEEL_DIR="$HOME/Downloads/py312-cu128-torch"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 SKIP_VERIFY="0"
 TRUSTED_HOST="pypi.tuna.tsinghua.edu.cn"
 INDEX_URL="https://pypi.tuna.tsinghua.edu.cn/simple"
 FIND_LINKS="https://mirrors.aliyun.com/pytorch-wheels/"
 
-TORCH_WHEEL="torch-2.11.0+cu128-cp310-cp310-manylinux_2_28_x86_64.whl"
-TORCHVISION_WHEEL="torchvision-0.26.0+cu128-cp310-cp310-manylinux_2_28_x86_64.whl"
-TORCHAUDIO_WHEEL="torchaudio-2.11.0+cu128-cp310-cp310-manylinux_2_28_x86_64.whl"
-TRITON_WHEEL="triton-3.6.0-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+TORCH_WHEEL="torch-2.11.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl"
+TORCHVISION_WHEEL="torchvision-0.26.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl"
+TORCHAUDIO_WHEEL="torchaudio-2.11.0+cu128-cp312-cp312-manylinux_2_28_x86_64.whl"
+TRITON_WHEEL="triton-3.6.0-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
 
 usage() {
     cat <<EOF
@@ -72,16 +72,34 @@ print(f"{sys.version_info.major}.{sys.version_info.minor}")
 PY
 )"
 
-if [ "$PY_VERSION" != "3.10" ]; then
-    fail "This script installs cp310 wheels and requires Python 3.10, current: ${PY_VERSION}"
+if [ "$PY_VERSION" != "3.12" ]; then
+    fail "This script installs cp312 wheels and requires Python 3.12, current: ${PY_VERSION}"
 fi
 
 log "Using Python: $($PYTHON_BIN -c 'import sys; print(sys.executable)')"
 log "Python version: ${PY_VERSION}"
 log "Wheel directory: ${WHEEL_DIR}"
 
-for wheel in "$TORCH_WHEEL" "$TORCHVISION_WHEEL" "$TORCHAUDIO_WHEEL" "$TRITON_WHEEL"; do
-    [ -f "${WHEEL_DIR}/${wheel}" ] || fail "Missing wheel: ${WHEEL_DIR}/${wheel}"
+# Wheels: use local copies when present, otherwise download the missing ones
+# (wheel files only, --no-deps; dependencies resolve at install time).
+WHEELS=("$TORCH_WHEEL" "$TORCHVISION_WHEEL" "$TORCHAUDIO_WHEEL" "$TRITON_WHEEL")
+SPECS=("torch==2.11.0+cu128" "torchvision==0.26.0+cu128" "torchaudio==2.11.0+cu128" "triton==3.6.0")
+
+mkdir -p "$WHEEL_DIR"
+for i in "${!WHEELS[@]}"; do
+    wheel="${WHEELS[$i]}"
+    if [ ! -f "${WHEEL_DIR}/${wheel}" ]; then
+        log "Missing wheel, downloading: ${wheel}"
+        "$PYTHON_BIN" -m pip download "${SPECS[$i]}" --no-deps \
+            -d "$WHEEL_DIR" \
+            -f "${FIND_LINKS}cu128/" \
+            -i "$INDEX_URL" \
+            --trusted-host "$TRUSTED_HOST"
+    fi
+done
+
+for wheel in "${WHEELS[@]}"; do
+    [ -f "${WHEEL_DIR}/${wheel}" ] || fail "Missing wheel after download: ${WHEEL_DIR}/${wheel}"
 done
 
 log "Upgrading pip"
