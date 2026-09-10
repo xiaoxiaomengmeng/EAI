@@ -250,12 +250,14 @@ uv run scripts/infer_policy.py \
 
 ### 6.1 先配置 wandb
 
-训练日志由 mjlab/rsl_rl 走 wandb（与 LeRobot 一样没有 tensorboard）。二选一：
+训练日志由 mjlab/rsl_rl 走 wandb（与 LeRobot 一样没有 tensorboard）。**必须在启动 `train` 之前设置好**，否则进程会卡在交互式三选一提示（Create account / Use existing / Don't visualize）等待输入：
 
 ```bash
-export WANDB_MODE=offline     # 离线模式，日志存本地，事后可 wandb sync 上传
+export WANDB_MODE=offline     # 离线模式，run 存本地 wandb/ 目录，事后可 wandb sync 上传（推荐）
 # 或：uv run --with wandb wandb login   # 有 API key 时在线记录
 ```
+
+> 若已经卡在提示处：输入 `3` 回车等价于本次禁用 wandb，训练会继续，checkpoint 照常保存到本地 `logs/rsl_rl/...`，只是这次 run 不会写入 `wandb/`（之后 `play`/`export.py` 无法用 wandb-run-path 引用它）。
 
 ### 6.2 先 smoke 再正式训练
 
@@ -270,6 +272,24 @@ uv run train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 4096
 ```
 
 显存不够就降 `--env.scene.num-envs`（2048 / 1024），5090 32GB 跑 4096 官方配置无压力。
+
+**首次启动的正常现象（本机 5090 实测）**：
+
+- 开头有十几行 `Module ... load on device 'cuda:0' took xxx ms (compiled)`：这是 MuJoCo Warp 首次为 sm_120 JIT 编译 CUDA kernel，约 1-2 分钟，编译缓存在 `~/.cache/warp/1.12.0`，**之后启动不再编译**；
+- `[mdp] Patches 1-2 active: NaN-safe reward/advantage`、`Patch 4 active: ONNX export filters passive_* joints`：上游打在 rsl_rl 上的补丁，正常；
+- tyro 的 `UserWarning`（list/tuple 类型注解）和 mjlab 的 actuator/site 匹配提示均无害，可忽略；
+- 环境配置表应打印：512 envs、physics step 0.005s、env step 0.02s（即 50Hz 控制）、**actor obs 61 维**（base_ang_vel 3 + projected_gravity 3 + joint_pos 14 + joint_vel 14 + actions 14 + command 3 + head_command 4 + body_command 6）、**critic 76 维**（多特权信息：base_lin_vel、foot_height/air_time/contact/contact_forces）、16 个 reward term、7 个 curriculum；
+- 策略网络为 MLP：actor `61→512→256→128→14`（ELU），critic `76→512→256→128→1`；
+- 之后开始刷 `Learning iteration N/...`，smoke 看到 mean_reward 不为负且 episode length 正常、无 NaN 即算跑通。
+
+正式训练建议挂后台、日志落盘（train 的本地日志目录形如 `logs/rsl_rl/velocity/<时间戳>_velocity/`，checkpoint 也保存在这里）：
+
+```bash
+mkdir -p logs
+WANDB_MODE=offline nohup uv run train Mjlab-Velocity-Flat-MicroDuck \
+  --env.scene.num-envs 4096 > logs/train_velocity_$(date +%Y%m%d_%H%M%S).log 2>&1 &
+tail -f logs/train_velocity_*.log   # 观察，Ctrl-C 只退出 tail 不影响训练
+```
 
 断点续训：
 
@@ -355,7 +375,8 @@ uv run scripts/infer_policy.py --walking output.onnx
 | `torch.cuda.is_available()` 为 False | 先 `nvidia-smi` 确认驱动；确认用的是 `uv run`（.venv 内 torch 2.9.1 CUDA 版）而非系统 Python；容器内需 `--gpus all` |
 | `uv sync` 卡在 bam 下载 | bam 是 GitHub git 依赖，检查 SSH key / 代理；可手动 `git clone https://github.com/Rhoban/bam` 测试连通性 |
 | PyPI 下载慢/超时 | `export UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/`、`UV_HTTP_TIMEOUT=600` |
-| warp 首次训练报错或编译慢 | warp 首次运行会 JIT 编译 CUDA kernel，属正常；保持驱动为新版 |
+| warp 首次训练报错或编译慢 | warp 首次运行会 JIT 编译 CUDA kernel（5090 上约 1-2 分钟，十几行 `Module ... (compiled)`），缓存在 `~/.cache/warp/`，属正常；保持驱动为新版 |
+| `train` 启动后停在 `wandb: Enter your choice:` | 没预设 wandb 模式：输入 `3` 继续（本次不记录），或 Ctrl-C 后 `export WANDB_MODE=offline` 再启动（run 存本地，供 `play`/`export.py` 引用） |
 | 训练 OOM | 降 `--env.scene.num-envs`（4096→2048→1024） |
 | `list-envs` 找不到 Microduck | 确认在 `microduck_rl` 目录下、`uv sync` 成功（任务通过 `mjlab.tasks` entry point 注册） |
 | 想用 setup_py312 脚本装 GPU 环境 | 该脚本已修正为 cp312（装 torch 2.11.0+cu128，见 `scripts/setup_py312_cu128_rtx5090_torch.sh`），但 microduck_rl 的 torch 由 uv.lock 锁定 2.9.1，两套不要混用：训练环境只走步骤 3 的 `uv sync` |
