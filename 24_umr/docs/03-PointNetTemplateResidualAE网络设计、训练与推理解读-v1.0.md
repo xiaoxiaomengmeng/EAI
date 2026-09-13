@@ -661,60 +661,312 @@ L = w_chamfer × L_chamfer
   + w_edge × L_edge
 ```
 
-### 6.1 Chamfer L2：覆盖目标表面
+### 6.1 先建立直觉：为什么不能只用一种损失
 
-代码使用双向最近点平方距离：
+网络目前输出的是 `recon=(B,4096,3)`，也就是 4096 个可以自由移动的预测 slot。只告诉网络“预测点要接近目标表面”仍然不够：它可能把许多点堆到同一处、把相邻皮肤点撕开，或以不必要的大幅度从 template 跳到目标表面。
 
-```text
-L_chamfer = mean_{p∈recon} min_{q∈target} ||p-q||²
-          + mean_{q∈target} min_{p∈recon} ||q-p||²
-```
-
-它不要求 `recon[i]` 对应 `target[i]`，因此适合输入顺序随机的点云。第一个方向防止预测 slot 离开表面；第二个方向防止目标表面大面积无人覆盖。
-
-### 6.2 Repulsion：防止 slot 聚团
-
-每个预测点取最近的 `k` 个预测邻居，计算：
+四项损失分工如下：
 
 ```text
-L_repulsion = mean exp(-d² / radius²)
+Chamfer        ：预测点云整体要贴住、覆盖 target 表面。
+Repulsion      ：预测 slot 不能在局部大量重合、聚团。
+Residual       ：预测 slot 不应无理由远离共同 template。
+Edge smoothness：template 上相邻的 slot，应保持连续的变形趋势。
 ```
 
-距离越小，指数项越接近 1，损失越大；距离变大后损失快速趋近 0。它避免 Chamfer 单独训练时多个 slot 都挤到容易拟合的一小块区域。
+可把它想成在一张有弹性的、布满均匀标记点的皮肤上套到目标形状：Chamfer 负责“整张皮要贴到目标表面”；repulsion 防止标记点挤成一团；residual 防止整张皮无约束地乱飞；edge smoothness 则像相邻标记点间的弹性连接，防止皮肤局部撕裂。
 
-### 6.3 Residual regularization：限制离 template 太远
+四项函数都只对网络输出 `recon` 或 `residual` 求导；`target` 与固定的 `template_points` 都是监督参照，不会被优化器修改。实现和调用顺序见 [损失函数定义](../UMR/scripts/train_correspondence_template_residual_ae.py#L281-L397) 与 [训练循环](../UMR/scripts/train_correspondence_template_residual_ae.py#L733-L750)。
+
+### 6.2 Chamfer L2：让预测点云贴住且覆盖目标表面
+
+#### 6.2.1 要解决什么问题
+
+`recon` 与 `target` 都是无序点云。即使它们表示相同人体表面，`recon[100]` 也没有理由对应 `target[100]`：训练输入 `source` 甚至会被随机打乱。因此不能使用常见的逐行 MSE：
 
 ```text
-L_residual = mean(residual²)
+错误的思路：mean ||recon[i] - target[i]||²
 ```
 
-它鼓励小偏移，防止 Decoder 无约束地把 template 点大幅搬运。本机 Quick Start 设置 `residual_weight=0.0`，所以该项会计算但不进入有效总损失。
+这会把“数组第 i 行”误当成真实的点对应关系。Chamfer distance 只问几何问题：每个点云是否都紧贴并覆盖了另一个点云，而不关心它们数组中的行顺序。
 
-### 6.4 Edge smoothness：保留表面拓扑
+#### 6.2.2 源码逐行做了什么
 
-对边图中每对相邻 slot `(i,j)`：
+函数是 [chamfer_l2()](../UMR/scripts/train_correspondence_template_residual_ae.py#L281-L283)：
+
+```python
+def chamfer_l2(pred, target):
+    dist = torch.cdist(pred, target, p=2) ** 2
+    return dist.min(dim=2).values.mean() + dist.min(dim=1).values.mean()
+```
+
+输入与中间 shape 为：
 
 ```text
-L_edge = mean ||residual[i] - residual[j]||²
+pred=recon： (B,4096,3)
+target：     (B,4096,3)
+
+cdist 后 dist： (B,4096,4096)
+              ↑    ↑    ↑
+             样本  pred  target
 ```
 
-它要求原本沿人体表面相邻的 template 点具有相近的偏移趋势。若没有该项，两个原本相邻的 slot 可能在 G1 表面被拉到远离的位置，导致对应关系扭曲、交叉或破碎。
+`dist[b,i,j]` 是 batch 第 `b` 个样本中，预测点 `pred[b,i]` 到目标点 `target[b,j]` 的**平方欧氏距离**。这表示对每个样本计算约 4096×4096 个点对距离；没有把人体点与 G1 点放在同一个距离矩阵中比较。
 
-### 6.5 Quick Start 的实际权重
+接下来有两个方向：
 
-以下是 `humanoid_retarget_defaults.json` 传给 Quick Start 的**实际配置值**，不是训练脚本 `parse_args()` 的 CLI 默认值。两者存在差异：例如脚本默认 `repulsion_weight=0.01`、`residual_weight=0.001`、`edge_weight=0.01`、`edge_graph=euclidean`，而 Quick Start 明确覆盖为下表数值和 `geodesic` 边图。复现实验时应优先以流水线最终打印的命令和配置为准。
+```text
+A：dist.min(dim=2)
+   对每个预测点 i，在全部 target 点 j 中找最近者。
+   意义：每个 recon 点都应落在 target 表面附近，不能飘走。
 
-| 参数 | 值 | 结果 |
-|---|---:|---|
-| `chamfer_weight` | 1.0 | 主导表面覆盖。 |
-| `repulsion_weight` | 0.002 | 轻量防聚团。 |
-| `repulsion_k` | 8 | 每点检查 8 个最近邻。 |
-| `repulsion_radius` | 0.035 | 排斥的有效尺度。 |
-| `residual_weight` | 0.0 | 不额外限制残差长度。 |
-| `edge_weight` | 0.4 | 较强地保留测地邻接。 |
-| `edge_k` | 32 | 每个 template slot 有 32 个测地邻居。 |
+B：dist.min(dim=1)
+   对每个 target 点 j，在全部预测点 i 中找最近者。
+   意义：target 的每一处都应被至少一个 recon 点覆盖，不能漏掉手、脚等区域。
+```
 
-训练日志的 `loss=0.001660` 是这些加权项之和，不是机器人最终 `qpos` 的运动误差，也不能单独代表动作重定向质量。
+`min()` 返回 `values`（最近距离）与 `indices`（最近点编号）；代码和 max pooling 一样只取 `.values`。随后两次 `.mean()` 会分别对 batch 与所有点求平均，最终返回单个标量。
+
+#### 6.2.3 数学式与一个小例子
+
+设 `P` 是预测点集合、`Q` 是 target 点集合：
+
+```text
+L_chamfer = mean_{p∈P} min_{q∈Q} ||p-q||²
+          + mean_{q∈Q} min_{p∈P} ||q-p||²
+```
+
+只保留第一个方向时，全部预测点可能只贴住 target 的一小块皮肤，损失仍很小；只保留第二个方向时，少量预测点也可能试图覆盖很大区域。双向项一起使用，才同时约束“预测点不离表面”和“目标表面不漏覆盖”。
+
+训练反向传播时，某个预测点的梯度会推动它靠近当前最近的 target 点；当它越过分界线、另一个 target 点变得更近时，最近邻关系会切换。这种按最近邻匹配的局部不光滑性是 Chamfer 的正常特征，也是它适用于无序点云的代价。
+
+#### 6.2.4 Chamfer 单独使用为什么仍不够
+
+Chamfer 只关心“最近距离”，不关心预测点之间是否均匀。例如 100 个 slot 重叠在同一块容易匹配的躯干表面，其余位置由少数 slot 勉强覆盖，Chamfer 可能仍能下降，但 slot 分布和后续重定向需要的稳定表面对应都很差。这正是 repulsion 和 edge smoothness 必须存在的原因。
+
+### 6.3 Repulsion：让 4096 个 slot 均匀散开
+
+#### 6.3.1 它惩罚的不是“离 target 远”，而是“彼此太近”
+
+Repulsion 的输入只有 `recon`，见 [point_repulsion_loss()](../UMR/scripts/train_correspondence_template_residual_ae.py#L286-L294)。它不看 target；它要消除的是预测点云内部的坍缩：
+
+```text
+不希望：slot #12、#13、#14、#15 重叠在同一小块躯干表面。
+希望：  4096 个 slot 分散覆盖头、躯干、双臂、双腿等整个外表面。
+```
+
+#### 6.3.2 源码中的 K 最近邻排斥
+
+核心实现为：
+
+```python
+dist2 = torch.cdist(points, points, p=2) ** 2
+dist2 = dist2.masked_fill(eye, float("inf"))
+knn_dist2 = torch.topk(dist2, k=k, dim=-1, largest=False).values
+return torch.exp(-knn_dist2 / (radius ** 2)).mean()
+```
+
+对 `points=recon=(B,4096,3)`：
+
+```text
+① dist2：        (B,4096,4096)，同一预测点云内部任意两点的平方距离。
+② masked_fill：  将 [i,i] 的自距离 0 改为 ∞，否则每个点自己永远是最近邻。
+③ topk(...largest=False)：
+                 对每个 slot 选 k 个距离最小的其他 slot；本例 k=8。
+                 knn_dist2 的 shape=(B,4096,8)。
+④ exp(...)：     将每个近邻距离转换为排斥惩罚，再对 B、4096、8 全部求均值。
+```
+
+排斥项是：
+
+```text
+L_repulsion = mean exp(-d² / r²)
+```
+
+其中 `d²` 是两个 slot 的平方距离，`r` 是 `repulsion_radius`。
+
+```text
+d = 0        → exp(0)  = 1：重合，惩罚最大。
+d = r        → exp(-1) ≈ 0.368：仍有明显惩罚。
+d = 2r       → exp(-4) ≈ 0.018：几乎不再排斥。
+d 远大于 r  → 接近 0：不惩罚本来就分散的点。
+```
+
+所以它不是把所有点无限推远，而是只强烈分开过于接近的局部邻居。降低该项会推动邻居距离增大。
+
+#### 6.3.3 本例参数如何理解
+
+Quick Start 使用：
+
+```text
+repulsion_k      = 8
+repulsion_radius = 0.035
+repulsion_weight = 0.002
+```
+
+这些值均在**归一化坐标空间**中生效。每个 slot 只检查 8 个最近邻，而不强迫它远离其余 4087 点；权重 `0.002` 明显小于 Chamfer 的 `1.0`，说明它是“维持均匀覆盖”的辅助约束，不能压过“贴住真实表面”的主目标。
+
+如果 `repulsion_weight` 太小，点更可能聚团；太大则会为了彼此远离而离开 target 表面，甚至在狭窄的手臂、脚踝区域产生不合理的稀疏分布。
+
+### 6.4 Residual regularization：限制从 template 出发的总位移
+
+#### 6.4.1 它约束的对象
+
+网络不是直接输出点坐标，而是输出：
+
+```text
+residual[b,i] = recon[b,i] - template_points[i]
+```
+
+Residual regularization 不检查 `recon` 之间的距离，也不检查是否贴 target；它单独问：“第 i 个 template slot 移动得是否过远？”
+
+源码 [residual_regularization_loss()](../UMR/scripts/train_correspondence_template_residual_ae.py#L297-L298) 只有一行：
+
+```python
+return (residual ** 2).mean()
+```
+
+对 `(B,4096,3)` 的每个 `Δx、Δy、Δz` 平方后，对 batch、slot 和坐标轴全部求平均：
+
+```text
+L_residual = mean ||residual[b,i]||²
+```
+
+平方意味着位移增大一倍，惩罚约增加四倍；因此它会更强烈地压制少数异常大的跳跃。
+
+#### 6.4.2 它在理论上有什么用
+
+共同 template 是 slot 编号的锚点。一个小的 residual 表示“slot #i 与 template #i 的语义仍相近”；若每个点都可以任意跨越身体表面，编号语义更容易混乱，模型也可能借助过大的偏移去记忆训练样本。
+
+启用这项时，它和 Chamfer 形成权衡：
+
+```text
+Chamfer：尽量准确贴 target，即使需要较大移动。
+Residual：在能贴 target 的前提下，尽量少移动 template slot。
+```
+
+#### 6.4.3 本例为什么显示它但实际不生效
+
+Quick Start 的配置是：
+
+```text
+residual_weight = 0.0
+```
+
+训练循环仍会调用函数并打印其加权值：
+
+```python
+residual_reg = residual_regularization_loss(residual)
+weighted_residual = args.residual_weight * residual_reg
+```
+
+但乘以 0 后，`weighted_residual=0`，它对 `loss.backward()` 没有梯度贡献。换言之，本例**没有直接限制 residual 大小**；template 锚定主要依靠 zero-init、共享 Decoder 结构，以及 Chamfer + repulsion + edge smoothness 的组合间接保持。
+
+脚本 CLI 的默认 `residual_weight=0.001` 与 Quick Start 不同。若在新模型上尝试启用，应从很小的正值开始，并同时观察 Chamfer、edge 和 slot 可视化；数值是否合适依赖归一化方式与目标形状差异，不能直接把 0.001 当作所有机器人的最佳值。
+
+### 6.5 Edge smoothness：让表面邻居协同移动，而不是局部撕裂
+
+#### 6.5.1 为什么不能只看欧氏距离或数组编号
+
+template 点通过 `y_z_x` 排序后，`slot #100` 与 `#101` 的数组行相邻，但它们不一定位于皮肤表面相邻位置。因此 edge smoothness 不能简单比较 `residual[:,i]` 和 `residual[:,i+1]`。
+
+本例先建立 `geodesic` 边图：从 template 中每个 slot 沿人体三角网格表面寻找 32 个测地近邻。这个过程使用 `sample_face_ids`、mesh 顶点/三角面及 Dijkstra，详见 [build_template_geodesic_edges()](../UMR/scripts/train_correspondence_template_residual_ae.py#L320-L388) 与本文 [第五章](#五template-拓扑图为什么还需要-geodesic-edge)。结果为：
+
+```text
+edge_index.shape = (4096×32,2) = (131072,2)
+edge_index[e] = [i,j]：template 表面上 slot #i 的一个近邻是 slot #j。
+```
+
+#### 6.5.2 源码如何计算“相邻点的残差差”
+
+函数为 [residual_edge_smoothness_loss()](../UMR/scripts/train_correspondence_template_residual_ae.py#L391-L397)：
+
+```python
+src = edge_index[:, 0]
+dst = edge_index[:, 1]
+edge_residual = residual[:, src, :] - residual[:, dst, :]
+return (edge_residual ** 2).sum(dim=-1).mean()
+```
+
+shape 流动如下：
+
+```text
+residual：      (B,4096,3)
+residual[:,src]：(B,131072,3)
+residual[:,dst]：(B,131072,3)
+两端相减：       (B,131072,3)
+sum(dim=-1)：   (B,131072)   # 每条边的 Δx²+Δy²+Δz²
+mean()：        标量
+```
+
+数学上：
+
+```text
+L_edge = mean_{(i,j)∈E} ||residual[i] - residual[j]||²
+```
+
+它不要求相邻点移动到相同位置；它要求它们的**位移向量**相近。例如手臂表面的一小片邻居可共同向外移动 0.1，而不会受到惩罚；若两个相邻点一个突然向左跳很远、另一个向右跳很远，则惩罚很大。
+
+#### 6.5.3 这和“保持拓扑”是什么关系
+
+把每条测地边想成一根连接 template 相邻 slot 的弹簧。若相邻 slot 的 residual 差非常大，意味着这根弹簧被急剧拉伸，输出表面就更容易出现局部断裂、折叠或对应编号跳跃。最小化 `L_edge` 等价于图拉普拉斯平滑的一种形式：鼓励残差场在人体表面上连续变化。
+
+它也有边界：edge smoothness 本身不保证输出严格不自交，也不能保证每个 slot 自动有“左手/右脚”人类语义；它只把可学习对应限制为局部连贯的形变。因此仍需要 Chamfer 负责贴表面、repulsion 负责分散覆盖。
+
+本例 `edge_weight=0.4` 相对较大，且使用 `edge_k=32` 的测地邻域，表明 Quick Start 重视对应 surface slot 的连续性。该权重并不能直接和 Chamfer 数值按 0.4:1 比较，因为各 loss 的未加权数值尺度不同；应观察日志中的**加权项**及可视化结果共同判断。
+
+### 6.6 四项损失如何共同决定一次参数更新
+
+训练循环中的实际顺序见 [源码第 737–750 行](../UMR/scripts/train_correspondence_template_residual_ae.py#L733-L750)：
+
+```text
+source（扰动、乱序点云）
+       │ model(source)
+       ▼
+recon / residual
+       ├── recon 与 target ───────→ Chamfer
+       ├── recon 自己 ────────────→ Repulsion
+       ├── residual 自己 ─────────→ Residual regularization（本例权重为 0）
+       └── residual + edge_index ─→ Edge smoothness
+                                      │
+                                      ▼
+                       加权求和 → loss.backward() → optimizer.step()
+```
+
+本例真正参与梯度的三项是：
+
+```text
+loss = 1.0 × Chamfer
+     + 0.002 × Repulsion
+     + 0.0 × Residual
+     + 0.4 × Edge
+```
+
+不要只根据配置权重判断谁“贡献最大”：四个原始 loss 的量纲和数值范围不同。日志输出的 `chamfer`、`repulsion`、`residual`、`edge` 已是**加权后的项**，它们相加才是 `loss`。本机日志的 `loss=0.001660` 是该训练目标，不是机器人最终 `qpos` 的误差，也不能单独代表动作自然程度。
+
+### 6.7 初学者阅读损失日志的顺序
+
+1. 先确认 `loss` 是否整体下降，且没有 `nan/inf`；这是数值稳定性的最低要求。
+2. 看加权 `chamfer`：它表示预测点云是否逐渐贴近并覆盖 target。
+3. 看加权 `repulsion`：它不应异常高；若 slot 可视化明显聚团，再考虑增大该项或调整 `radius`。
+4. 看加权 `edge`：它用于发现局部残差是否过于撕裂；不能盲目压到零，否则会妨碍人体 template 变成 G1 的必要局部差异。
+5. 本例的加权 `residual` 始终为 0 是正常现象，因为配置主动禁用了它；不要把这一项长期显示 0 误判为程序没有计算。
+6. 最后一定查看导出的 slot 叠层和重定向动作。损失函数只优化静态 canonical 表面的对应质量，不能单独保证动态跳舞时的接触、关节限位或轨迹自然性。
+
+### 6.8 Quick Start 的实际权重
+
+以下是 `humanoid_retarget_defaults.json` 传给 Quick Start 的**实际配置值**，不是训练脚本 `parse_args()` 的 CLI 默认值。两者存在差异：例如脚本默认 `repulsion_weight=0.01`、`residual_weight=0.001`、`edge_weight=0.01`、`edge_graph=euclidean`，而 Quick Start 明确覆盖为下列数值和 `geodesic` 边图。复现实验时应优先以流水线最终打印的命令和配置为准。
+
+```text
+chamfer_weight    = 1.0    # 主导表面覆盖
+repulsion_weight  = 0.002  # 轻量防聚团
+repulsion_k       = 8      # 每点检查 8 个最近邻
+repulsion_radius  = 0.035  # 排斥有效半径（归一化坐标）
+residual_weight   = 0.0    # 本例禁用残差大小正则
+edge_weight       = 0.4    # 强调局部表面连续性
+edge_graph        = geodesic
+edge_k            = 32     # 每个 template slot 的测地近邻数
+```
 
 ---
 
