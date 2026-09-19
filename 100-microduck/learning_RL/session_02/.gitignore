@@ -1,0 +1,16 @@
+# 虚拟环境
+.venv/
+venv/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# 训练产出：权重 / Q 表 / 训练曲线
+*.pt
+*.pth
+*.npy
+*.csv
+
+# macOS
+.DS_Store

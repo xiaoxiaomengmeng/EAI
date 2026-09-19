@@ -1,9 +1,9 @@
 # updater / updaterd —— 更新引擎与回滚网（梳理）
 
 > 忠实梳理自官方三份设计文档：
-> [`microduck/docs/design/updater-design.md`](../../microduck/docs/design/updater-design.md)（1468 行）、
-> [`restart-order.md`](../../microduck/docs/design/restart-order.md)（442 行）、
-> [`boot-recovery-net.md`](../../microduck/docs/design/boot-recovery-net.md)（232 行）。
+> [`microduck/docs/design/updater-design.md`](../../../microduck/docs/design/updater-design.md)（1468 行）、
+> [`restart-order.md`](../../../microduck/docs/design/restart-order.md)（442 行）、
+> [`boot-recovery-net.md`](../../../microduck/docs/design/boot-recovery-net.md)（232 行）。
 > 保留原文的技术例子、问题背景、推理过程、实践细节与观点分歧；去掉作者身份与推广信息。
 > 代码锚点：更新引擎在 `updater/src/`（`engine.rs` 约 3829 行是核心）；`updaterd` 守护进程是它外面的一层进程。
 
@@ -250,7 +250,7 @@ release 在 **CI 里签**，不在本地——一个刻意选择，其补偿性�
 
 ## 6. apply 流程（升级）——完整时序
 
-入口 [`apply`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L594-L641) → [`apply_inner`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L644-L821) → [`stage_and_swap`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L824-L1098) → [`post_swap`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L1102-L1138)。**step 8 之前没有任何东西碰 live 路径。** 下面是 [`restart-order.md` §2](../../microduck/docs/design/restart-order.md) 里从代码逐行读出来的权威 18 步表：
+入口 [`apply`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L594-L641) → [`apply_inner`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L644-L821) → [`stage_and_swap`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L824-L1098) → [`post_swap`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L1102-L1138)。**step 8 之前没有任何东西碰 live 路径。** 下面是 [`restart-order.md` §2](../../../microduck/docs/design/restart-order.md) 里从代码逐行读出来的权威 18 步表：
 
 | # | 步骤 | 重启什么? |
 |---|---|---|
@@ -296,7 +296,7 @@ preflight 检查项（任一失败都干净中止、无副作用）：单飞锁�
 拉到 manifest 并 `verify_manifest` 验签后（**签名通过前什么都不发生**），依次是若干拒绝：
 
 - **channel 检查**（`check_channel`）；**pin 检查**（若被 pin 到别的版本则拒绝）。
-- **`AlreadyCurrent`**：若 manifest 版本 == 已装版本，停止并报 `already_current`，什么都不下载/交换。但这里回答的是**错误的问题**在一个情形下：release 装了、而某个 daemon 在从**另一个** release 服务。那正是运维伸手去 `apply` 通常想修的，而回答"已是最新"告诉他们没什么可修。所以它调 [`stale_units`](../../microduck/docs/design/restart-order.md) 点名那些跑着别的版本的单元、在应答后重启它们（见 §7.6）。
+- **`AlreadyCurrent`**：若 manifest 版本 == 已装版本，停止并报 `already_current`，什么都不下载/交换。但这里回答的是**错误的问题**在一个情形下：release 装了、而某个 daemon 在从**另一个** release 服务。那正是运维伸手去 `apply` 通常想修的，而回答"已是最新"告诉他们没什么可修。所以它调 [`stale_units`](../../../microduck/docs/design/restart-order.md) 点名那些跑着别的版本的单元、在应答后重启它们（见 §7.6）。
 - **回滚攻击守卫**（downgrade attack，§8.4.1）：**只守卫 `Target::Latest`**。一个签名证明产物是*我们的*；它对产物是否*最新*什么都没说。一个陈旧或被回退的镜像能提供一个旧的、仍有效签名的 manifest，把整个 fleet 悄悄倒退回一个我们撤回的版本——这是签名产物方案上的经典降级攻击。`Exact` 豁免（那是定向回退怎么做到的，是运维的刻意动作，镜像诱导不了）；`Ref` *永远*看起来像降级（dev 构建是 semver prerelease，排序低于它前驱的 release），守卫它会拒绝每一次分支安装；`from_dir` 豁免（一个 root 在命令行点名的目录不是一个倒退回去了的镜像，而且本地构建是个 prerelease、排序低于板子正在跑的，守卫它会拒绝每一次笔记本推送）。`rollback` 和 `reset-to-golden` 刻意向后走、且不经过这里。
 - **`staging_has_nothing_newer`**：`--staging` 用在一台已经领先候选通道的板子上（一个 release 直接晋升到 stable、没发 staging 候选时可达）。**拒绝而非安装**：这里以下每一层在被要求时都行为正确（产物验证了、swap 发生了、一个旧 release 不含的单元起不来、更新回退了），但运维要的是"正在被测的那个"而它不存在，所以答案是一句话而非一次回滚。
 - **兼容性检查**（`manifest.compatibility`）：`Ok` 放行；`Refused` 返回 `Incompatible`；`Unknown`（通常因 `robotd` 够不到）——对 daemon 通道放行（那次更新正是修一个死掉的 `robotd` 的办法），但对声明了 `model_api` 的 model manifest 则等待。
@@ -390,7 +390,7 @@ units_to_restart        = units_shipped(…) − NEVER_RESTART{updaterd, btd}
 
 ### 7.5 其它转换（`transition_to`）
 
-`select`、`rollback`、`reset-to-golden` 共享 [`engine.rs::transition_to`](../../microduck/docs/design/restart-order.md)：arm、swap、`on_apply`、健康门、失败则回退。它们**不跑 hook、不 self-test**——没有产物被解压，所以没有新东西要装或证明。
+`select`、`rollback`、`reset-to-golden` 共享 [`engine.rs::transition_to`](../../../microduck/docs/design/restart-order.md)：arm、swap、`on_apply`、健康门、失败则回退。它们**不跑 hook、不 self-test**——没有产物被解压，所以没有新东西要装或证明。
 
 | | hooks | `on_apply` | self-test | 延迟 updaterd/btd 重启 |
 |---|---|---|---|---|
@@ -432,7 +432,7 @@ units_to_restart        = units_shipped(…) − NEVER_RESTART{updaterd, btd}
 
 比较是**方向无关**的——任何差异都是陈旧——这正是让它覆盖"一个被显式回滚留在 `current` *前面*的 release"、而不只是留在后面的东西。它在每次 `updaterd` 启动跑，所以在 boot 时是个 no-op（一切都从同一符号链接启动）；成本是每单元一次文件读。
 
-**从 `apply` 做同样的读**：[`reconcile::stale_units`](../../microduck/docs/design/restart-order.md) 是对同一批身份文件跑 `verdict_for` 但把行动拿掉，`apply` 和 `select` 在它们的 already-current 路径上调它。它存在正是因为上面那个例外：一个陈旧的 `updaterd` 是这个模块拒绝修的唯一 skew，而事后唯一会看它的人是"因为某 daemon 看起来不对而跑 `apply`"的人。那过去回答 `already_current` 且什么都不调度，读起来像"确认没什么可修"。两个属性让它不成为 §7.6 守的那个循环：它在**请求时**触发而非每次启动，且经 `systemd-run` 调度而非从被重启的进程内部驱动 `systemctl`。它也**报告**：单元被点名在 `already_current` 结果里，所以客户端看到哪些 daemon 没跑着机器人已装的 release。
+**从 `apply` 做同样的读**：[`reconcile::stale_units`](../../../microduck/docs/design/restart-order.md) 是对同一批身份文件跑 `verdict_for` 但把行动拿掉，`apply` 和 `select` 在它们的 already-current 路径上调它。它存在正是因为上面那个例外：一个陈旧的 `updaterd` 是这个模块拒绝修的唯一 skew，而事后唯一会看它的人是"因为某 daemon 看起来不对而跑 `apply`"的人。那过去回答 `already_current` 且什么都不调度，读起来像"确认没什么可修"。两个属性让它不成为 §7.6 守的那个循环：它在**请求时**触发而非每次启动，且经 `systemd-run` 调度而非从被重启的进程内部驱动 `systemctl`。它也**报告**：单元被点名在 `already_current` 结果里，所以客户端看到哪些 daemon 没跑着机器人已装的 release。
 
 ### 7.7 首次安装（`scripts/install.sh`，§6）
 
@@ -528,7 +528,7 @@ store.swap_to(&manifest.version)?;                    // step 10 ← 再 swap
 
 ### 9.3 recover_on_start：启动恢复序列
 
-[`recover_on_start`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L1648-L1845) 在 socket 被服务**之前**跑（[`main.rs::serve`](../../microduck/docs/design/restart-order.md) step 5），所以一台 boot 进坏 release 的机器人在任何东西能请它做别的事之前就已经开始回退。顺序（每个都 load-bearing）：
+[`recover_on_start`](file:///Users/damon/Documents/10_code/openSources/100-microduck/microduck/updater/src/engine.rs#L1648-L1845) 在 socket 被服务**之前**跑（[`main.rs::serve`](../../../microduck/docs/design/restart-order.md) step 5），所以一台 boot 进坏 release 的机器人在任何东西能请它做别的事之前就已经开始回退。顺序（每个都 load-bearing）：
 
 1. **`clean_staging`**（每个组件）：删 `releases/.staging-*`。
 2. **`record_rescue`**：若 `<state_dir>/rescued` 存在，说明 boot 恢复网（§10）在没有任何东西运行时把 `current` swap 到了 golden。把它作为一次 rollback 拷进更新日志、**清除该 component 的 trial**、删文件。**在 `record_boot` 之前是刻意的**：救援已经走得比 trial 会走的更远（到 golden 而非 previous），一个留着 armed 的 trial 会在一两次 boot 后把 `current` 从救援刚选的 golden 上挪走——恢复网和 never-brick 保证互相拆台，只差一次 boot。删文件也是**释放救援的循环守卫**的东西（§10.5）。

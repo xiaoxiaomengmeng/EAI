@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1500" width="1024" height="1500"
+     font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif">
+  <defs>
+    <marker id="arrOrange" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#F97316"/>
+    </marker>
+    <marker id="arrGray" markerWidth="10" markerHeight="8" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#9CA3AF"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1024" height="1500" fill="#FAF8F5"/>
+
+  <!-- ===================== Header ===================== -->
+  <rect x="48" y="64" width="7" height="50" rx="3" fill="#F97316"/>
+  <text x="72" y="104" font-size="46" font-weight="700" fill="#141414">马尔可夫决策过程 MDP</text>
+  <text x="72" y="146" font-size="23" fill="#4B5563">Markov Decision Process：序贯决策问题的标准数学语言</text>
+  <text x="72" y="182" font-size="17" fill="#6B7280">MDP 是『问题』本身，RL 算法是『解法』；本图为纯原理版，不绑定具体代码。</text>
+
+  <!-- ===================== Highlight cards ===================== -->
+  <g>
+    <rect x="48" y="214" width="293" height="104" rx="14" fill="#F7F4EF" stroke="#E7E2D9" stroke-width="1.5"/>
+    <rect x="48" y="214" width="5" height="104" fill="#F97316"/>
+    <text x="72" y="256" font-size="22" font-weight="700" fill="#141414">五元组建模</text>
+    <text x="72" y="290" font-size="16" fill="#4B5563">状态 / 动作 / 转移 / 奖励 / 折扣</text>
+
+    <rect x="365" y="214" width="293" height="104" rx="14" fill="#F7F4EF" stroke="#E7E2D9" stroke-width="1.5"/>
+    <rect x="365" y="214" width="5" height="104" fill="#2563EB"/>
+    <text x="389" y="256" font-size="22" font-weight="700" fill="#141414">回报与折扣</text>
+    <text x="389" y="290" font-size="16" fill="#4B5563">未来奖励折算到当下求和</text>
+
+    <rect x="682" y="214" width="293" height="104" rx="14" fill="#F7F4EF" stroke="#E7E2D9" stroke-width="1.5"/>
+    <rect x="682" y="214" width="5" height="104" fill="#16A34A"/>
+    <text x="706" y="256" font-size="22" font-weight="700" fill="#141414">Bellman 方程</text>
+    <text x="706" y="290" font-size="16" fill="#4B5563">价值的递归自洽结构</text>
+  </g>
+
+  <!-- ===================== Panel 1: 五元组 + 马尔可夫性 + 交互回路 ===================== -->
+  <rect x="48" y="356" width="928" height="330" rx="16" fill="#FFFFFF" stroke="#E7E2D9" stroke-width="1.5"/>
+  <rect x="48" y="334" width="300" height="44" rx="22" fill="#F97316"/>
+  <text x="76" y="363" font-size="24" font-weight="700" fill="#FFFFFF">五元组与马尔可夫性</text>
+
+  <text x="80" y="420" font-size="22" fill="#141414"><tspan font-family="'Times New Roman',Times,serif" font-style="italic" font-size="25">S</tspan><tspan dx="8">状态空间：所有局面的集合</tspan></text>
+  <text x="80" y="466" font-size="22" fill="#141414"><tspan font-family="'Times New Roman',Times,serif" font-style="italic" font-size="25">A</tspan><tspan dx="8">动作空间：所有可选动作</tspan></text>
+  <text x="80" y="512" font-size="22" fill="#141414"><tspan font-family="'Times New Roman',Times,serif" font-style="italic" font-size="25">P(s'|s,a)</tspan><tspan dx="8">转移概率（可含随机）</tspan></text>
+  <text x="80" y="558" font-size="22" fill="#141414"><tspan font-family="'Times New Roman',Times,serif" font-style="italic" font-size="25">R(s,a)</tspan><tspan dx="8">奖励：即时好坏评分</tspan></text>
+  <text x="80" y="604" font-size="22" fill="#141414"><tspan font-family="'Times New Roman',Times,serif" font-style="italic" font-size="25">γ</tspan><tspan dx="8">折扣：未来奖励的汇率</tspan></text>
+  <text x="80" y="652" font-size="17" fill="#6B7280">马尔可夫性：下一状态只取决于 (当前状态, 动作)，与历史无关 —— 决策只需看现在。</text>
+
+  <!-- right: agent-environment loop -->
+  <text x="566" y="412" font-size="18" fill="#6B7280">智能体与环境的交互回路</text>
+  <rect x="580" y="436" width="130" height="56" rx="10" fill="#FFF7ED" stroke="#F97316" stroke-width="1.8"/>
+  <text x="645" y="470" font-size="16" font-weight="700" fill="#141414" text-anchor="middle">Agent 智能体</text>
+  <rect x="790" y="436" width="150" height="56" rx="10" fill="#FFF7ED" stroke="#F97316" stroke-width="1.8"/>
+  <text x="865" y="470" font-size="15" font-weight="700" fill="#141414" text-anchor="middle">Environment 环境</text>
+  <line x1="712" y1="452" x2="786" y2="452" stroke="#F97316" stroke-width="2" marker-end="url(#arrOrange)"/>
+  <text x="749" y="444" font-size="15" fill="#F97316" text-anchor="middle" font-family="'Times New Roman',Times,serif"><tspan font-style="italic">a</tspan></text>
+  <line x1="786" y1="480" x2="712" y2="480" stroke="#9CA3AF" stroke-width="2" marker-end="url(#arrGray)"/>
+  <text x="749" y="500" font-size="14" fill="#6B7280" text-anchor="middle" font-family="'Times New Roman',Times,serif"><tspan font-style="italic">s', r</tspan></text>
+  <text x="566" y="540" font-size="15" fill="#6B7280">每步：智能体给动作 a，环境回下一状态 s' 与奖励 r。</text>
+
+  <!-- ===================== Panel 2: 回报/折扣 + 价值函数 ===================== -->
+  <rect x="48" y="726" width="928" height="250" rx="16" fill="#FFFFFF" stroke="#E7E2D9" stroke-width="1.5"/>
+  <rect x="48" y="704" width="360" height="44" rx="22" fill="#2563EB"/>
+  <text x="76" y="733" font-size="24" font-weight="700" fill="#FFFFFF">策略、轨迹、回报与价值</text>
+
+  <text x="90" y="770" font-size="19" font-weight="700" fill="#2563EB">回报 return：把未来折算到当下</text>
+  <text x="90" y="806" font-family="'Times New Roman',Times,serif" font-size="20" fill="#141414"><tspan font-style="italic">G</tspan><tspan font-size="13" dy="6" font-style="italic">t</tspan><tspan dy="-6"> = </tspan><tspan font-style="italic">r</tspan><tspan font-size="13" dy="6" font-style="italic">t</tspan><tspan dy="-6"> + </tspan><tspan font-style="italic">γ r</tspan><tspan font-size="13" dy="6" font-style="italic">t+1</tspan><tspan dy="-6"> + </tspan><tspan font-style="italic">γ</tspan><tspan font-size="13" dy="-10">2</tspan><tspan dy="10"> </tspan><tspan font-style="italic">r</tspan><tspan font-size="13" dy="6" font-style="italic">t+2</tspan><tspan dy="-6"> + ...</tspan></text>
+  <text x="128" y="840" font-family="'Times New Roman',Times,serif" font-size="20" fill="#141414"><tspan>= </tspan><tspan font-size="25">Σ</tspan><tspan font-size="13" dy="6" font-style="italic">k</tspan><tspan dy="-6"> </tspan><tspan font-style="italic">γ</tspan><tspan font-size="13" dy="-10" font-style="italic">k</tspan><tspan dy="10"> </tspan><tspan font-style="italic">r</tspan><tspan font-size="13" dy="6" font-style="italic">t+k</tspan></text>
+  <text x="90" y="876" font-size="16" fill="#4B5563">折扣小=短视，折扣大=远视；不打折可能发散。</text>
+
+  <text x="560" y="770" font-size="19" font-weight="700" fill="#2563EB">价值函数：给局面与动作打分</text>
+  <text x="560" y="806" font-family="'Times New Roman',Times,serif" font-size="20" fill="#141414"><tspan font-style="italic">V</tspan><tspan font-size="13" dy="-9">π</tspan><tspan dy="9">(</tspan><tspan font-style="italic">s</tspan><tspan>) = </tspan><tspan font-style="italic">E</tspan><tspan>[ </tspan><tspan font-style="italic">G</tspan><tspan font-size="13" dy="6" font-style="italic">t</tspan><tspan dy="-6"> | </tspan><tspan font-style="italic">s</tspan><tspan font-size="13" dy="6" font-style="italic">t</tspan><tspan dy="-6"> = </tspan><tspan font-style="italic">s</tspan><tspan> ]</tspan></text>
+  <text x="560" y="840" font-family="'Times New Roman',Times,serif" font-size="20" fill="#141414"><tspan font-style="italic">Q</tspan><tspan font-size="13" dy="-9">π</tspan><tspan dy="9">(</tspan><tspan font-style="italic">s</tspan><tspan>,</tspan><tspan font-style="italic">a</tspan><tspan>) = </tspan><tspan font-style="italic">E</tspan><tspan>[ </tspan><tspan font-style="italic">G</tspan><tspan font-size="13" dy="6" font-style="italic">t</tspan><tspan dy="-6"> | </tspan><tspan font-style="italic">s</tspan><tspan font-size="13" dy="6" font-style="italic">t</tspan><tspan dy="-6">=</tspan><tspan font-style="italic">s</tspan><tspan>, </tspan><tspan font-style="italic">a</tspan><tspan font-size="13" dy="6" font-style="italic">t</tspan><tspan dy="-6">=</tspan><tspan font-style="italic">a</tspan><tspan> ]</tspan></text>
+  <text x="560" y="876" font-size="16" fill="#4B5563">V 评局面，Q 评局面+动作。</text>
+
+  <text x="90" y="936" font-size="17" fill="#6B7280">策略是 RL 要学的对象；轨迹是按策略走出的一串经历；有最优 Q 即可贪心出最优策略。</text>
+
+  <!-- ===================== Panel 3: Bellman + MDP/RL 分工 ===================== -->
+  <rect x="48" y="1016" width="928" height="400" rx="16" fill="#FFFFFF" stroke="#E7E2D9" stroke-width="1.5"/>
+  <rect x="48" y="994" width="390" height="44" rx="22" fill="#16A34A"/>
+  <text x="76" y="1023" font-size="24" font-weight="700" fill="#FFFFFF">Bellman 方程与 MDP/RL 分工</text>
+
+  <text x="90" y="1062" font-size="19" font-weight="700" fill="#16A34A">Bellman 期望方程：评估给定策略（policy evaluation）</text>
+  <text x="90" y="1104" font-family="'Times New Roman',Times,serif" font-size="23" fill="#141414"><tspan font-style="italic">V</tspan><tspan font-size="15" dy="-11">π</tspan><tspan dy="11">(</tspan><tspan font-style="italic">s</tspan><tspan>) = </tspan><tspan font-size="29">Σ</tspan><tspan font-size="14" dy="7" font-style="italic">a</tspan><tspan dy="-7"> </tspan><tspan font-style="italic">π</tspan><tspan>(</tspan><tspan font-style="italic">a</tspan><tspan>|</tspan><tspan font-style="italic">s</tspan><tspan>) </tspan><tspan font-size="29">Σ</tspan><tspan font-size="14" dy="7" font-style="italic">s'</tspan><tspan dy="-7"> </tspan><tspan font-style="italic">P</tspan><tspan>(</tspan><tspan font-style="italic">s'</tspan><tspan>|</tspan><tspan font-style="italic">s</tspan><tspan>,</tspan><tspan font-style="italic">a</tspan><tspan>)[ </tspan><tspan font-style="italic">R</tspan><tspan>(</tspan><tspan font-style="italic">s</tspan><tspan>,</tspan><tspan font-style="italic">a</tspan><tspan>) + </tspan><tspan font-style="italic">γ V</tspan><tspan font-size="15" dy="-11">π</tspan><tspan dy="11">(</tspan><tspan font-style="italic">s'</tspan><tspan>) ]</tspan></text>
+
+  <text x="90" y="1164" font-size="19" font-weight="700" fill="#16A34A">Bellman 最优方程：求最优价值（value iteration）</text>
+  <rect x="164" y="1187" width="58" height="28" rx="8" fill="#DCFCE7"/>
+  <text x="90" y="1206" font-family="'Times New Roman',Times,serif" font-size="23" fill="#141414"><tspan font-style="italic">V</tspan><tspan font-size="16" dy="-13">*</tspan><tspan dy="13">(</tspan><tspan font-style="italic">s</tspan><tspan>) = max</tspan><tspan font-size="14" dy="6" font-style="italic">a</tspan><tspan dy="-6"> </tspan><tspan font-size="29">Σ</tspan><tspan font-size="14" dy="7" font-style="italic">s'</tspan><tspan dy="-7"> </tspan><tspan font-style="italic">P</tspan><tspan>(</tspan><tspan font-style="italic">s'</tspan><tspan>|</tspan><tspan font-style="italic">s</tspan><tspan>,</tspan><tspan font-style="italic">a</tspan><tspan>)[ </tspan><tspan font-style="italic">R</tspan><tspan>(</tspan><tspan font-style="italic">s</tspan><tspan>,</tspan><tspan font-style="italic">a</tspan><tspan>) + </tspan><tspan font-style="italic">γ V</tspan><tspan font-size="16" dy="-13">*</tspan><tspan dy="13">(</tspan><tspan font-style="italic">s'</tspan><tspan>) ]</tspan></text>
+
+  <text x="90" y="1250" font-size="17" fill="#4B5563">直觉：今天 = 即时奖励 + 打折的明天（bootstrap 自举）；期望版按策略加权，最优版取 max。</text>
+
+  <text x="90" y="1290" font-size="19" font-weight="700" fill="#16A34A">同一个 MDP，两种解法（取决于知不知道 P 和 R）</text>
+  <g fill="#F0FDF4" stroke="#16A34A" stroke-width="1.4">
+    <rect x="72" y="1306" width="430" height="86" rx="12"/>
+    <rect x="522" y="1306" width="430" height="86" rx="12"/>
+  </g>
+  <text x="92" y="1340" font-size="18" font-weight="700" fill="#141414">P, R 已知：动态规划（DP）</text>
+  <text x="92" y="1370" font-size="15" fill="#4B5563">value iteration / policy iteration 直接迭代 Bellman 方程</text>
+  <text x="542" y="1340" font-size="18" font-weight="700" fill="#141414">P, R 未知：强化学习（RL）</text>
+  <text x="542" y="1370" font-size="15" fill="#4B5563">靠采样经验估计价值、改进策略（Q-learning / DQN / PPO）</text>
+
+  <!-- ===================== Footer ===================== -->
+  <text x="48" y="1458" font-size="17" fill="#6B7280">一句话：MDP 用五元组写清问题，Bellman 给出价值递归，RL 在 P/R 未知时把它解出来。</text>
+  <text x="976" y="1458" font-size="15" fill="#9CA3AF" text-anchor="end">MDP 原理 / 纯概念版</text>
+</svg>

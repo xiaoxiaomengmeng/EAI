@@ -1,0 +1,7 @@
+# session_02 依赖：MDP/Bellman + 表格 Q-learning + 从零 DQN
+# 安装：uv pip install -r requirements.txt   或   pip install -r requirements.txt
+# 说明：在 session_01 基础上加 gymnasium（RL 标准练手环境库）。
+#       只用 CartPole-v1(classic_control) 与 FrozenLake-v1(toy_text)，纯 Python，无需真渲染。
+torch>=2.2
+numpy>=1.24
+gymnasium[classic_control,toy_text]>=0.29

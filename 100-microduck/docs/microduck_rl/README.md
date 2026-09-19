@@ -12,7 +12,9 @@
 
 | 你想做的事 | 直接去读 | 说明 |
 |---|---|---|
+| 我是 RL 初学者，想知道**几个月怎么安排** | [`learning_roadmap.md`](learning_roadmap.md) | ⭐ **约 12 个月的周计划 + 每阶段硬检查点**，把认知阶梯拉成可执行时间表 |
 | 尽快在机器上把鸭子跑起来 | [`01-quickstart/desktop_quickstart.md`](01-quickstart/desktop_quickstart.md) | 环境搭建 + 首次训练 + 故障速查，**命令的唯一权威** |
+| 无真机，想在本机复现仿真部署 + 训练（5090/py3.12） | [`01-quickstart/sim_deploy_rl_reproduce_guide.md`](01-quickstart/sim_deploy_rl_reproduce_guide.md) | 仿真查看 / 官方策略回放 / 本地 PPO 训练 + ONNX 导出的复现指南 |
 | 系统理解"训练一只鸭子"的全流程 | [`03-walkthrough/training_walkthrough.md`](03-walkthrough/training_walkthrough.md) | ⭐ **学习主线**，跟着 velocity 实例走 8 个阶段 |
 | 搞懂某个概念/原理（PPO、BAM、61 维…） | [`02-architecture/architecture_and_glossary.md`](02-architecture/architecture_and_glossary.md) | 第一部分是架构，第二部分是 A–F 概念词典 |
 | 查"某个命令的代码入口在哪个文件" | [`07-reference/entry_points_map.md`](07-reference/entry_points_map.md) | 三类入口（插件/命令/脚本）速查 |
@@ -27,8 +29,9 @@
 
 | 目录 | 文档 | 定位（一句话职责） | 状态 |
 |---|---|---|---|
+| （本目录） | [`learning_roadmap.md`](learning_roadmap.md) | **几个月怎么学**（约 12 个月周计划 + 每阶段硬检查点，把编号阶梯拉成时间表） | ✅ 现有 |
 | `00-primer/` | RL 零基础预备 | 强化学习 / 仿真 / sim2real 扫盲 | 🚧 规划（内容暂并入 walkthrough 第 0 部分） |
-| `01-quickstart/` | [`desktop_quickstart.md`](01-quickstart/desktop_quickstart.md) | **怎么跑起来 + 坏了怎么办**（命令与故障权威） | ✅ 现有 |
+| `01-quickstart/` | [`desktop_quickstart.md`](01-quickstart/desktop_quickstart.md) · [`sim_deploy_rl_reproduce_guide.md`](01-quickstart/sim_deploy_rl_reproduce_guide.md) | **怎么跑起来 + 坏了怎么办**（命令与故障权威）；后者是无真机的仿真部署+训练复现指南 | ✅ 现有 |
 | `02-architecture/` | [`architecture_and_glossary.md`](02-architecture/architecture_and_glossary.md) | **是什么 / 为什么**（架构总览 §1–11 + 概念词典 A–F） | ✅ 现有 |
 | `03-walkthrough/` | [`training_walkthrough.md`](03-walkthrough/training_walkthrough.md) | **跟着实例走一遍全链路**（阶段 0–8，velocity 贯穿） | ✅ 现有 ⭐主线 |
 | `04-modules/` | 13 份模块导读（#5 已完成） | **逐个吃透源码模块**（以 velocity 为脊柱） | 🚧 1/13 · [#5 velocity 精讲](04-modules/05-velocity-deep-dive.md) ✅ |

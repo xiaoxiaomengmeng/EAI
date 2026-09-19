@@ -698,7 +698,7 @@ uv run duck-body --ducks 4 --port 7801
 robotd --sim 127.0.0.1:7801
 ```
 
-🔗 **深入**：[`architecture_and_glossary.md`](../02-architecture/architecture_and_glossary.md) §4.3；真机栈的 `robotd` 见 [`docs/modules/robotd.md`](../../modules/robotd.md)。
+🔗 **深入**：[`architecture_and_glossary.md`](../02-architecture/architecture_and_glossary.md) §4.3；真机栈的 `robotd` 见 [`docs/microduck/modules/robotd.md`](../../microduck/modules/robotd.md)。
 
 ---
 

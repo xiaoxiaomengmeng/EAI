@@ -1,0 +1,20 @@
+[project]
+name = "session-01-pytorch-foundations"
+version = "0.1.0"
+description = "RL 学习路线阶段 0：PyTorch 地基 + MLP 训 MNIST（对应 learning_roadmap.md 第 1–2 周）"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "torch>=2.2",
+    "torchvision>=0.17",
+]
+
+# 本目录是教学脚本集合，不是可安装的库；用 uv 管理环境即可：
+#   uv venv --python 3.11 && source .venv/bin/activate && uv pip install -e .
+# 或直接 uv pip install -r requirements.txt（脚本互相独立，无需打包）。
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []

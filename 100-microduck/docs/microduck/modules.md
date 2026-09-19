@@ -3,7 +3,7 @@
 > 配合 [`README.md`](README.md) 总览使用。每个模块一小节，先给**一句话职责 + 关键源文件 + 官方文档指引 + 待展开要点**。
 > 展开时可直接填充"待展开"小节；若某模块内容变多，可把它拆成 `modules/<name>.md` 独立文件，并在此处改为链接。
 >
-> 源文件路径均相对于 [`microduck/`](../microduck/)。官方设计文档在 [`microduck/docs/design/`](../microduck/docs/design/)。
+> 源文件路径均相对于 [`microduck/`](../../microduck/)。官方设计文档在 [`microduck/docs/design/`](../../microduck/docs/design/)。
 
 ## 索引
 
@@ -32,7 +32,7 @@
 - `robotd/src/intents.rs`（意图槽）、`robotd/src/chorale.rs`、`theremin.rs`、`sound.rs`、`soc.rs`（板载热区）
 - 控制核心逻辑在库 `duck-control/`（见下）
 
-**官方文档**：[`design/robotd-design.md`](../microduck/docs/design/robotd-design.md)
+**官方文档**：[`design/robotd-design.md`](../../microduck/docs/design/robotd-design.md)
 
 **待展开**：
 - [ ] tick 的完整数据流（read → observe → policy → safety.apply → publish）
@@ -53,7 +53,7 @@
 - `updater/src/hooks.rs`（preinstall/postinstall）、`preflight.rs`、`reconcile.rs`、`orphan.rs`、`robot.rs`（对 robotd 的接口）、`ipc.rs`、`config.rs`、`main.rs`
 - 测试：`updater/tests/apply.rs`（故障注入驱动真实引擎）
 
-**官方文档**：[`design/updater-design.md`](../microduck/docs/design/updater-design.md)、[`design/restart-order.md`](../microduck/docs/design/restart-order.md)、[`design/boot-recovery-net.md`](../microduck/docs/design/boot-recovery-net.md)
+**官方文档**：[`design/updater-design.md`](../../microduck/docs/design/updater-design.md)、[`design/restart-order.md`](../../microduck/docs/design/restart-order.md)、[`design/boot-recovery-net.md`](../../microduck/docs/design/boot-recovery-net.md)
 
 **待展开**：
 - [ ] 发布产物格式（release format）与验证流程
@@ -71,7 +71,7 @@
 - `nm.rs`（NetworkManager D-Bus 客户端，Linux-only）、`net.rs`、`bluez.rs`（~910 行，BlueZ 客户端，Linux-only）
 - `identity.rs`、`pad.rs`（手柄配对）、`power.rs`、`units.rs`
 
-**官方文档**：[`design/app-path-design.md`](../microduck/docs/design/app-path-design.md)
+**官方文档**：[`design/app-path-design.md`](../../microduck/docs/design/app-path-design.md)
 
 **待展开**：
 - [ ] 为何 wifi 交给 NetworkManager 拥有（netplan/networkd 的不足）
@@ -87,7 +87,7 @@
 - `btd/src/main.rs`、`session.rs`（~938 行）、`route.rs`（~658 行，路由子集）
 - `bluez.rs`（~778 行）、`framing.rs`（BLE 分片重组）、`gatt.rs`、`adv.rs`（广播）、`pairing.rs`、`link.rs`、`upstream.rs`、`chorale.rs`（合唱信标）
 
-**官方文档**：[`design/app-path-design.md`](../microduck/docs/design/app-path-design.md)
+**官方文档**：[`design/app-path-design.md`](../../microduck/docs/design/app-path-design.md)
 
 **待展开**：
 - [ ] BLE 暴露的 API 子集（provisioning / status / update 触发+进度），为何 payloads 不走 BLE
@@ -102,7 +102,7 @@
 **关键源文件**：
 - `padd/src/main.rs`（~663 行，gilrs 读取）、`tap.rs`（~766 行，raw input 流）
 
-**官方文档**：[`design/robotd-design.md`](../microduck/docs/design/robotd-design.md) §4.3；[`robot/pair-a-gamepad.md`](../microduck/docs/robot/pair-a-gamepad.md)
+**官方文档**：[`design/robotd-design.md`](../../microduck/docs/design/robotd-design.md) §4.3；[`robot/pair-a-gamepad.md`](../../microduck/docs/robot/pair-a-gamepad.md)
 
 **待展开**：
 - [ ] 手柄按键映射（button mapping）→ intent
@@ -119,7 +119,7 @@
 - `session.rs`（WebRTC 会话层）、`route.rs`、`upstream.rs`、`web.rs`（console）、`detect.rs`、`exposure.rs`（3A/rkaiq）、`producer.rs`、`config.rs`
 - `mediad/webclient/`（控制台前端）
 
-**官方文档**：[`design/remote-webrtc.md`](../microduck/docs/design/remote-webrtc.md)、[`design/webrtc-console.md`](../microduck/docs/design/webrtc-console.md)、[`project/media-bringup.md`](../microduck/docs/project/media-bringup.md)
+**官方文档**：[`design/remote-webrtc.md`](../../microduck/docs/design/remote-webrtc.md)、[`design/webrtc-console.md`](../../microduck/docs/design/webrtc-console.md)、[`project/media-bringup.md`](../../microduck/docs/project/media-bringup.md)
 
 **待展开**：
 - [ ] PeerConnection 结构：video/audio track + control(可靠) / teleop(不可靠) 两个 datachannel
@@ -137,7 +137,7 @@
 - `tof/build.rs` + `tof/vendor/platform.c`（经 `linux/i2c.h`，仅 Linux 目标编译）
 - `tof/src/` 的 `--fake` 路径供离板运行
 
-**官方文档**：[`design/architecture.md`](../microduck/docs/design/architecture.md) §1；theremin 见 [`design/robotd-design.md`](../microduck/docs/design/robotd-design.md) §4.5
+**官方文档**：[`design/architecture.md`](../../microduck/docs/design/architecture.md) §1；theremin 见 [`design/robotd-design.md`](../../microduck/docs/design/robotd-design.md) §4.5
 
 **待展开**：
 - [ ] 为何独立于 robotd（上电上传 ~90KB 固件、I²C 与音频 codec 共享、多数鸭子没装）
@@ -171,7 +171,7 @@
 - `duck-control/src/policy.rs`（~509 行，ONNX 加载/推理、runtime 探测）
 - `duck-control/src/obs.rs`（~390 行，61-D 观测构建）、`model.rs`（15 关节常量、battery_percent）、`imu.rs`、`fall.rs`（limp-fall 预测）、`io.rs`
 
-**官方文档**：[`design/robotd-design.md`](../microduck/docs/design/robotd-design.md) §1.3、§2
+**官方文档**：[`design/robotd-design.md`](../../microduck/docs/design/robotd-design.md) §1.3、§2
 
 **待展开**：
 - [ ] `RobotIo` trait 与两个实现（`DynamixelIo` / `FakeIo`）
@@ -198,7 +198,7 @@
 
 **关键源文件**：`odometry/src/lib.rs`（~348 行，`Odometry::alpha()`）
 
-**官方文档**：[`design/robotd-design.md`](../microduck/docs/design/robotd-design.md) §4.4
+**官方文档**：[`design/robotd-design.md`](../../microduck/docs/design/robotd-design.md) §4.4
 
 **待展开**：
 - [ ] 接触式里程计： sole corner 作为 ground anchor，anchor 切换避免跳变
@@ -234,7 +234,7 @@
 
 **关键源文件**：`duck-detect/src/lib.rs`（~477 行）、`onnx.rs`、`rknn.rs`（~462 行）；`duck-detect/models/`
 
-**官方文档**：[`project/npu-bringup.md`](../microduck/docs/project/npu-bringup.md)
+**官方文档**：[`project/npu-bringup.md`](../../microduck/docs/project/npu-bringup.md)
 
 **待展开**：
 - [ ] NPU（RKNN）路径与 dlopen
@@ -247,7 +247,7 @@
 
 **关键源文件**：`robotd-params/src/lib.rs`（~1482 行）、`registry.rs`（~587 行）；`deploy/robotd.toml`
 
-**官方文档**：[`design/robotd-design.md`](../microduck/docs/design/robotd-design.md) §4.2
+**官方文档**：[`design/robotd-design.md`](../../microduck/docs/design/robotd-design.md) §4.2
 
 **待展开**：
 - [ ] 参数集：control rate、gains、action scale、low-pass alphas、max velocities、deadman timeout、policy paths、gate 阈值
@@ -265,7 +265,7 @@
 
 **关键源文件**：`robotctl/src/main.rs`（~4414 行）、`monitor.rs`（~4219 行，含 3D 视图/path map）、`configure.rs`（~1332 行）、`duck.rs`、`show.rs`、`path_map.rs`；`robotctl/assets/`
 
-**官方文档**：[`robot/cheatsheet.md`](../microduck/docs/robot/cheatsheet.md)
+**官方文档**：[`robot/cheatsheet.md`](../../microduck/docs/robot/cheatsheet.md)
 
 **待展开**：
 - [ ] 各子命令职责与对应 socket
@@ -279,7 +279,7 @@
 
 **关键源文件**：`duckctl/src/main.rs`（~2466 行）；`duckctl/examples/`
 
-**官方文档**：[`robot/duckctl.md`](../microduck/docs/robot/duckctl.md)
+**官方文档**：[`robot/duckctl.md`](../../microduck/docs/robot/duckctl.md)
 
 **待展开**：
 - [ ] 与 robotctl 的区别（笔记本端 vs 板端）
@@ -292,7 +292,7 @@
 
 **关键源文件**：`xtask/src/main.rs`（~1637 行）；`xtask/tests/`
 
-**官方文档**：[`project/ci-setup.md`](../microduck/docs/project/ci-setup.md)、[`microduck/CONTRIBUTING.md`](../microduck/CONTRIBUTING.md) "Releasing"
+**官方文档**：[`project/ci-setup.md`](../../microduck/docs/project/ci-setup.md)、[`microduck/CONTRIBUTING.md`](../../microduck/CONTRIBUTING.md) "Releasing"
 
 **待展开**：
 - [ ] package：如何把 ONNX Runtime 版本烘进 preinstall hook（单一真相源 + 测试断言）

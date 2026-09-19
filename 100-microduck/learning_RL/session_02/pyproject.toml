@@ -1,0 +1,20 @@
+[project]
+name = "session-02-mdp-and-dqn"
+version = "0.1.0"
+description = "RL 学习路线阶段 1：MDP/Bellman + 表格 Q-learning(FrozenLake) + 从零 DQN(CartPole)（对应 learning_roadmap.md 第 3–8 周）"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "torch>=2.2",
+    "numpy>=1.24",
+    "gymnasium[classic_control,toy_text]>=0.29",
+]
+
+# 本目录是教学脚本集合，不是可安装的库；用 uv 管理环境即可：
+#   uv venv --python 3.11 && source .venv/bin/activate && uv pip install -r requirements.txt
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = []

@@ -1,6 +1,6 @@
 # robotd —— 控制循环（梳理）
 
-> 忠实梳理自官方 [`microduck/docs/design/robotd-design.md`](../../microduck/docs/design/robotd-design.md)（956 行）。
+> 忠实梳理自官方 [`microduck/docs/design/robotd-design.md`](../../../microduck/docs/design/robotd-design.md)（956 行）。
 > 保留原文的技术例子、问题背景、推理过程、实践细节与观点分歧；去掉作者身份与推广信息。
 > 被吸收的原型是 `apirrone/microduck_runtime`（下文简称 **the runtime / 原型**）。
 > 代码锚点：进程主体在 `robotd/`，控制核心在库 `duck-control/`。

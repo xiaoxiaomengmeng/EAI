@@ -1,0 +1,6 @@
+# session_01 依赖：PyTorch 地基 + MLP 训 MNIST
+# 安装：uv pip install -r requirements.txt   或   pip install -r requirements.txt
+# 说明：不锁小版本，交给解析器选与当前 Python(3.11)/平台匹配的最新兼容版。
+#       NVIDIA 机器若需指定 CUDA 构建，参考 https://pytorch.org/get-started/locally/
+torch>=2.2
+torchvision>=0.17

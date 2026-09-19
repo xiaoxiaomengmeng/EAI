@@ -1,0 +1,17 @@
+# 虚拟环境（上层 .gitignore 通常已忽略，这里冗余保险）
+.venv/
+venv/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# MNIST 数据缓存（02/03 自动下载到 ./data，体积大，不进版本库）
+data/
+
+# 训练产出的权重
+*.pt
+*.pth
+
+# macOS
+.DS_Store
