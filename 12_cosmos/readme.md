@@ -30,6 +30,20 @@ modelscope download --model nv-community/Cosmos3-Edge-Policy-DROID
 
 > 模型以软链接方式指向 ModelScope 默认缓存目录，避免重复占用磁盘空间。
 
+## 代码仓库
+
+Cosmos 3 采用 **Server（加载运行模型）+ Client（仿真评测）** 架构，模型权重之外还需克隆以下仓库代码：
+
+| 仓库 | 克隆命令 | 用途 |
+| --- | --- | --- |
+| NVIDIA/cosmos-framework | `git clone https://github.com/NVIDIA/cosmos-framework.git` | 核心推理框架 + policy server（`action_policy_server_robolab`），加载并运行 Edge / Edge-Policy 模型 |
+| NVlabs/RoboLab | `git clone https://github.com/NVlabs/RoboLab.git` | 仿真评测客户端 / benchmark，驱动机器人跑任务（如 `BananaInBowlTask`），含 `policies/cosmos3/run.py` |
+| NVIDIA/cosmos | `git clone https://github.com/NVIDIA/cosmos.git` | 主仓库：cookbooks、部署文档、评测脚本说明、蒸馏配方 |
+
+- **仅跑 `Cosmos3-Edge` 单模型推理**（VLM 理解 / 图像 / 视频生成）：`cosmos-framework` 一个仓库即可。
+- **闭环评测 `Cosmos3-Edge-Policy-DROID`**：需要 `cosmos-framework`（server）+ `RoboLab`（client），`cosmos` 提供 cookbook 步骤参考。
+- 三个仓库官方均推荐 **Docker + `uv sync`** 方式装依赖（cosmos-framework 用 `cu130-torch213` 依赖组），以适配 RTX 5090 的 Blackwell（sm_120）。
+
 ## 环境配置（RTX 5090 · conda · Python 3.12）
 
 目标硬件：RTX 5090（sm_120 / Blackwell），NVIDIA 驱动 ≥ 570。PyTorch wheel 自带 CUDA 12.8 运行库，**无需单独安装 CUDA Toolkit**。
