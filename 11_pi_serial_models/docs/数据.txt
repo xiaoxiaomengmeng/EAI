@@ -1,0 +1,18 @@
+1、数据  + 模型
+预训练数据：社区的开源的基模
+ego：开源
+
+基模：vlm 基于千问，2b 4b 9b
+caption模型：qwen3vl-32b
+depth：depth anything
+光流：DFflow
+in-context-learning
+
+1、ego:论文-路线-应用
+生成：
+2、世界模型：
+数据生成器-用于训练
+3、仿真：基于先验知识，白盒学习，积累知识，学习涌现，有限的知识模拟无限的可能性
+4、vla操作模型和评测
+
+RL - article - 触碰瓶颈 - 天花板  搜索+学习
