@@ -1,8 +1,8 @@
 [submodule "23_video/ComfyUI"]
 	path = 23_video/ComfyUI
 	url = https://github.com/Comfy-Org/ComfyUI.git
-[submodule "09_human_dexterous_teleop"]
-	path = 09_human_dexterous_teleop
+[submodule "200_human_dexterous_teleop"]
+	path = 200_human_dexterous_teleop
 	url = https://gitee.com/zgrxmm/hand_gesture_recognition.git
 [submodule "21_demo/RynnBrain"]
 	path = 21_demo/RynnBrain
