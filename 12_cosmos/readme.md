@@ -19,6 +19,9 @@ modelscope download --model nv-community/Cosmos-Predict2.5-2B
 
 # 机器人边缘策略模型
 modelscope download --model nv-community/Cosmos3-Edge-Policy-DROID
+
+# Cosmos3 边缘多模态模型（VLM 理解 / 图像 / 视频生成）
+modelscope download --model nv-community/Cosmos3-Edge
 ```
 
 ### 本地模型路径
@@ -27,6 +30,7 @@ modelscope download --model nv-community/Cosmos3-Edge-Policy-DROID
 | --- | --- | --- |
 | Cosmos-Predict2.5-2B | `models/Cosmos-Predict2.5-2B` | `~/.cache/modelscope/models/nv-community--Cosmos-Predict2.5-2B/snapshots/master` |
 | Cosmos3-Edge-Policy-DROID | `models/Cosmos3-Edge-Policy-DROID` | `~/.cache/modelscope/models/nv-community--Cosmos3-Edge-Policy-DROID/snapshots/master` |
+| Cosmos3-Edge | `models/Cosmos3-Edge` | `~/.cache/modelscope/models/nv-community--Cosmos3-Edge/snapshots/master` |
 
 > 模型以软链接方式指向 ModelScope 默认缓存目录，避免重复占用磁盘空间。
 

@@ -1,0 +1,16 @@
+# 第三方仓库（独立 git repo，不作为子目录纳入版本管理）
+RynnMotion/
+RynnMotion.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# MuJoCo 运行时临时文件
+.scene_drag_tmp.xml
+
+# 仿真输出
+outputs/
+*.mp4

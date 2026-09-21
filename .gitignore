@@ -40,6 +40,9 @@ dist/
 
 20_unitreerobotics/outputs/
 
+101-robots/RynnMotion/
+101-robots/RynnMotion.zip
+
 # 23_video: ComfyUI 作为 git submodule 管理（.venv / models / output 仍由 ComfyUI 自身 .gitignore 排除）
 
 # Large local model/checkpoint artifacts

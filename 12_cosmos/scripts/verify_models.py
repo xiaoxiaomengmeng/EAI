@@ -177,6 +177,43 @@ def verify_filesystem(model_dir: Path, spec: ModelSpec) -> bool:
     return all_ok
 
 
+def verify_pt_zip(path: Path) -> bool:
+    """对 torch 新版 zip 格式 .pt 做结构校验（只读头尾中央目录，不读权重数据）。"""
+    import zipfile
+
+    try:
+        if not zipfile.is_zipfile(path):
+            fail(f"不是合法的 torch/zip checkpoint（可能下载截断）: {path.name}")
+            return False
+        with zipfile.ZipFile(path) as z:
+            n_entries = len(z.namelist())
+        ok(f"  ↳ zip 结构完整，{n_entries} 个内部条目")
+        return True
+    except Exception as e:
+        fail(f"checkpoint 校验异常: {path.name} -> {e}")
+        return False
+
+
+def verify_safetensors(path: Path) -> bool:
+    """校验 safetensors：前 8 字节为小端 header 长度，其后为 JSON header。"""
+    import struct
+
+    try:
+        with open(path, "rb") as f:
+            header_len = struct.unpack("<Q", f.read(8))[0]
+            if header_len <= 2 or header_len > 100 * 1024 * 1024:
+                fail(f"safetensors header 长度异常 ({header_len}): {path.name}")
+                return False
+            header = f.read(min(header_len, 16))
+        if not header.startswith(b"{"):
+            fail(f"safetensors header 不是 JSON: {path.name}")
+            return False
+        return True
+    except Exception as e:
+        fail(f"safetensors 校验异常: {path.name} -> {e}")
+        return False
+
+
 def verify_weights(model_dir: Path, spec: ModelSpec) -> bool:
     section(f"[{spec.name}] 阶段 4：权重文件完整性")
     weights = list(find_files(model_dir, spec.weight_suffixes))
@@ -184,18 +221,41 @@ def verify_weights(model_dir: Path, spec: ModelSpec) -> bool:
         fail("未找到任何权重文件")
         return False
 
-    info(f"共发现 {len(weights)} 个权重文件，逐一检查大小与可加载性...")
+    real_weights: list[Path] = []
+    empty_distcp = 0
     all_ok = True
     total_size = 0
+
+    # 先分类：.distcp 是 torch.distributed.checkpoint 的 per-rank 分片，
+    # 多 rank 保存时不持有数据的 rank 会产生合法的 0 字节分片，不算损坏。
     for w in sorted(weights):
         size = w.stat().st_size
-        total_size += size
-        rel = w.relative_to(model_dir)
+        if w.suffix == ".distcp" and size == 0:
+            empty_distcp += 1
+            continue
         if size == 0:
-            fail(f"空文件: {rel}")
+            fail(f"空权重文件（非 DCP 分片）: {w.relative_to(model_dir)}")
             all_ok = False
+            continue
+        real_weights.append(w)
+        total_size += size
+
+    info(
+        f"权重文件共 {len(weights)} 个：{len(real_weights)} 个非空、"
+        f"{empty_distcp} 个 DCP 空分片（多 rank 保存的正常产物，已跳过）"
+    )
+
+    for w in real_weights:
+        rel = w.relative_to(model_dir)
+        size_ok = True
+        if w.suffix == ".pt":
+            size_ok = verify_pt_zip(w)
+        elif w.suffix == ".safetensors":
+            size_ok = verify_safetensors(w)
+        if size_ok:
+            ok(f"{rel} ({human_size(w.stat().st_size)})")
         else:
-            ok(f"{rel} ({human_size(size)})")
+            all_ok = False
 
     info(f"权重总大小: {human_size(total_size)}")
     return all_ok
