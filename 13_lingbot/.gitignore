@@ -1,0 +1,6 @@
+# 推理/训练产物（合并自原 13_lingbot 与 22_lingbot）
+result/
+outputs/
+models/.lock/
+*.mv
+*.msc

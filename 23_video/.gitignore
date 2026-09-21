@@ -1,0 +1,1 @@
+# ComfyUI 作为 git submodule 管理（.venv / models / output 由 ComfyUI 自身 .gitignore 排除）

@@ -1,0 +1,7 @@
+# 本地环境与生成产物
+.libero/
+outputs/
+models/
+openvla/experiments/logs/
+openvla/rollouts/
+openvla/cache/

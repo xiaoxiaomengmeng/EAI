@@ -25,25 +25,10 @@ dist/
 .vscode/
 .idea/
 
-# OpenVLA local environment and generated artifacts
-10_openVLA/.libero/
-10_openVLA/outputs/
-10_openVLA/models/
-10_openVLA/openvla/experiments/logs/
-10_openVLA/openvla/rollouts/
-10_openVLA/openvla/cache/
-
-11_pi_serial_models/.venv312/
-11_pi_serial_models/data/
-11_pi_serial_models/outputs/
-11_pi_serial_models/logs/
-
-20_unitreerobotics/outputs/
-
-101-robots/RynnMotion/
-101-robots/RynnMotion.zip
-
-# 23_video: ComfyUI 作为 git submodule 管理（.venv / models / output 仍由 ComfyUI 自身 .gitignore 排除）
+# 项目特定的忽略规则已分散到各项目目录的 .gitignore：
+#   10_openVLA/.gitignore, 11_pi_serial_models/.gitignore,
+#   20_unitreerobotics/.gitignore, 101-robots/.gitignore,
+#   22_lingbot/.gitignore, 23_video/.gitignore
 
 # Large local model/checkpoint artifacts
 *.ckpt
@@ -51,9 +36,15 @@ dist/
 *.pth
 *.safetensors
 *.bin
+*.npy
+*.ply
+*.mp4
 
 # Preventive: training/download byproducts not present yet
 nohup.out
 *.whl
 wandb/
 MUJOCO_LOG.TXT
+
+# MuJoCo 运行时临时文件
+.scene_drag_tmp.xml
