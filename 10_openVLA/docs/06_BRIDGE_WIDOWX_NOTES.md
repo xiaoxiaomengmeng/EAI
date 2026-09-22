@@ -6,7 +6,7 @@
 
 BridgeData V2 是 Berkeley / Bridge 系列机器人操作数据集，主要包含 WidowX 系列机器人在真实场景中的操作轨迹。
 
-OpenVLA base 模型与 BridgeData / WidowX 有较强关系，因此当前本地 base 推理和 `openvla_sim` 常用：
+OpenVLA base 模型与 BridgeData / WidowX 有较强关系，因此当前本地 base 推理和 `sim` 常用：
 
 ```text
 unnorm_key = bridge_orig
@@ -41,7 +41,7 @@ prompt 里的 WidowX / Franka 文字不会替代控制适配层
 
 OpenVLA 官方 Bridge 评测面向 WidowX / Bridge V2 真实机器人环境。
 
-当前 `openvla_sim` 支持 WX250S，是因为：
+当前 `sim` 支持 WX250S，是因为：
 
 ```text
 WX250S 和 WidowX 风格机械臂更接近
@@ -109,9 +109,9 @@ unnorm_key = bridge_orig
 
 如果本机没有对应服务，脚本无法仅靠代码目录完成评测。
 
-## 7. 与 openvla_sim 的关系
+## 7. 与 sim 的关系
 
-`openvla_sim` 是当前项目自定义的 MuJoCo demo：
+`sim` 是当前项目自定义的 MuJoCo demo：
 
 ```text
 MuJoCo 场景

@@ -46,3 +46,6 @@
 [submodule "24_umr/UMR"]
 	path = 24_umr/UMR
 	url = https://github.com/hanyang9/UMR.git
+[submodule "docs/every-embodied"]
+	path = docs/every-embodied
+	url = https://github.com/datawhalechina/every-embodied.git

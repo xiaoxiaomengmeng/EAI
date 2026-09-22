@@ -1,6 +1,6 @@
 # OpenVLA 术语与参数速查
 
-本文提供 OpenVLA、MuJoCo、LIBERO、Bridge/WidowX 和当前 `openvla_sim` 常用术语与参数速查。
+本文提供 OpenVLA、MuJoCo、LIBERO、Bridge/WidowX 和当前 `sim` 常用术语与参数速查。
 
 ## 1. 模型术语
 
@@ -200,7 +200,7 @@ BridgeData / OpenVLA 实机评测中常见的真实机器人平台。
 WX250S
 ```
 
-Trossen WX250S 机械臂。当前 `openvla_sim` 支持该平台，用于接近 WidowX 风格的本地 MuJoCo 验证。
+Trossen WX250S 机械臂。当前 `sim` 支持该平台，用于接近 WidowX 风格的本地 MuJoCo 验证。
 
 ```text
 robot adapter
@@ -212,7 +212,7 @@ robot adapter
 motion_mode
 ```
 
-当前 `openvla_sim` 中的运动模式抽象，支持 `ik`、`demo`、`direct`。
+当前 `sim` 中的运动模式抽象，支持 `ik`、`demo`、`direct`。
 
 ## 6. 训练术语
 
@@ -260,7 +260,7 @@ adapter
 
 ## 7. 常用 CLI 参数
 
-`demo_predict_action.py`：
+`scripts/demo_predict_action.py`：
 
 ```text
 --model-path              本地模型目录或 Hugging Face repo id
@@ -270,7 +270,7 @@ adapter
 --attn-implementation     eager / sdpa / flash_attention_2
 ```
 
-`openvla_sim`：
+`sim`：
 
 ```text
 --robot                   franka / wx250s
@@ -310,10 +310,10 @@ prompt 里的机器人名字 vs robot adapter
 prompt 主要描述任务目标，真正让机器人动起来的是 `unnorm_key`、adapter、IK 和 controller。
 
 ```text
-openvla_sim vs LIBERO
+sim vs LIBERO
 ```
 
-`openvla_sim` 是自定义 MuJoCo demo；LIBERO 是标准 benchmark。
+`sim` 是自定义 MuJoCo demo；LIBERO 是标准 benchmark。
 
 ```text
 Bridge/WidowX vs MuJoCo 仿真

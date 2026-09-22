@@ -2,6 +2,5 @@
 .libero/
 outputs/
 models/
-openvla/experiments/logs/
-openvla/rollouts/
-openvla/cache/
+
+# repos/openvla、repos/LIBERO 为 git submodule，其内部日志/产物由各自仓库管理

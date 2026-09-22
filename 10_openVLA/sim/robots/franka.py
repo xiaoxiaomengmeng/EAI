@@ -7,7 +7,7 @@ from .base import RobotConfig
 
 FRANKA_CONFIG = RobotConfig(
     name="franka",
-    robot_dir=Path("/home/creator/ws/mujoco_menagerie/franka_emika_panda"),
+    robot_dir=Path("/home/creator/ws/assets/mujoco/mujoco_menagerie/franka_emika_panda"),
     actuator_names=[
         "actuator1",
         "actuator2",

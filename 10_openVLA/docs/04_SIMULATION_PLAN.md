@@ -5,7 +5,7 @@
 ## 1. 三条路线的定位
 
 ```text
-openvla_sim      自定义 MuJoCo demo，用于工程链路验证
+sim      自定义 MuJoCo demo，用于工程链路验证
 LIBERO           标准 MuJoCo / robosuite benchmark，用于成功率评测
 Bridge/WidowX    真实机器人评测，不是离线仿真
 ```
@@ -13,7 +13,7 @@ Bridge/WidowX    真实机器人评测，不是离线仿真
 不要混淆三者：
 
 ```text
-openvla_sim 跑通不等于 LIBERO 成功率
+sim 跑通不等于 LIBERO 成功率
 LIBERO 评测不等于 WidowX 实机
 Bridge/WidowX 官方脚本需要外部实机服务
 ```
@@ -25,9 +25,9 @@ Bridge/WidowX 官方脚本需要外部实机服务
 命令：
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
-python demo_predict_action.py
+python scripts/demo_predict_action.py
 ```
 
 重点观察：
@@ -40,18 +40,18 @@ action shape 是否为 7D
 unnorm_key 是否为 bridge_orig
 ```
 
-## 3. 阶段 2：openvla_sim dry-run
+## 3. 阶段 2：sim dry-run
 
 目标：不加载 7B 模型，只验证 MuJoCo、渲染、控制和输出保存。
 
 命令：
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 export MUJOCO_GL=egl
 
-python -m openvla_sim \
+python -m sim \
   --dry-run \
   --robot wx250s \
   --policy-steps 2 \
@@ -73,7 +73,7 @@ action / target_ctrl / timing 等字段
 命令：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --robot wx250s \
   --motion-mode ik \
   --policy-steps 20 \
@@ -85,7 +85,7 @@ python -m openvla_sim \
 Franka 对照：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --robot franka \
   --motion-mode ik \
   --policy-steps 20 \
@@ -155,9 +155,9 @@ timing
 推荐先跑 smoke test：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
-export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
+export LIBERO_CONFIG_PATH=/home/creator/ws/10_openVLA/.libero
 export MUJOCO_GL=egl
 
 python experiments/robot/libero/run_libero_eval.py \
@@ -197,10 +197,10 @@ host_ip / port
 ## 9. 当前推荐学习顺序
 
 ```text
-1. demo_predict_action.py 单步推理
+1. scripts/demo_predict_action.py 单步推理
 2. docs/02_ACTION_SPACE_AND_CONTROL.md 理解 action 与 unnorm_key
-3. openvla_sim dry-run
-4. openvla_sim + openvla-7b base
+3. sim dry-run
+4. sim + openvla-7b base
 5. docs/03_MUJOCO_SIM_NOTES.md 理解 MuJoCo 和 IK
 6. LIBERO smoke test
 7. docs/07_TRAINING_AND_FINETUNING.md 理解训练和微调

@@ -1,4 +1,4 @@
-# openvla_sim：OpenVLA Base 多机器人仿真 Demo
+# sim：OpenVLA Base 多机器人仿真 Demo
 
 本目录是 OpenVLA 的自定义 MuJoCo 闭环仿真测试代码，支持 Franka Emika Panda 和 WX250S 双机器人平台，目标是验证：
 
@@ -34,7 +34,7 @@ RGB 图像 + instruction
 PolicyConfig.unnorm_key = "bridge_orig"
 ```
 
-`bridge_orig` 表示使用 OpenVLA base 模型中 BridgeData / WidowX 风格的动作统计做反归一化。它在 OpenVLA 官方 OXE 数据转换代码中对应 `Original Version of Bridge V2 from Project Website`，可理解为 BridgeData V2 原始版动作统计 key。它决定 action token 被解码成多大的 `dx/dy/dz/rotation/gripper` 连续值；同样的 token，换成不同数据集或机器人统计，物理动作尺度可能不同。当前本地 `openvla-7b` 支持的完整 `norm_stats` key 列表见根目录 [DAMO_README.md](file:///home/creator/ws/openVLA/DAMO_README.md)。
+`bridge_orig` 表示使用 OpenVLA base 模型中 BridgeData / WidowX 风格的动作统计做反归一化。它在 OpenVLA 官方 OXE 数据转换代码中对应 `Original Version of Bridge V2 from Project Website`，可理解为 BridgeData V2 原始版动作统计 key。它决定 action token 被解码成多大的 `dx/dy/dz/rotation/gripper` 连续值；同样的 token，换成不同数据集或机器人统计，物理动作尺度可能不同。当前本地 `openvla-7b` 支持的完整 `norm_stats` key 列表见 [docs/09_ENVIRONMENT_RTX5090.md](../docs/09_ENVIRONMENT_RTX5090.md)。
 
 机器人名字本身主要影响的是控制适配层，而不是 OpenVLA 自然语言输入：
 
@@ -70,18 +70,17 @@ PolicyConfig.unnorm_key = "bridge_orig"
 
 命令行入口，负责解析参数并组装配置。
 
-可以通过下面两种方式运行：
+运行方式：
 
 ```bash
-python run_openvla_sim.py
-python -m openvla_sim
+python -m sim
 ```
 
 支持机器人选择（默认 franka）：
 
 ```bash
-python -m openvla_sim --robot franka
-python -m openvla_sim --robot wx250s
+python -m sim --robot franka
+python -m sim --robot wx250s
 ```
 
 ### config.py
@@ -243,7 +242,7 @@ x=0.28, y=0.0, z=0.055
 相比最早的单文件版本，现在有这些改进：
 
 ```text
-代码拆分到 openvla_sim/
+代码拆分到 sim/
 支持多机器人平台：Franka Emika Panda（默认）、WX250S
 新增 --robot 参数选择机器人
 新增 robots/ 目录管理机器人配置
@@ -253,8 +252,7 @@ cube 默认放近、放中间
 新增 --motion-mode ik，使用 MuJoCo site Jacobian 做位置 IK
 新增 --reach-bias，让 IK/demo 模式更容易向 red cube 靠近
 日志新增 ee_site_pos、ik_info、gripper_cube_distance、gripper_state
-保留旧入口 run_openvla_sim.py
-支持 python -m openvla_sim
+支持 python -m sim
 ```
 
 `gripper_cube_distance` 是判断机械臂是否靠近目标的关键指标。如果视频看不清，可以直接看 JSON 日志中这个值是否下降。
@@ -329,7 +327,7 @@ record video / logs
 ## 5. 运行前提
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 ```
 
@@ -345,27 +343,19 @@ python --version
 不加载 7B 模型，只验证 MuJoCo、渲染、控制和视频保存：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --dry-run \
   --policy-steps 2 \
   --sim-steps-per-policy 2
 ```
 
-兼容旧入口：
-
-```bash
-python run_openvla_sim.py \
-  --dry-run \
-  --policy-steps 2 \
-  --sim-steps-per-policy 2
-```
 
 ## 7. 运行真实 OpenVLA base 闭环
 
 最小真实模型验证：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --policy-steps 1 \
   --sim-steps-per-policy 1 \
   --attn-implementation sdpa
@@ -374,7 +364,7 @@ python -m openvla_sim \
 完整一点的 IK rollout：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --policy-steps 20 \
   --sim-steps-per-policy 30 \
   --motion-mode ik \
@@ -391,7 +381,7 @@ python -m openvla_sim \
 如果想对比旧的演示映射：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --motion-mode demo \
   --joint-gain 3.0 \
   --max-joint-delta 0.08
@@ -450,7 +440,7 @@ python -m openvla_sim \
 默认输出：
 
 ```text
-/home/creator/ws/openVLA/outputs/wx250s_openvla/
+/home/creator/ws/10_openVLA/outputs/wx250s_openvla/
 ```
 
 包括：

@@ -65,7 +65,7 @@ def parse_args():
     parser.add_argument("--dry-run", action="store_true", help="Skip OpenVLA loading and use deterministic test actions.")
     parser.add_argument("--save-frames", action="store_true", help="Also save individual debug/video RGB frames.")
     parser.add_argument("--save-policy-inputs", action=argparse.BooleanOptionalAction, default=True, help="Save OpenVLA policy input images.")
-    parser.add_argument("--save-wrist-debug", action=argparse.BooleanOptionalAction, default=True, help="Save optional wrist/near-gripper debug camera images; not used for policy inference.")
+    parser.add_argument("--save-wrist-debug", action=argparse.BooleanOptionalAction, default=False, help="Save optional wrist/near-gripper debug camera images; not used for policy inference.")
     return parser.parse_args()
 
 
@@ -74,7 +74,7 @@ def build_runner(args) -> RolloutRunner:
     
     output_dir = args.output_dir
     if output_dir is None:
-        output_dir = f"/home/creator/ws/openVLA/outputs/{robot_config.name}_openvla"
+        output_dir = f"/home/creator/ws/10_openVLA/outputs/{robot_config.name}_openvla"
     
     policy_camera = args.camera or args.policy_camera
     video_camera = args.camera or args.video_camera

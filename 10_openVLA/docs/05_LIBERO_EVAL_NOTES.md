@@ -87,14 +87,14 @@ Action un-norm key libero_spatial not found in VLA norm_stats
 激活环境：
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 ```
 
 安装 OpenVLA 源码依赖：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
+cd /home/creator/ws/10_openVLA/repos/openvla
 python -m pip install -r requirements-min.txt
 python -m pip install -e . --no-deps
 ```
@@ -125,32 +125,32 @@ python -m pip install numpy==1.26.4 opencv-python==4.10.0.84
 
 ## 6. LIBERO 源码配置
 
-如果 `/home/creator/ws/openVLA/repos/LIBERO` 已存在：
+如果 `/home/creator/ws/10_openVLA/repos/LIBERO` 已存在：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/LIBERO
-source /home/creator/ws/openVLA/.venv/bin/activate
+cd /home/creator/ws/10_openVLA/repos/LIBERO
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 python -m pip install -e .
 ```
 
 配置路径：
 
 ```bash
-mkdir -p /home/creator/ws/openVLA/.libero
+mkdir -p /home/creator/ws/10_openVLA/.libero
 
-cat > /home/creator/ws/openVLA/.libero/config.yaml <<'YAML'
-assets: /home/creator/ws/openVLA/repos/LIBERO/libero/libero/assets
-bddl_files: /home/creator/ws/openVLA/repos/LIBERO/libero/libero/bddl_files
-benchmark_root: /home/creator/ws/openVLA/repos/LIBERO/libero/libero
-datasets: /home/creator/ws/openVLA/repos/LIBERO/libero/datasets
-init_states: /home/creator/ws/openVLA/repos/LIBERO/libero/libero/init_files
+cat > /home/creator/ws/10_openVLA/.libero/config.yaml <<'YAML'
+assets: /home/creator/ws/10_openVLA/repos/LIBERO/libero/libero/assets
+bddl_files: /home/creator/ws/10_openVLA/repos/LIBERO/libero/libero/bddl_files
+benchmark_root: /home/creator/ws/10_openVLA/repos/LIBERO/libero/libero
+datasets: /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets
+init_states: /home/creator/ws/10_openVLA/repos/LIBERO/libero/libero/init_files
 YAML
 ```
 
 运行前设置：
 
 ```bash
-export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
+export LIBERO_CONFIG_PATH=/home/creator/ws/10_openVLA/.libero
 export MUJOCO_GL=egl
 ```
 
@@ -159,9 +159,9 @@ export MUJOCO_GL=egl
 推荐先跑 1 个 trial，避免默认完整评测过久。
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
-export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
+export LIBERO_CONFIG_PATH=/home/creator/ws/10_openVLA/.libero
 export MUJOCO_GL=egl
 
 python experiments/robot/libero/run_libero_eval.py \

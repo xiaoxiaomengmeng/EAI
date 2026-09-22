@@ -7,7 +7,7 @@
 当前工作区主要包含三条路线：
 
 ```text
-openvla_sim      自定义 MuJoCo demo，支持 Franka / WX250S，适合工程链路验证
+sim      自定义 MuJoCo demo，支持 Franka / WX250S，适合工程链路验证
 LIBERO           官方标准 MuJoCo / robosuite benchmark，适合成功率评测
 Bridge/WidowX    官方真实机器人评测入口，不是离线仿真
 ```
@@ -15,7 +15,7 @@ Bridge/WidowX    官方真实机器人评测入口，不是离线仿真
 核心区别：
 
 ```text
-openvla_sim 跑通不等于 LIBERO 成功率
+sim 跑通不等于 LIBERO 成功率
 LIBERO 仿真不等于 Bridge/WidowX 实机
 openvla-7b base 不应直接当作 LIBERO 微调 checkpoint 使用
 ```
@@ -23,16 +23,16 @@ openvla-7b base 不应直接当作 LIBERO 微调 checkpoint 使用
 ## 2. 目录结构
 
 ```text
-/home/creator/ws/openVLA
-├── README.md                         # 本文：项目导航和常用命令
-├── DAMO_README.md                    # RTX 5090 / base demo / flash-attn 环境记录
-├── TRAINING_AND_FINETUNING.md        # 旧版训练微调详细记录，后续优先维护 docs 版本
-├── demo_predict_action.py            # OpenVLA 单步动作预测 demo
-├── docs/                             # 结构化主题文档
-├── openvla_sim/                      # 自定义 MuJoCo 闭环仿真 demo
+/home/creator/ws/10_openVLA
+├── README.md                     # 本文：项目导航和常用命令
+├── docs/                         # 结构化主题文档（01-09 主题 + reports/ 报告资产）
+├── sim/                          # OpenVLA base + MuJoCo 闭环仿真包（Franka / WX250S）
+├── scripts/
+│   └── demo_predict_action.py    # OpenVLA 单步动作预测 demo
 ├── repos/
-│   ├── openvla/                    # 官方 OpenVLA 源码
-│   └── LIBERO/                     # LIBERO 源码，如已安装
+│   ├── openvla/                  # 官方 OpenVLA 源码（git submodule）
+│   └── LIBERO/                   # LIBERO 源码（git submodule）
+└── outputs/                      # 仿真产物（已 gitignore）
 ```
 
 ## 3. 文档导航
@@ -49,15 +49,15 @@ openvla-7b base 不应直接当作 LIBERO 微调 checkpoint 使用
 | [06_BRIDGE_WIDOWX_NOTES.md](docs/06_BRIDGE_WIDOWX_NOTES.md) | BridgeData V2、WidowX/WX250S、实机依赖、`bridge_orig` |
 | [07_TRAINING_AND_FINETUNING.md](docs/07_TRAINING_AND_FINETUNING.md) | 训练数据格式、ActionTokenizer、LoRA、全量微调 |
 | [08_TERMS_AND_PARAMS.md](docs/08_TERMS_AND_PARAMS.md) | 术语和 CLI 参数速查 |
-| [openvla_sim/README.md](openvla_sim/README.md) | 自定义 MuJoCo 仿真模块详细说明 |
-| [DAMO_README.md](DAMO_README.md) | 当前 RTX 5090 环境和 base demo 历史记录 |
+| [09_ENVIRONMENT_RTX5090.md](docs/09_ENVIRONMENT_RTX5090.md) | 当前 RTX 5090 环境、base demo 与 norm_stats 记录 |
+| [sim/README.md](sim/README.md) | 自定义 MuJoCo 仿真模块详细说明 |
 
 ## 4. 环境前提
 
 激活虚拟环境：
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 ```
 
@@ -70,7 +70,7 @@ export MUJOCO_GL=egl
 LIBERO 评测还需要：
 
 ```bash
-export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
+export LIBERO_CONFIG_PATH=/home/creator/ws/10_openVLA/.libero
 ```
 
 当前工作区环境与官方 README 常见环境不同：
@@ -83,8 +83,8 @@ export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
 安装 `openvla` 源码包时优先使用：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 python -m pip install -e . --no-deps
 ```
 
@@ -95,21 +95,21 @@ python -m pip install -e . --no-deps
 用于验证 `openvla-7b` base 模型加载、processor、prompt、GPU 推理和 action 解码。
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
-python demo_predict_action.py
+python scripts/demo_predict_action.py
 ```
 
 显式使用当前推荐后端：
 
 ```bash
-python demo_predict_action.py --attn-implementation sdpa
+python scripts/demo_predict_action.py --attn-implementation sdpa
 ```
 
 使用真实图片和指令：
 
 ```bash
-python demo_predict_action.py \
+python scripts/demo_predict_action.py \
   --image /path/to/image.jpg \
   --instruction "pick up the object" \
   --unnorm-key bridge_orig \
@@ -121,11 +121,11 @@ python demo_predict_action.py \
 不加载 7B 模型，只验证 MuJoCo、渲染、控制、视频和 JSON 输出。
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 export MUJOCO_GL=egl
 
-python -m openvla_sim \
+python -m sim \
   --dry-run \
   --robot wx250s \
   --policy-steps 2 \
@@ -135,7 +135,7 @@ python -m openvla_sim \
 Franka：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --dry-run \
   --robot franka \
   --policy-steps 2 \
@@ -149,11 +149,11 @@ python -m openvla_sim \
 WX250S：
 
 ```bash
-cd /home/creator/ws/openVLA
+cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
 export MUJOCO_GL=egl
 
-python -m openvla_sim \
+python -m sim \
   --robot wx250s \
   --motion-mode ik \
   --policy-steps 20 \
@@ -165,7 +165,7 @@ python -m openvla_sim \
 Franka：
 
 ```bash
-python -m openvla_sim \
+python -m sim \
   --robot franka \
   --motion-mode ik \
   --policy-steps 20 \
@@ -189,9 +189,9 @@ direct  action[:6] 直接映射为关节增量，用于对照
 LIBERO 是标准 MuJoCo / robosuite benchmark。不要直接用 `openvla-7b` base 跑标准 LIBERO，推荐使用 LIBERO 微调 checkpoint。
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
-export LIBERO_CONFIG_PATH=/home/creator/ws/openVLA/.libero
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
+export LIBERO_CONFIG_PATH=/home/creator/ws/10_openVLA/.libero
 export MUJOCO_GL=egl
 
 python experiments/robot/libero/run_libero_eval.py \
@@ -237,10 +237,10 @@ host_ip / port
 
 ## 10. 输出位置
 
-`openvla_sim` 默认输出：
+`sim` 默认输出：
 
 ```text
-/home/creator/ws/openVLA/outputs/<robot>_openvla/
+/home/creator/ws/10_openVLA/outputs/<robot>_openvla/
 ```
 
 通常包含：
@@ -269,13 +269,40 @@ gripper_state
 ## 11. 推荐学习顺序
 
 ```text
-1. demo_predict_action.py 单步推理
+1. scripts/demo_predict_action.py 单步推理
 2. docs/01_OPENVLA_MODEL_NOTES.md
 3. docs/02_ACTION_SPACE_AND_CONTROL.md
-4. openvla_sim dry-run
-5. openvla_sim + openvla-7b base
+4. sim dry-run
+5. sim + openvla-7b base
 6. docs/03_MUJOCO_SIM_NOTES.md
 7. docs/05_LIBERO_EVAL_NOTES.md
 8. docs/07_TRAINING_AND_FINETUNING.md
 9. docs/06_BRIDGE_WIDOWX_NOTES.md
 ```
+
+
+
+路线a:
+cd /home/creator/ws/10_openVLA && source .venv/bin/activate && export MUJOCO_GL=egl
+# ① 单步推理：图像+指令 → 7D action
+python scripts/demo_predict_action.py --attn-implementation sdpa
+# ② sim dry-run：验证 MuJoCo 链路（不加载模型）
+python -m sim --dry-run --robot franka --policy-steps 2 --sim-steps-per-policy 2
+# ③ base+MuJoCo 闭环：真实模型驱动仿真
+python -m sim --robot franka --motion-mode ik --policy-steps 20 --sim-steps-per-policy 30 --unnorm-key bridge_orig --attn-implementation sdpa
+
+路线b：
+
+cd /home/creator/ws/10_openVLA && source .venv/bin/activate
+# ① 重装失效的 editable 包（--no-deps 保护已验证的 torch/cuda）
+(cd repos/LIBERO  && pip install -e . --no-deps)
+(cd repos/openvla && pip install -e . --no-deps)
+python -c "import libero, prismatic; print('import OK')"
+# ② 下载微调 checkpoint（~14GB，需 HF 网络）：openvla/openvla-7b-finetuned-libero-spatial
+# ③ smoke test
+export LIBERO_CONFIG_PATH=/home/creator/ws/10_openVLA/.libero MUJOCO_GL=egl
+cd repos/openvla && python experiments/robot/libero/run_libero_eval.py \
+  --model_family openvla --pretrained_checkpoint openvla/openvla-7b-finetuned-libero-spatial \
+  --task_suite_name libero_spatial --center_crop True --num_trials_per_task 1 --use_wandb False
+
+  modelscope download --model superpeach/openvla-7b-finetuned-libero-spatial

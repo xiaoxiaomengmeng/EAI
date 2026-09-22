@@ -16,7 +16,7 @@ from .openvla_policy import DryRunPolicy, OpenVLAPolicy
 from .robots.base import RobotConfig
 
 
-_logger = logging.getLogger("openvla_sim")
+_logger = logging.getLogger("sim")
 
 
 def log(message: str):
@@ -77,6 +77,8 @@ class RolloutRunner:
         grasp_latched = False
         grasp_latched_step = None
         grasp_hold_count = 0
+        grasp_lifting = False
+        grasp_lift_count = 0
         stop_reason = None
 
         log(f"Starting rollout")
@@ -139,23 +141,35 @@ class RolloutRunner:
 
                 pre_ctrl_diagnostics = env.diagnostics()
                 distance = pre_ctrl_diagnostics.get("gripper_cube_distance")
+                ee_p = np.asarray(pre_ctrl_diagnostics.get("ee_site_pos", (0.0, 0.0, 0.0)))
+                cu_p = np.asarray(pre_ctrl_diagnostics.get("cube_pos", (0.0, 0.0, 0.0)))
+                horiz = float(np.linalg.norm(ee_p[:2] - cu_p[:2]))
+                vert = float(abs(ee_p[2] - cu_p[2]))
 
                 effective_action = action.copy()
                 distance_for_ctrl = distance
                 grasp_event = "none"
                 if self.control_config.grasp_assist and distance is not None:
-                    if not grasp_latched and distance <= self.control_config.grasp_trigger_distance:
+                    aligned = horiz <= self.control_config.grasp_horizontal_tolerance and vert <= self.control_config.grasp_vertical_tolerance
+                    if not grasp_latched and aligned and distance <= self.control_config.grasp_trigger_distance:
                         grasp_latched = True
                         grasp_latched_step = policy_step
                         grasp_event = "latched"
-                        log(f"Grasp assist latched at step={policy_step:03d}, dist={distance:.4f}")
+                        log(f"Grasp assist latched at step={policy_step:03d}, dist={distance:.4f}, horiz={horiz:.4f}, vert={vert:.4f}")
                     if grasp_latched:
                         grasp_hold_count = policy_step - int(grasp_latched_step) + 1
                         distance_for_ctrl = 0.0
                         effective_action[:3] = 0.0
-                        effective_action[6] = 0.0
+                        # settle 阶段先保持开爪，让 reach_bias 把 ee 拉到方块正上方再闭合，避免打飞方块
+                        effective_action[6] = 0.0 if grasp_hold_count > self.control_config.grasp_settle_steps else 1.0
                         if grasp_event == "none":
                             grasp_event = "holding"
+                        if grasp_hold_count >= self.control_config.grasp_hold_steps and self.control_config.grasp_lift_steps > 0:
+                            grasp_lifting = True
+                        if grasp_lifting:
+                            grasp_lift_count += 1
+                            effective_action[:3] = np.array([0.0, 0.0, self.control_config.grasp_lift_delta])
+                            grasp_event = "lifting"
 
                 motion_start = time.perf_counter()
                 target_ctrl, arm_delta, ik_info = self.adapter.to_ctrl(env, current_ctrl, effective_action, distance_for_ctrl)
@@ -186,7 +200,7 @@ class RolloutRunner:
                 if ik_info.get("ik_timing"):
                     timing.update(ik_info["ik_timing"])
 
-                gripper_ctrl_val = float(target_ctrl[6])
+                gripper_ctrl_val = float(target_ctrl[-1])
                 if robot_name == "franka":
                     gripper_open = 255.0
                     gripper_closed = 0.0
@@ -195,8 +209,12 @@ class RolloutRunner:
                     gripper_closed = 0.015
                 gripper_state = "open" if gripper_ctrl_val > (gripper_open + gripper_closed) / 2 else "closed"
                 grasp_completed = grasp_latched and grasp_hold_count >= self.control_config.grasp_hold_steps
-                if grasp_completed and self.control_config.early_stop_on_grasp:
-                    stop_reason = f"grasp_completed_after_{grasp_hold_count}_hold_steps"
+                lift_completed = grasp_lifting and grasp_lift_count >= self.control_config.grasp_lift_steps
+                if self.control_config.early_stop_on_grasp:
+                    if lift_completed:
+                        stop_reason = f"grasp_lifted_after_{grasp_lift_count}_lift_steps"
+                    elif grasp_completed and self.control_config.grasp_lift_steps <= 0:
+                        stop_reason = f"grasp_completed_after_{grasp_hold_count}_hold_steps"
 
                 record = {
                     "policy_step": policy_step,
@@ -220,6 +238,8 @@ class RolloutRunner:
                         "latched_step": grasp_latched_step,
                         "hold_count": grasp_hold_count,
                         "completed": grasp_completed,
+                        "lifting": grasp_lifting,
+                        "lift_count": grasp_lift_count,
                         "trigger_distance": self.control_config.grasp_trigger_distance,
                     },
                     "motion_mode": self.control_config.motion_mode,

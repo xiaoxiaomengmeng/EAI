@@ -26,7 +26,7 @@
 ```bash
 cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
-python demo_predict_action.py
+python scripts/demo_predict_action.py
 ```
 
 成功时会看到类似输出：
@@ -45,17 +45,23 @@ Predicted action: [ 0.00337 ... 0. ]
 
 ```text
 /home/creator/ws/10_openVLA
-├── README.md                 # 本说明文档
-├── demo_predict_action.py    # 最小动作预测 demo
-├── .venv/                    # Python 3.10 虚拟环境
-└── openvla/                  # OpenVLA 源码目录
+├── README.md                   # 项目导航
+├── docs/                       # 结构化主题文档（含本环境报告）
+├── sim/                        # OpenVLA base + MuJoCo 闭环仿真包
+├── scripts/
+│   └── demo_predict_action.py  # 最小动作预测 demo
+├── repos/
+│   ├── openvla/                # OpenVLA 官方源码（git submodule）
+│   └── LIBERO/                 # LIBERO 源码（git submodule）
+├── outputs/                    # 仿真产物（已 gitignore）
+└── .venv/                      # Python 3.10 虚拟环境
 ```
 
-如果 `openvla/` 源码目录不存在，可执行：
+`repos/openvla`、`repos/LIBERO` 为 git submodule，如未初始化可执行：
 
 ```bash
-cd /home/creator/ws/10_openVLA
-git clone https://github.com/xiaoxiaomengmeng/openvla.git
+cd /home/creator/ws
+git submodule update --init 10_openVLA/repos/openvla 10_openVLA/repos/LIBERO
 ```
 
 ## 3. 快速开始
@@ -92,19 +98,19 @@ capability: (12, 0)
 ### 3.3 运行默认占位图 demo
 
 ```bash
-python demo_predict_action.py
+python scripts/demo_predict_action.py
 ```
 
 当前脚本默认使用 `sdpa` attention。如需显式指定：
 
 ```bash
-python demo_predict_action.py --attn-implementation sdpa
+python scripts/demo_predict_action.py --attn-implementation sdpa
 ```
 
 ### 3.4 使用真实图片与指令
 
 ```bash
-python demo_predict_action.py \
+python scripts/demo_predict_action.py \
   --image /path/to/image.jpg \
   --instruction "pick up the object"
 ```
@@ -172,7 +178,7 @@ ModelScope 默认缓存路径：
 /home/creator/.cache/modelscope/models/zixiaoBios--openvla-7b/snapshots/master/
 ```
 
-`demo_predict_action.py` 默认模型路径：
+`scripts/demo_predict_action.py` 默认模型路径：
 
 ```python
 DEFAULT_MODEL_PATH = "/home/creator/.cache/modelscope/models/zixiaoBios--openvla-7b/snapshots/master"
@@ -204,7 +210,7 @@ tokenizer.model
 然后运行时显式指定：
 
 ```bash
-python demo_predict_action.py --model-path /home/creator/ws/10_openVLA/models/openvla-7b
+python scripts/demo_predict_action.py --model-path /home/creator/ws/10_openVLA/models/openvla-7b
 ```
 
 ## 6. Demo 脚本说明
@@ -212,7 +218,7 @@ python demo_predict_action.py --model-path /home/creator/ws/10_openVLA/models/op
 ### 6.1 脚本入口
 
 ```text
-/home/creator/ws/10_openVLA/demo_predict_action.py
+/home/creator/ws/10_openVLA/scripts/demo_predict_action.py
 ```
 
 ### 6.2 常用参数
@@ -303,7 +309,7 @@ viola
 当前 RTX 5090 环境下已验证：
 
 ```bash
-python demo_predict_action.py --attn-implementation sdpa
+python scripts/demo_predict_action.py --attn-implementation sdpa
 ```
 
 可以正常完成 `model.predict_action(...)` 并输出 7DoF action。
@@ -313,7 +319,7 @@ python demo_predict_action.py --attn-implementation sdpa
 如果运行：
 
 ```bash
-python demo_predict_action.py --attn-implementation eager
+python scripts/demo_predict_action.py --attn-implementation eager
 ```
 
 可能在 `model.predict_action(...)` 阶段出现：
@@ -329,7 +335,7 @@ RuntimeError: The size of tensor a (275) must match the size of tensor b (274) a
 flash-attn 已在当前 RTX 5090 / `sm_120` 环境下完成验证，可以正常运行：
 
 ```bash
-python demo_predict_action.py --attn-implementation flash_attention_2
+python scripts/demo_predict_action.py --attn-implementation flash_attention_2
 ```
 
 成功时会看到：
@@ -505,13 +511,13 @@ openvla/openvla-7b-finetuned-libero-10
 当前 demo 支持不传 `--image`，会自动生成一张 224x224 占位图用于验证推理链路：
 
 ```bash
-python demo_predict_action.py
+python scripts/demo_predict_action.py
 ```
 
 如需真实图片，显式传入：
 
 ```bash
-python demo_predict_action.py --image /path/to/image.jpg
+python scripts/demo_predict_action.py --image /path/to/image.jpg
 ```
 
 ### 10.2 `eager` attention 报 causal mask 长度不一致
@@ -519,9 +525,9 @@ python demo_predict_action.py --image /path/to/image.jpg
 不要使用 `eager` 作为默认后端。使用：
 
 ```bash
-python demo_predict_action.py
+python scripts/demo_predict_action.py
 # 或
-python demo_predict_action.py --attn-implementation sdpa
+python scripts/demo_predict_action.py --attn-implementation sdpa
 ```
 
 ### 10.3 flash-attn 报 `no kernel image is available`

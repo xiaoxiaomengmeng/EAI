@@ -23,10 +23,14 @@ class MotionMode(ABC):
         joint_names = self.robot_config.arm_joint_names[:6]
         return {name: float(value) for name, value in zip(joint_names, arm_delta)}
 
-    def gripper_ctrl(self, gripper_action: float, distance: float | None = None) -> float:
+    def gripper_ctrl(self, gripper_action: float, distance: float | None = None, aligned: bool = True, force_closed: bool = False) -> float:
         gripper_open = self.robot_config.gripper_open
         gripper_closed = self.robot_config.gripper_closed
+        if force_closed:
+            return gripper_closed
         if distance is not None and distance > self.config.gripper_close_threshold:
+            return gripper_open
+        if not aligned:
             return gripper_open
         return gripper_open if gripper_action > 0.5 else gripper_closed
 

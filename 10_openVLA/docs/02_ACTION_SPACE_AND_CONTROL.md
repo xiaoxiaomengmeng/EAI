@@ -79,12 +79,12 @@ RGB 图像 + instruction
 当前项目中对应实现：
 
 ```text
-openvla_sim/openvla_policy.py      # 模型加载和 predict_action
-openvla_sim/action_adapter.py      # action -> ctrl 统一入口
-openvla_sim/motion_mode.py         # motion_mode 抽象和工厂
-openvla_sim/motion_modes/ik.py     # ee_site + Jacobian IK
-openvla_sim/motion_modes/demo.py   # 演示友好映射
-openvla_sim/motion_modes/direct.py # 直接关节增量映射
+sim/openvla_policy.py      # 模型加载和 predict_action
+sim/action_adapter.py      # action -> ctrl 统一入口
+sim/motion_mode.py         # motion_mode 抽象和工厂
+sim/motion_modes/ik.py     # ee_site + Jacobian IK
+sim/motion_modes/demo.py   # 演示友好映射
+sim/motion_modes/direct.py # 直接关节增量映射
 ```
 
 ## 5. motion_mode 三种模式
@@ -100,9 +100,9 @@ direct  action[:6] 直接映射为关节增量，用于对照
 运行示例：
 
 ```bash
-python -m openvla_sim --robot wx250s --motion-mode ik
-python -m openvla_sim --robot wx250s --motion-mode demo
-python -m openvla_sim --robot wx250s --motion-mode direct
+python -m sim --robot wx250s --motion-mode ik
+python -m sim --robot wx250s --motion-mode demo
+python -m sim --robot wx250s --motion-mode direct
 ```
 
 ## 6. IK 模式
@@ -135,7 +135,7 @@ OpenVLA [dx, dy, dz]
 
 ## 7. Franka 控制链路
 
-Franka 配置由 `openvla_sim/robots/franka.py` 管理。
+Franka 配置由 `sim/robots/franka.py` 管理。
 
 核心信息：
 
@@ -150,7 +150,7 @@ Franka 配置由 `openvla_sim/robots/franka.py` 管理。
 
 ## 8. WX250S 控制链路
 
-WX250S 配置由 `openvla_sim/robots/wx250s.py` 管理。
+WX250S 配置由 `sim/robots/wx250s.py` 管理。
 
 核心信息：
 
@@ -165,7 +165,7 @@ BridgeData / WidowX 风格 action 与该平台语义更接近
 
 ## 9. 抓取逻辑边界
 
-当前 `openvla_sim` 的目标是工程闭环验证，不等于完整抓取策略。
+当前 `sim` 的目标是工程闭环验证，不等于完整抓取策略。
 
 已支持：
 

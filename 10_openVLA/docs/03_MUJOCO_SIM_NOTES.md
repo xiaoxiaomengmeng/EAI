@@ -1,6 +1,6 @@
 # MuJoCo 仿真笔记
 
-本文记录 OpenVLA 工作区中 MuJoCo 仿真的关键概念、当前 `openvla_sim` 的实现方式，以及常见兼容性问题。
+本文记录 OpenVLA 工作区中 MuJoCo 仿真的关键概念、当前 `sim` 的实现方式，以及常见兼容性问题。
 
 ## 1. MuJoCo 在本项目中的角色
 
@@ -8,19 +8,19 @@
 
 ```text
 LIBERO                         标准 benchmark，底层基于 MuJoCo / robosuite
-openvla_sim                    自定义 MuJoCo demo，支持 Franka 和 WX250S
+sim                    自定义 MuJoCo demo，支持 Franka 和 WX250S
 ```
 
 二者定位不同：
 
 ```text
 LIBERO      用于标准仿真评测和成功率统计
-openvla_sim 用于本地工程验证、控制适配、视频和日志调试
+sim 用于本地工程验证、控制适配、视频和日志调试
 ```
 
-## 2. openvla_sim 场景流程
+## 2. sim 场景流程
 
-`openvla_sim` 的闭环流程：
+`sim` 的闭环流程：
 
 ```text
 动态构建 MuJoCo 场景
@@ -37,10 +37,10 @@ openvla_sim 用于本地工程验证、控制适配、视频和日志调试
 核心文件：
 
 ```text
-openvla_sim/mujoco_env.py
-openvla_sim/runner.py
-openvla_sim/robots/franka.py
-openvla_sim/robots/wx250s.py
+sim/mujoco_env.py
+sim/runner.py
+sim/robots/franka.py
+sim/robots/wx250s.py
 ```
 
 ## 3. MuJoCo XML 基本概念
@@ -152,7 +152,7 @@ export MUJOCO_GL=egl
 
 ## 9. 输出与诊断
 
-`openvla_sim` 默认输出：
+`sim` 默认输出：
 
 ```text
 outputs/<robot>_openvla/<timestamp>.mp4

@@ -7,7 +7,7 @@ from .base import RobotConfig
 
 WX250S_CONFIG = RobotConfig(
     name="wx250s",
-    robot_dir=Path("/home/creator/ws/mujoco_menagerie/trossen_wx250s"),
+    robot_dir=Path("/home/creator/ws/assets/mujoco/mujoco_menagerie/trossen_wx250s"),
     actuator_names=[
         "waist",
         "shoulder",

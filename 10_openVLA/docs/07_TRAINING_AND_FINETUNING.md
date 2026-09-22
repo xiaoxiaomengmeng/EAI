@@ -1,6 +1,6 @@
 # OpenVLA 训练、数据格式与微调总结
 
-本文整理当前工作区中 OpenVLA 训练、数据格式、动作 token 化、LoRA 微调、全量微调和当前环境注意事项。根目录旧版 `TRAINING_AND_FINETUNING.md` 保留为历史详细记录；后续推荐优先维护本文。
+本文整理当前工作区中 OpenVLA 训练、数据格式、动作 token 化、LoRA 微调、全量微调和当前环境注意事项，是训练/微调主题的唯一维护文档。
 
 ## 1. 一句话理解 OpenVLA 训练
 
@@ -141,7 +141,7 @@ LIBERO 官方评测脚本会根据 `task_suite_name` 设置 `unnorm_key`，例�
 
 #### 示例 3：自定义 Franka / WX250S MuJoCo 微调样本
 
-如果后续要把当前 `openvla_sim` 场景采成微调数据，最小样本可以设计成：
+如果后续要把当前 `sim` 场景采成微调数据，最小样本可以设计成：
 
 ```python
 sample = {
@@ -264,8 +264,8 @@ LoRA 是当前更实用的低成本微调路线。
 典型命令模板：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 
 torchrun --standalone --nnodes 1 --nproc-per-node 1 vla-scripts/finetune.py \
   --vla_path openvla/openvla-7b \
@@ -345,8 +345,8 @@ predict_action 使用对应 unnorm_key
 Prismatic 格式模型若要用 Hugging Face AutoClasses 推理，需要转换：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 
 python vla-scripts/extern/convert_openvla_weights_to_hf.py \
   --openvla_model_path_or_id <PRISMATIC_RUN_DIR> \
@@ -366,8 +366,8 @@ RTX 5090 / sm_120 / CUDA 12.8 / PyTorch 2.11.0+cu128
 安装源码包时优先：
 
 ```bash
-cd /home/creator/ws/openVLA/repos/openvla
-source /home/creator/ws/openVLA/.venv/bin/activate
+cd /home/creator/ws/10_openVLA/repos/openvla
+source /home/creator/ws/10_openVLA/.venv/bin/activate
 python -m pip install -e . --no-deps
 ```
 

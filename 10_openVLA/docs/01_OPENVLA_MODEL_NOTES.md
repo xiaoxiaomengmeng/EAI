@@ -37,7 +37,7 @@ ModelScope 默认缓存路径：
 单步动作预测验证
 OpenVLA 加载链路验证
 BridgeData / WidowX 风格 action 验证
-openvla_sim 自定义 MuJoCo demo
+sim 自定义 MuJoCo demo
 ```
 
 不建议直接用于：
@@ -82,8 +82,8 @@ model = AutoModelForVision2Seq.from_pretrained(
 当前项目中的封装位置：
 
 ```text
-demo_predict_action.py
-openvla_sim/openvla_policy.py
+scripts/demo_predict_action.py
+sim/openvla_policy.py
 repos/openvla/experiments/robot/openvla_utils.py
 repos/openvla/experiments/robot/robot_utils.py
 ```

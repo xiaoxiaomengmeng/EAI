@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-PROJECT_ROOT = Path("/home/creator/ws/openVLA")
+# 由本文件位置推导项目根（sim/config.py 上两级），避免硬编码绝对路径
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MODEL_PATH = "/home/creator/.cache/modelscope/models/zixiaoBios--openvla-7b/snapshots/master"
 
 
@@ -46,10 +47,15 @@ class ControlConfig:
     ik_max_position_delta: float = 0.05
     ik_damping: float = 0.05
     gripper_close_threshold: float = 0.05
-    grip_down_offset: float = 0.015
+    grip_down_offset: float = 0.025
     grasp_assist: bool = True
     grasp_trigger_distance: float = 0.055
-    grasp_hold_steps: int = 5
+    grasp_hold_steps: int = 8
+    grasp_horizontal_tolerance: float = 0.02
+    grasp_vertical_tolerance: float = 0.035
+    grasp_settle_steps: int = 4
+    grasp_lift_steps: int = 8
+    grasp_lift_delta: float = 0.045
     early_stop_on_grasp: bool = True
 
 
@@ -57,8 +63,8 @@ class ControlConfig:
 class RolloutConfig:
     policy_steps: int = 20
     sim_steps_per_policy: int = 30
-    output_dir: str = str(PROJECT_ROOT / "outputs" / "wx250s_openvla")
+    output_dir: str = str(PROJECT_ROOT / "outputs" / "franka_openvla")
     save_frames: bool = False
     save_policy_inputs: bool = True
-    save_wrist_debug: bool = True
+    save_wrist_debug: bool = False
     dry_run: bool = False

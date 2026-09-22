@@ -1,12 +1,15 @@
 import argparse
+import sys
 from pathlib import Path
 
 from PIL import Image
 import torch
 from transformers import AutoModelForVision2Seq, AutoProcessor
 
+# 允许从 scripts/ 目录运行时导入 sim 包，复用统一的默认模型路径，避免多处硬编码
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from sim.config import DEFAULT_MODEL_PATH
 
-DEFAULT_MODEL_PATH = "/home/creator/.cache/modelscope/models/zixiaoBios--openvla-7b/snapshots/master"
 DEFAULT_INSTRUCTION = "pick up the object"
 
 
