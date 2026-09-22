@@ -1,0 +1,258 @@
+[LIBERO Eval] LIBERO_CONFIG_PATH=/home/creator/ws/10_openVLA/.libero | MUJOCO_GL=egl
+[LIBERO Eval] 注册 OpenVLA 到 HF Auto 类（prismatic 源码实现）...
+2026-09-22 22:55:44.635796: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-09-22 22:55:44.657285: E external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:9261] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+2026-09-22 22:55:44.657309: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:607] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+2026-09-22 22:55:44.657966: E external/local_xla/xla/stream_executor/cuda/cuda_blas.cc:1515] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2026-09-22 22:55:44.660879: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-09-22 22:55:44.982148: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+2026-09-22 22:55:46.183768: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:901] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-09-22 22:55:46.186523: W tensorflow/core/common_runtime/gpu/gpu_device.cc:2256] Cannot dlopen some GPU libraries. Please make sure the missing libraries mentioned above are installed properly if you would like to use GPU. Follow the guide at https://www.tensorflow.org/install/gpu for how to download and setup the required libraries for your platform.
+Skipping registering GPU devices...
+[LIBERO Eval] wandb 导入失败（ImportError），--use-wandb 已关闭，注入空 stub 跳过。
+[LIBERO Eval] 已将 torch.load 默认改为 weights_only=False（适配 LIBERO init_states 加载）。
+09/22 [22:55:49] INFO     | >> No OpenGL_accelerate module loaded:  acceleratesupport.py:24
+                          No module named 'OpenGL_accelerate'                              
+[LIBERO Eval] 已为 robosuite 1.4.x 注入 mj_fullM 兼容 shim（numpy 展开稀疏惯性矩阵，适配 mujoco>=3）。
+[LIBERO Eval] 构建离线加载器并 monkeypatch 官方 get_vla / get_processor ...
+[robosuite WARNING] No private macro file found! (macros.py:53)
+                 WARNING  | >> No private macro file found!                    macros.py:53
+[robosuite WARNING] It is recommended to use a private macro file (macros.py:54)
+                 WARNING  | >> It is recommended to use a private macro file   macros.py:54
+[robosuite WARNING] To setup, run: python /home/creator/ws/10_openVLA/.venv/lib/python3.10/site-packages/robosuite/scripts/setup_macros.py (macros.py:55)
+                 WARNING  | >> To setup, run: python                           macros.py:55
+                          /home/creator/ws/10_openVLA/.venv/lib/python3.10/sit             
+                          e-packages/robosuite/scripts/setup_macros.py                     
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[LIBERO Eval] 调用官方 eval_libero()，参数：
+[LIBERO Eval] --model_family openvla --pretrained_checkpoint /home/creator/ws/modules/openvla-7b-finetuned-libero-spatial --task_suite_name libero_spatial --center_crop True --num_trials_per_task 1 --num_steps_wait 10 --use_wandb False --seed 7 --run_id_note smoke-test
+[LIBERO Eval] 离线加载 VLA：/home/creator/ws/modules/openvla-7b-finetuned-libero-spatial（attn=sdpa）
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:00,  7.16it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:00<00:00,  7.95it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:00<00:00,  8.22it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  8.43it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:00<00:00,  8.22it/s]
+[LIBERO Eval] 已加载 dataset_statistics.json：/home/creator/ws/modules/openvla-7b-finetuned-libero-spatial/dataset_statistics.json
+Loaded model: <class 'prismatic.extern.hf.modeling_prismatic.OpenVLAForActionPrediction'>
+Logging to local log file: ./experiments/logs/EVAL-libero_spatial-openvla-2026_09_22-22_55_49--smoke-test.txt
+[info] using task orders [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+Task suite: libero_spatial
+  0%|          | 0/10 [00:00<?, ?it/s][Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:18<00:00, 18.42s/it][A100%|██████████| 1/1 [00:18<00:00, 18.42s/it]
+ 10%|█         | 1/10 [00:19<02:55, 19.52s/it]
+Task: pick up the black bowl between the plate and the ramekin and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=1--success=True--task=pick_up_the_black_bowl_between_the_plate_and_the_r.mp4
+Success: True
+# episodes completed so far: 1
+# successes: 1 (100.0%)
+Current task success rate: 1.0
+Current total success rate: 1.0
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:20<00:00, 20.83s/it][A100%|██████████| 1/1 [00:20<00:00, 20.83s/it]
+ 20%|██        | 2/10 [00:40<02:44, 20.62s/it]
+Task: pick up the black bowl next to the ramekin and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=2--success=True--task=pick_up_the_black_bowl_next_to_the_ramekin_and_pla.mp4
+Success: True
+# episodes completed so far: 2
+# successes: 2 (100.0%)
+Current task success rate: 1.0
+Current total success rate: 1.0
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:42<00:00, 42.61s/it][A100%|██████████| 1/1 [00:42<00:00, 42.61s/it]
+ 30%|███       | 3/10 [01:24<03:36, 30.89s/it]
+Task: pick up the black bowl from table center and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=3--success=False--task=pick_up_the_black_bowl_from_table_center_and_place.mp4
+Success: False
+# episodes completed so far: 3
+# successes: 2 (66.7%)
+Current task success rate: 0.0
+Current total success rate: 0.6666666666666666
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:16<00:00, 16.01s/it][A100%|██████████| 1/1 [00:16<00:00, 16.01s/it]
+ 40%|████      | 4/10 [01:40<02:31, 25.20s/it]
+Task: pick up the black bowl on the cookie box and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=4--success=True--task=pick_up_the_black_bowl_on_the_cookie_box_and_place.mp4
+Success: True
+# episodes completed so far: 4
+# successes: 3 (75.0%)
+Current task success rate: 1.0
+Current total success rate: 0.75
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:24<00:00, 24.93s/it][A100%|██████████| 1/1 [00:24<00:00, 24.93s/it]
+ 50%|█████     | 5/10 [02:05<02:06, 25.27s/it]
+Task: pick up the black bowl in the top drawer of the wooden cabinet and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=5--success=True--task=pick_up_the_black_bowl_in_the_top_drawer_of_the_wo.mp4
+Success: True
+# episodes completed so far: 5
+# successes: 4 (80.0%)
+Current task success rate: 1.0
+Current total success rate: 0.8
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:19<00:00, 19.19s/it][A100%|██████████| 1/1 [00:19<00:00, 19.19s/it]
+ 60%|██████    | 6/10 [02:25<01:33, 23.37s/it]
+Task: pick up the black bowl on the ramekin and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=6--success=True--task=pick_up_the_black_bowl_on_the_ramekin_and_place_it.mp4
+Success: True
+# episodes completed so far: 6
+# successes: 5 (83.3%)
+Current task success rate: 1.0
+Current total success rate: 0.8333333333333334
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:22<00:00, 22.44s/it][A100%|██████████| 1/1 [00:22<00:00, 22.44s/it]
+ 70%|███████   | 7/10 [02:48<01:09, 23.22s/it]
+Task: pick up the black bowl next to the cookie box and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=7--success=True--task=pick_up_the_black_bowl_next_to_the_cookie_box_and_.mp4
+Success: True
+# episodes completed so far: 7
+# successes: 6 (85.7%)
+Current task success rate: 1.0
+Current total success rate: 0.8571428571428571
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:20<00:00, 20.07s/it][A100%|██████████| 1/1 [00:20<00:00, 20.07s/it]
+ 80%|████████  | 8/10 [03:09<00:44, 22.37s/it]
+Task: pick up the black bowl on the stove and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=8--success=True--task=pick_up_the_black_bowl_on_the_stove_and_place_it_o.mp4
+Success: True
+# episodes completed so far: 8
+# successes: 7 (87.5%)
+Current task success rate: 1.0
+Current total success rate: 0.875
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:21<00:00, 21.11s/it][A100%|██████████| 1/1 [00:21<00:00, 21.11s/it]
+ 90%|█████████ | 9/10 [03:30<00:22, 22.13s/it]
+Task: pick up the black bowl next to the plate and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=9--success=True--task=pick_up_the_black_bowl_next_to_the_plate_and_place.mp4
+Success: True
+# episodes completed so far: 9
+# successes: 8 (88.9%)
+Current task success rate: 1.0
+Current total success rate: 0.8888888888888888
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+[Warning]: datasets path /home/creator/ws/10_openVLA/repos/LIBERO/libero/datasets does not exist!
+
+  0%|          | 0/1 [00:00<?, ?it/s][Ahuggingface/tokenizers: The current process just got forked, after parallelism has already been used. Disabling parallelism to avoid deadlocks...
+To disable this warning, you can either:
+	- Avoid using `tokenizers` before the fork if possible
+	- Explicitly set the environment variable TOKENIZERS_PARALLELISM=(true | false)
+
+100%|██████████| 1/1 [00:21<00:00, 21.53s/it][A100%|██████████| 1/1 [00:21<00:00, 21.53s/it]
+100%|██████████| 10/10 [03:52<00:00, 22.09s/it]100%|██████████| 10/10 [03:52<00:00, 23.26s/it]
+
+Task: pick up the black bowl on the wooden cabinet and place it on the plate
+Starting episode 1...
+Saved rollout MP4 at path ./rollouts/2026_09_22/2026_09_22-22_55_49--episode=10--success=True--task=pick_up_the_black_bowl_on_the_wooden_cabinet_and_p.mp4
+Success: True
+# episodes completed so far: 10
+# successes: 9 (90.0%)
+Current task success rate: 1.0
+Current total success rate: 0.9
+Exception ignored in: <function MjRenderContext.__del__ at 0x7099bc3d5000>
+Traceback (most recent call last):
+  File "/home/creator/ws/10_openVLA/.venv/lib/python3.10/site-packages/robosuite/utils/binding_utils.py", line 199, in __del__
+    self.gl_ctx.free()
+  File "/home/creator/ws/10_openVLA/.venv/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 149, in free
+    EGL.eglMakeCurrent(EGL_DISPLAY, EGL.EGL_NO_SURFACE, EGL.EGL_NO_SURFACE, EGL.EGL_NO_CONTEXT)
+  File "/home/creator/ws/10_openVLA/.venv/lib/python3.10/site-packages/OpenGL/error.py", line 230, in glCheckError
+    raise self._errorClass(
+OpenGL.raw.EGL._errors.EGLError: EGLError(
+	err = EGL_NOT_INITIALIZED,
+	baseOperation = eglMakeCurrent,
+	cArguments = (
+		<OpenGL._opaque.EGLDisplay_pointer object at 0x7099a566e440>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7099c414f540>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7099c414f540>,
+		<OpenGL._opaque.EGLContext_pointer object at 0x7099c414f440>,
+	),
+	result = 0
+)
+Exception ignored in: <function EGLGLContext.__del__ at 0x7099bc3d4e50>
+Traceback (most recent call last):
+  File "/home/creator/ws/10_openVLA/.venv/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 155, in __del__
+    self.free()
+  File "/home/creator/ws/10_openVLA/.venv/lib/python3.10/site-packages/robosuite/renderers/context/egl_context.py", line 149, in free
+    EGL.eglMakeCurrent(EGL_DISPLAY, EGL.EGL_NO_SURFACE, EGL.EGL_NO_SURFACE, EGL.EGL_NO_CONTEXT)
+  File "/home/creator/ws/10_openVLA/.venv/lib/python3.10/site-packages/OpenGL/error.py", line 230, in glCheckError
+    raise self._errorClass(
+OpenGL.raw.EGL._errors.EGLError: EGLError(
+	err = EGL_NOT_INITIALIZED,
+	baseOperation = eglMakeCurrent,
+	cArguments = (
+		<OpenGL._opaque.EGLDisplay_pointer object at 0x7099a566e440>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7099c414f540>,
+		<OpenGL._opaque.EGLSurface_pointer object at 0x7099c414f540>,
+		<OpenGL._opaque.EGLContext_pointer object at 0x7099c414f440>,
+	),
+	result = 0
+)

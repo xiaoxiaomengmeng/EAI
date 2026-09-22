@@ -13,9 +13,18 @@ OpenVLA 常见输出是 7D action：
 含义：
 
 ```text
-dx / dy / dz             末端执行器位置增量
-droll / dpitch / dyaw    末端执行器姿态增量
-gripper                  夹爪开合信号
+dx / dy / dz             末端执行器位置增量（笛卡尔空间，单位米，相对当前位姿）
+droll / dpitch / dyaw    末端执行器姿态增量（单位弧度，相对当前位姿）
+gripper                  夹爪开合命令（约 0=开 / 1=合，非增量，详见第 2 节 mask）
+```
+
+关键定性：**OpenVLA 是末端 EE（笛卡尔空间）位姿增量控制，不是关节角控制**。
+
+```text
+前 6 维是“末端往哪个方向挪多少”，与具体关节数、臂长无关；
+同一个 EE 增量，在 Franka（6/7 自由度）与 WX250S（6 自由度）上的关节解完全不同。
+因此驱动任何机械臂都必须用该机械臂自己的运动学模型做 IK 解算（见第 6 节）；
+第 7 维夹爪旁路单独控制，不进 IK。
 ```
 
 它不是天然等同于某个机器人所有关节角，也不能直接喂给所有 MuJoCo actuator。
@@ -41,6 +50,40 @@ prompt 里的机器人名字不会自动改变动作尺度
 unnorm_key 才决定 action token 被解释成多大的连续动作
 robot adapter / IK / controller 才决定具体机器人怎么执行
 ```
+
+### 2.1 predict_action 的输出已是“反归一化后”
+
+`model.predict_action(...)` 内部分两步，返回值**已经是反归一化后的物理量纲**，调用方无需再做任何反归一化：
+
+```text
+① token → 离散 bin → normalized_actions        # 中间产物，落在 [-1, 1] 归一化域
+② 用 unnorm_key 对应的 q01/q99 反归一化：
+   actions = where(mask,
+                   0.5*(normalized+1)*(q99-q01)+q01,  # mask=True 的维度：映射回物理量纲
+                   normalized)                        # mask=False 的维度：保持归一化值
+```
+
+### 2.2 mask：为什么夹爪维不反归一化
+
+两个 checkpoint 的 action mask 都是 `[True, True, True, True, True, True, False]`：
+
+```text
+第 0-5 维（EE 位姿增量）mask=True  → 反归一化到 [q01, q99]，得到物理量纲增量
+第 6 维（夹爪）        mask=False → 走 else 分支，直接返回归一化值（约 0~1），非物理增量
+```
+
+这解释了实测现象：base 输出 gripper=0.0（开）、LIBERO 微调输出 gripper≈0.9961（合）。
+
+### 2.3 不同 key 的尺度差异（实测 q01/q99）
+
+```text
+bridge_orig    q01≈[-0.029,-0.042,-0.026,-0.081,-0.093,-0.207, 0.0]
+               q99≈[ 0.028, 0.041, 0.040, 0.082, 0.078, 0.204, 1.0]   # 增量小，WidowX 高频小步
+libero_spatial q01≈[-0.745,-0.662,-0.938,-0.107,-0.207,-0.184, 0.0]
+               q99≈[ 0.938, 0.876, 0.932, 0.104, 0.177, 0.146, 1.0]   # 增量大得多，尺度不同
+```
+
+用错 `unnorm_key` 会用错误的 q01/q99 缩放，导致 EE 增量尺度整体错乱——这是必须匹配 key 的根本原因。
 
 ## 3. base 模型与 LIBERO key
 

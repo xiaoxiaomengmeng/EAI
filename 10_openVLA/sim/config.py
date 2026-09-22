@@ -5,7 +5,9 @@ from pathlib import Path
 
 # 由本文件位置推导项目根（sim/config.py 上两级），避免硬编码绝对路径
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_MODEL_PATH = "/home/creator/.cache/modelscope/models/zixiaoBios--openvla-7b/snapshots/master"
+# 默认模型指向工作区统一模型目录 ws/modules 下的软链（→ ModelScope 缓存），
+# 日后换缓存位置只需改软链，无需改代码
+DEFAULT_MODEL_PATH = str(PROJECT_ROOT.parent / "modules" / "openvla-7b")
 
 
 @dataclass(frozen=True)

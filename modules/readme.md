@@ -12,6 +12,8 @@
 | `pi0_base` | Physical-Intelligence / lerobot | π0 基础策略权重 | `11_pi_serial_models` |
 | `pi0_libero_base` | Physical-Intelligence / lerobot | π0 LIBERO 任务基础权重 | `11_pi_serial_models` |
 | `pi05_libero_base` | Physical-Intelligence / lerobot | π0.5 LIBERO 任务基础权重 | `11_pi_serial_models` |
+| `openvla-7b` | ModelScope `zixiaoBios/openvla-7b` | OpenVLA base 模型（unnorm_key=bridge_orig） | `10_openVLA` |
+| `openvla-7b-finetuned-libero-spatial` | ModelScope `superpeach/openvla-7b-finetuned-libero-spatial` | OpenVLA LIBERO-spatial 微调 checkpoint（unnorm_key=libero_spatial） | `10_openVLA` |
 
 ## 约定
 

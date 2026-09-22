@@ -9,7 +9,8 @@
 # 留空(null)的字段会回退到"自动选择"或内置默认，行为与改造前一致。
 
 # 模型 checkpoint 路径（本地路径或 HF repo id）
-model_path: /home/creator/.cache/modelscope/models/zixiaoBios--openvla-7b/snapshots/master
+# 指向工作区统一模型目录 ws/modules 下的软链（→ ModelScope 缓存）
+model_path: /home/creator/ws/modules/openvla-7b
 
 # 输入 RGB 图像路径；留空(null)则生成 224x224 灰图占位，仅用于验证推理链路
 image: null

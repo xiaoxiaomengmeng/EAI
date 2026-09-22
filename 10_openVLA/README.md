@@ -35,7 +35,8 @@ openvla-7b base 不应直接当作 LIBERO 微调 checkpoint 使用
 ├── docs/                         # 结构化主题文档（01-09 主题 + reports/ 报告资产）
 ├── sim/                          # OpenVLA base + MuJoCo 闭环仿真包（Franka / WX250S）
 ├── scripts/
-│   └── demo_predict_action.py    # OpenVLA 单步动作预测 demo
+│   ├── demo_predict_action.py    # OpenVLA 单步动作预测 demo（裸 transformers + trust_remote_code）
+│   └── 01_openvla_verify.py      # 仅依赖 repos/openvla 源码包的单步验证（不依赖 sim）
 ├── repos/
 │   ├── openvla/                  # 官方 OpenVLA 源码（git submodule）
 │   └── LIBERO/                   # LIBERO 源码（git submodule）
@@ -97,19 +98,24 @@ python -m pip install -e . --no-deps
 
 避免自动依赖覆盖当前已验证的 PyTorch / CUDA 环境。
 
-## 5. 最小单步推理
+## 5. 最小单步推理（repos/openvla 源码验证）
+
+本节两个脚本都做同一件事：`图像 + 指令 → 7D action` 的单步推理。区别只在依赖来源：
+
+```text
+demo_predict_action.py   裸 transformers + trust_remote_code，默认路径来自 sim.config
+01_openvla_verify.py     只依赖 repos/openvla 的 prismatic 源码包，不依赖 sim
+```
+
+若目的是「验证 repos/openvla 源码本身可用」，用 `01_openvla_verify.py`。
+
+### 5.1 demo_predict_action.py
 
 用于验证 `openvla-7b` base 模型加载、processor、prompt、GPU 推理和 action 解码。
 
 ```bash
 cd /home/creator/ws/10_openVLA
 source .venv/bin/activate
-python scripts/demo_predict_action.py
-```
-
-显式使用当前推荐后端：
-
-```bash
 python scripts/demo_predict_action.py --attn-implementation sdpa
 ```
 
@@ -121,6 +127,97 @@ python scripts/demo_predict_action.py \
   --instruction "pick up the object" \
   --unnorm-key bridge_orig \
   --attn-implementation sdpa
+```
+
+### 5.2 01_openvla_verify.py（仅用 repos/openvla 源码）
+
+刻意只使用 `repos/openvla` 的 `prismatic` 源码包：把 `repos/openvla` 注入 `sys.path`，
+**无需先 `pip install -e .`** 即可运行；用于确认源码本身能加载 base 和 LIBERO 微调 checkpoint 并出 action。
+
+```bash
+cd /home/creator/ws/10_openVLA
+source .venv/bin/activate
+
+# base 模型（默认，unnorm_key=bridge_orig）
+python scripts/01_openvla_verify.py
+
+# 已下载的 LIBERO 微调 checkpoint（ModelScope superpeach，unnorm_key=libero_spatial）
+python scripts/01_openvla_verify.py --preset libero-spatial
+
+# 真实图片 + 指令
+python scripts/01_openvla_verify.py --preset libero-spatial \
+  --image /path/to/image.jpg --instruction "pick up the red cube"
+```
+
+**输入 / 输出**
+
+```text
+输入：--image        RGB 图（省略则用 224x224 灰色占位图，仅验证链路）
+      --instruction  英文指令，拼进 "In: What action should the robot take to {...}?\nOut:"
+      --preset / --checkpoint  选模型；--unnorm-key  选反归一化 key
+输出：numpy 7D action（已反归一化，物理量纲，无需再处理）
+      [dx, dy, dz, droll, dpitch, dyaw, gripper]
+      前 6 维：末端 EE 位姿增量（相对当前位姿；dxyz 单位米、drpy 单位弧度），由 q01/q99 反归一化
+      第 7 维：夹爪命令（mask=False，保持归一化值，约 0=开 / 1=合），非增量
+      脚本断言 shape==(7,)
+```
+
+> 注意：OpenVLA 是**末端 EE（笛卡尔空间）位姿增量控制**，不是关节角控制。
+> 要驱动具体机械臂，必须把前 6 维 EE 增量经 **IK 解算**转成关节命令（第 7 维夹爪单独控制）。
+> 本项目 `sim` 包的 `--motion-mode ik`（ee_site + MuJoCo Jacobian 阻尼最小二乘 IK）即负责这一步。
+
+**调用链路**
+
+```text
+sys.path.insert(repos/openvla)
+  → import prismatic.extern.hf.{configuration,modeling,processing}_prismatic
+  → 注册到 HF Auto 类（AutoConfig / AutoImageProcessor / AutoProcessor / AutoModelForVision2Seq）
+  → AutoProcessor.from_pretrained(本地路径, trust_remote_code=False, local_files_only=True)
+  → AutoModelForVision2Seq.from_pretrained(...) 得到 OpenVLAForActionPrediction，放到 cuda:0
+  → 读取本地 dataset_statistics.json 覆盖 model.norm_stats（微调 checkpoint 才有）
+  → processor(prompt, image) → input_ids / attention_mask / pixel_values
+  → model.predict_action(unnorm_key=...) → 反归一化得到 7D action
+```
+
+**关键参数**
+
+```text
+--preset base            → zixiaoBios--openvla-7b，       unnorm_key=bridge_orig
+--preset libero-spatial  → superpeach--...-libero-spatial，unnorm_key=libero_spatial
+--unnorm-key             必须存在于该 checkpoint 的 norm_stats，否则脚本报错并打印可用 key
+--attn-implementation    默认 sdpa；eager 在 OpenVLA 生成时会触发 causal-mask 长度不匹配
+trust_remote_code=False + local_files_only=True  已在脚本内固定，见下方坑 1
+```
+
+**实测参考（RTX 5090）**
+
+```text
+base           加载 ~2.1s，推理 ~0.47s，占位图 action 幅度极小、gripper=0.0
+libero-spatial 加载 ~2.5s，推理 ~0.47s，action 幅度明显、gripper≈1.0（符合微调分布）
+```
+
+### 5.3 坑总结
+
+```text
+坑 1（本节最关键）：ModelScope 的 OpenVLA 微调 checkpoint 目录内没有 .py 文件，
+  且 config.json / preprocessor_config.json 的 auto_map 指向跨仓库远程代码
+  "openvla/openvla-7b--modeling_prismatic.OpenVLAForActionPrediction"。
+  若用 trust_remote_code=True 加载，会去 huggingface.co 拉该远程代码，国内网络下卡死在
+  "加载 processor"。
+  解法：先用 prismatic 源码把 OpenVLA 注册到 HF Auto 类，再以
+  trust_remote_code=False + local_files_only=True 加载 → 走本地源码、完全不联网。
+  （base 模型 zixiaoBios 目录自带 .py、auto_map 为本地相对引用，所以不受影响。）
+
+坑 2：attn-implementation 用 eager 会触发 causal-mask 长度不匹配，统一用 sdpa。
+
+坑 3：import prismatic 会顺带加载 tensorflow（约 6s + 一堆 TF/CUDA 注册日志），
+  属正常现象，不影响验证，可用 grep 过滤噪音。
+
+坑 4：unnorm_key 必须与 checkpoint 匹配（base=bridge_orig，libero 微调=libero_spatial），
+  用错 key 会报错或得到错误分布的 action。
+
+坑 5：占位灰图只验证链路能出合法 action，不代表任务语义正确；
+  成功率评测须走第 8 节 LIBERO smoke test。
 ```
 
 ## 6. 自定义 MuJoCo dry-run
