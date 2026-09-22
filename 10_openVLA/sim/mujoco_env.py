@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import re
+import string
 import tempfile
 import time
 from pathlib import Path
@@ -18,6 +20,9 @@ IK_DT = 0.1
 IK_MAX_ITERS = 40
 IK_POS_THRESHOLD = 1e-3
 IK_SOLVER = "daqp"
+
+# 桌面场景模板文件：编译模型时读取，把 <asset>/<worldbody> 注入机器人 XML
+SCENE_TEMPLATE_PATH = Path(__file__).resolve().parent / "scenes" / "tabletop_scene.xml"
 
 
 class MuJoCoEnv:
@@ -317,38 +322,41 @@ class MuJoCoEnv:
 
     def _make_scene_xml(self) -> str:
         robot_xml = self._make_robot_xml_with_ee_site()
-        robot_xml = self._inject_scene_assets(robot_xml)
-        return self._inject_scene_worldbody(robot_xml)
+        scene_template = self._load_scene_template()
+        robot_xml = self._inject_scene_assets(robot_xml, scene_template)
+        return self._inject_scene_worldbody(robot_xml, scene_template)
 
-    def _inject_scene_assets(self, robot_xml: str) -> str:
-        scene_asset_xml = """
-    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.3 0.3 0.3" rgb2="0.4 0.4 0.4"/>
-    <material name="grid" texture="grid" texrepeat="1 1" reflectance="0.2"/>"""
+    def _load_scene_template(self) -> str:
+        """读取桌面场景模板文件，并用 SceneConfig 的值替换 ${...} 占位符。"""
+        if not SCENE_TEMPLATE_PATH.is_file():
+            raise FileNotFoundError(f"Scene template not found: {SCENE_TEMPLATE_PATH}")
+        template_text = SCENE_TEMPLATE_PATH.read_text(encoding="utf-8")
+        scene = self.scene_config
+        return string.Template(template_text).substitute(
+            table_x=scene.table_x,
+            table_y=scene.table_y,
+            cube_x=scene.cube_x,
+            cube_y=scene.cube_y,
+            cube_z=scene.cube_z,
+            cube_size=scene.cube_size,
+        )
+
+    @staticmethod
+    def _extract_section(xml_text: str, tag: str) -> str:
+        """取出模板中 <tag>...</tag> 的内部内容（不含标签本身）。"""
+        match = re.search(rf"<{tag}[^>]*>(.*?)</{tag}>", xml_text, flags=re.DOTALL)
+        if match is None:
+            raise ValueError(f"Scene template missing <{tag}> section: {SCENE_TEMPLATE_PATH}")
+        return match.group(1)
+
+    def _inject_scene_assets(self, robot_xml: str, scene_template: str) -> str:
+        scene_asset_xml = self._extract_section(scene_template, "asset")
         if "<asset>" not in robot_xml:
             raise ValueError("Robot XML does not contain an <asset> section for scene assets.")
         return robot_xml.replace("<asset>", "<asset>" + scene_asset_xml, 1)
 
-    def _inject_scene_worldbody(self, robot_xml: str) -> str:
-        scene = self.scene_config
-        scene_worldbody_xml = f"""
-    <camera name="agentview" pos="0.75 -0.65 0.55" xyaxes="0.65 0.75 0 -0.35 0.30 0.89"/>
-    <camera name="overview" pos="0.75 0.75 0.70" xyaxes="-0.71 0.71 0 -0.40 -0.40 0.82"/>
-    <camera name="wristview" pos="0.55 -0.50 0.38" xyaxes="0.65 0.75 0 -0.35 0.30 0.89"/>
-    <light name="ambient_light" pos="0 0 3" dir="0 0 -1" diffuse="0.6 0.6 0.6" specular="0.2 0.2 0.2" ambient="0.4 0.4 0.4"/>
-    <light name="point_light_1" pos="0.5 0.5 1.0" dir="-0.5 -0.5 -1" diffuse="0.8 0.8 0.8" specular="0.5 0.5 0.5"/>
-    <light name="point_light_2" pos="-0.5 0.5 1.0" dir="0.5 -0.5 -1" diffuse="0.8 0.8 0.8" specular="0.5 0.5 0.5"/>
-    <geom name="floor" type="plane" size="1.5 1.5 0.02" rgba="0.7 0.7 0.7 1" material="grid"/>
-    <body name="table" pos="{scene.table_x} {scene.table_y} 0">
-      <geom name="table_top" type="box" size="0.35 0.35 0.02" rgba="0.5 0.4 0.3 1"/>
-      <geom name="table_leg_1" type="box" size="0.02 0.02 0.48" pos="-0.33 0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
-      <geom name="table_leg_2" type="box" size="0.02 0.02 0.48" pos="-0.33 -0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
-      <geom name="table_leg_3" type="box" size="0.02 0.02 0.48" pos="0.33 0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
-      <geom name="table_leg_4" type="box" size="0.02 0.02 0.48" pos="0.33 -0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
-    </body>
-    <body name="red_cube" pos="{scene.cube_x} {scene.cube_y} {scene.cube_z}">
-      <freejoint name="cube_freejoint"/>
-      <geom name="cube_geom" type="box" size="{scene.cube_size} {scene.cube_size} {scene.cube_size}" rgba="1.0 0.0 0.0 1.0" mass="0.02" friction="1.5 0.005 0.0001"/>
-    </body>"""
+    def _inject_scene_worldbody(self, robot_xml: str, scene_template: str) -> str:
+        scene_worldbody_xml = self._extract_section(scene_template, "worldbody")
         if "<worldbody>" not in robot_xml:
             raise ValueError("Robot XML does not contain a <worldbody> section for scene bodies.")
         return robot_xml.replace("<worldbody>", "<worldbody>" + scene_worldbody_xml, 1)

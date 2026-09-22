@@ -12,6 +12,13 @@ LIBERO           官方标准 MuJoCo / robosuite benchmark，适合成功率评�
 Bridge/WidowX    官方真实机器人评测入口，不是离线仿真
 ```
 
+
+https://github.com/openvla/openvla
+
+https://github.com/Lifelong-Robot-Learning/LIBERO
+
+
+
 核心区别：
 
 ```text

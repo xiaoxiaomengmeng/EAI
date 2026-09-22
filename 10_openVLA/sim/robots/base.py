@@ -16,7 +16,6 @@ class RobotConfig:
     gripper_body_name: str
     finger_link_marker: str
     ee_site_pos: tuple[float, float, float]
-    scene_xml_template: str
     arm_joint_names: Optional[list[str]] = None
     gripper_open: float = 0.037
     gripper_closed: float = 0.015

@@ -1,0 +1,44 @@
+<!--
+  OpenVLA 桌面抓取场景模板 (tabletop scene)
+
+  用途:
+    由 sim/mujoco_env.py 在编译 MuJoCo 模型时读取。文件中的占位符会在运行时用
+    sim/config.py 里 SceneConfig 的字段替换 (string.Template 语法), 然后把 asset
+    与 worldbody 两段分别注入到机器人 XML (panda.xml / wx250s.xml) 对应区块中。
+
+  占位符 (全部来自 SceneConfig):
+    table_x, table_y          桌子在世界坐标下的 x / y 位置
+    cube_x, cube_y, cube_z    红方块初始位置 (reset() 还会用 freejoint qpos 再设一次)
+    cube_size                 红方块半边长
+
+  说明:
+    机器人本体、执行器、keyframe、option/visual 由机器人 XML 提供, 本文件只负责场景,
+    与具体机器人无关 (franka / wx250s 共用同一份场景)。
+-->
+<mujoco model="openvla_tabletop_scene">
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1="0.3 0.3 0.3" rgb2="0.4 0.4 0.4"/>
+    <material name="grid" texture="grid" texrepeat="1 1" reflectance="0.2"/>
+  </asset>
+
+  <worldbody>
+    <camera name="agentview" pos="0.75 -0.65 0.55" xyaxes="0.65 0.75 0 -0.35 0.30 0.89"/>
+    <camera name="overview" pos="0.75 0.75 0.70" xyaxes="-0.71 0.71 0 -0.40 -0.40 0.82"/>
+    <camera name="wristview" pos="0.55 -0.50 0.38" xyaxes="0.65 0.75 0 -0.35 0.30 0.89"/>
+    <light name="ambient_light" pos="0 0 3" dir="0 0 -1" diffuse="0.6 0.6 0.6" specular="0.2 0.2 0.2" ambient="0.4 0.4 0.4"/>
+    <light name="point_light_1" pos="0.5 0.5 1.0" dir="-0.5 -0.5 -1" diffuse="0.8 0.8 0.8" specular="0.5 0.5 0.5"/>
+    <light name="point_light_2" pos="-0.5 0.5 1.0" dir="0.5 -0.5 -1" diffuse="0.8 0.8 0.8" specular="0.5 0.5 0.5"/>
+    <geom name="floor" type="plane" size="1.5 1.5 0.02" rgba="0.7 0.7 0.7 1" material="grid"/>
+    <body name="table" pos="${table_x} ${table_y} 0">
+      <geom name="table_top" type="box" size="0.35 0.35 0.02" rgba="0.5 0.4 0.3 1"/>
+      <geom name="table_leg_1" type="box" size="0.02 0.02 0.48" pos="-0.33 0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
+      <geom name="table_leg_2" type="box" size="0.02 0.02 0.48" pos="-0.33 -0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
+      <geom name="table_leg_3" type="box" size="0.02 0.02 0.48" pos="0.33 0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
+      <geom name="table_leg_4" type="box" size="0.02 0.02 0.48" pos="0.33 -0.33 -0.5" rgba="0.4 0.3 0.2 1"/>
+    </body>
+    <body name="red_cube" pos="${cube_x} ${cube_y} ${cube_z}">
+      <freejoint name="cube_freejoint"/>
+      <geom name="cube_geom" type="box" size="${cube_size} ${cube_size} ${cube_size}" rgba="1.0 0.0 0.0 1.0" mass="0.02" friction="1.5 0.005 0.0001"/>
+    </body>
+  </worldbody>
+</mujoco>
