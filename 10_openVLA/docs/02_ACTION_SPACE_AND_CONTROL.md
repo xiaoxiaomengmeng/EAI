@@ -22,7 +22,7 @@ gripper                  夹爪开合命令（约 0=开 / 1=合，非增量，�
 
 ```text
 前 6 维是“末端往哪个方向挪多少”，与具体关节数、臂长无关；
-同一个 EE 增量，在 Franka（6/7 自由度）与 WX250S（6 自由度）上的关节解完全不同。
+同一个 EE 增量，在不同自由度的机械臂上的关节解完全不同。
 因此驱动任何机械臂都必须用该机械臂自己的运动学模型做 IK 解算（见第 6 节）；
 第 7 维夹爪旁路单独控制，不进 IK。
 ```
@@ -143,9 +143,9 @@ direct  action[:6] 直接映射为关节增量，用于对照
 运行示例：
 
 ```bash
-python -m sim --robot wx250s --motion-mode ik
-python -m sim --robot wx250s --motion-mode demo
-python -m sim --robot wx250s --motion-mode direct
+python -m sim --motion-mode ik
+python -m sim --motion-mode demo
+python -m sim --motion-mode direct
 ```
 
 ## 6. IK 模式
@@ -191,22 +191,7 @@ Franka 配置由 `sim/robots/franka.py` 管理。
 
 在默认 IK 模式下，action 前三维被转换为末端位置目标，再由 MuJoCo Jacobian 求解关节增量。
 
-## 8. WX250S 控制链路
-
-WX250S 配置由 `sim/robots/wx250s.py` 管理。
-
-核心信息：
-
-```text
-6 个 arm position actuator
-1 个 gripper actuator
-使用 gripper_link 附近插入 ee_site
-BridgeData / WidowX 风格 action 与该平台语义更接近
-```
-
-这也是 `bridge_orig` 更自然适配 WX250S / WidowX 风格验证的原因。
-
-## 9. 抓取逻辑边界
+## 8. 抓取逻辑边界
 
 当前 `sim` 的目标是工程闭环验证，不等于完整抓取策略。
 

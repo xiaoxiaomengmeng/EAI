@@ -19,7 +19,7 @@ def parse_args():
         description="Run OpenVLA base + MuJoCo closed-loop simulation."
     )
     parser.add_argument("--model-path", default=DEFAULT_MODEL_PATH, help="Local OpenVLA checkpoint path or HF repo id.")
-    parser.add_argument("--robot", default=DEFAULT_ROBOT, choices=list(ROBOT_CONFIGS.keys()), help="Robot type (franka or wx250s).")
+    parser.add_argument("--robot", default=DEFAULT_ROBOT, choices=list(ROBOT_CONFIGS.keys()), help="Robot type (Franka Panda only).")
     parser.add_argument("--output-dir", default=None, help="Directory for rollout video, frames, and logs.")
     parser.add_argument("--instruction", default="pick up the red cube", help="Language command.")
     parser.add_argument("--unnorm-key", default="bridge_orig", help="OpenVLA action un-normalization key.")

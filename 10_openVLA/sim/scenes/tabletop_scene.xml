@@ -4,7 +4,7 @@
   用途:
     由 sim/mujoco_env.py 在编译 MuJoCo 模型时读取。文件中的占位符会在运行时用
     sim/config.py 里 SceneConfig 的字段替换 (string.Template 语法), 然后把 asset
-    与 worldbody 两段分别注入到机器人 XML (panda.xml / wx250s.xml) 对应区块中。
+    与 worldbody 两段分别注入到机器人 XML (panda.xml) 对应区块中。
 
   占位符 (全部来自 SceneConfig):
     table_x, table_y          桌子在世界坐标下的 x / y 位置
@@ -13,7 +13,7 @@
 
   说明:
     机器人本体、执行器、keyframe、option/visual 由机器人 XML 提供, 本文件只负责场景,
-    与具体机器人无关 (franka / wx250s 共用同一份场景)。
+    与具体机器人无关 (Franka Panda 使用该场景)。
 -->
 <mujoco model="openvla_tabletop_scene">
   <asset>

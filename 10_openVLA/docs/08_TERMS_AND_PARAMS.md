@@ -138,7 +138,7 @@ robosuite
 mujoco_menagerie
 ```
 
-MuJoCo 官方/社区机器人模型集合，当前使用 Franka 和 WX250S 模型。
+MuJoCo 官方/社区机器人模型集合，当前使用 Franka Panda 模型。
 
 ```text
 body
@@ -194,13 +194,7 @@ Franka Emika Panda 机械臂，常用于仿真和机器人学习任务。
 WidowX
 ```
 
-BridgeData / OpenVLA 实机评测中常见的真实机器人平台。
-
-```text
-WX250S
-```
-
-Trossen WX250S 机械臂。当前 `sim` 支持该平台，用于接近 WidowX 风格的本地 MuJoCo 验证。
+BridgeData / OpenVLA 实机评测中常见的真实机器人平台（`bridge_orig` 动作统计的数据来源）。
 
 ```text
 robot adapter
@@ -273,7 +267,7 @@ adapter
 `sim`：
 
 ```text
---robot                   franka / wx250s
+--robot                   franka
 --motion-mode             ik / demo / direct
 --policy-steps            OpenVLA policy 查询次数
 --sim-steps-per-policy    每次 policy action 后的 MuJoCo step 数

@@ -93,7 +93,7 @@ OpenVLA 训练和评测里常见的数据集可以按来源分成几类：
 | Open-X Embodiment / OXE mixture | 多机器人、多任务真实数据 | OpenVLA base 预训练 | 包含多个机器人数据集，每个数据集有独立动作统计 |
 | LIBERO | MuJoCo / robosuite 仿真 | 标准仿真评测、LIBERO 微调 checkpoint | 需要 `libero_spatial` 等 LIBERO 专用 `unnorm_key` |
 | DROID | 大规模真实机器人数据 | 微调示例、真实机器人泛化研究 | 常见于 OpenVLA 微调配置示例 |
-| 自定义 MuJoCo 数据 | Franka / WX250S / 其他本地机器人 | 后续自定义场景 LoRA 微调 | 必须明确图像、指令、7D action 和 `norm_stats` |
+| 自定义 MuJoCo 数据 | Franka Panda / 其他本地机器人 | 后续自定义场景 LoRA 微调 | 必须明确图像、指令、7D action 和 `norm_stats` |
 
 注意：数据集名称不仅是“来源标签”，还会影响动作统计。模型推理时选择的 `unnorm_key` 必须和 checkpoint 中保存的 `norm_stats` 对齐。
 
@@ -139,7 +139,7 @@ sample = {
 
 LIBERO 官方评测脚本会根据 `task_suite_name` 设置 `unnorm_key`，例如 `libero_spatial`。因此 LIBERO 标准评测应使用 `openvla-7b-finetuned-libero-*`，不能直接混用 base `openvla-7b`。
 
-#### 示例 3：自定义 Franka / WX250S MuJoCo 微调样本
+#### 示例 3：自定义 Franka MuJoCo 微调样本
 
 如果后续要把当前 `sim` 场景采成微调数据，最小样本可以设计成：
 
@@ -373,7 +373,7 @@ python -m pip install -e . --no-deps
 
 ## 11. 对当前仿真的启发
 
-如果目标是让当前 MuJoCo Franka / WX250S 红方块场景稳定执行，优先级通常是：
+如果目标是让当前 MuJoCo Franka Panda 红方块场景稳定执行，优先级通常是：
 
 ```text
 1. 修正控制适配层，例如 gripper actuator、IK、抓取逻辑

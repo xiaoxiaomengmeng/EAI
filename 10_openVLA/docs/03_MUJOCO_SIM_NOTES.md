@@ -8,7 +8,7 @@
 
 ```text
 LIBERO                         标准 benchmark，底层基于 MuJoCo / robosuite
-sim                    自定义 MuJoCo demo，支持 Franka 和 WX250S
+sim                    自定义 MuJoCo demo，使用 Franka Panda
 ```
 
 二者定位不同：
@@ -40,7 +40,6 @@ sim 用于本地工程验证、控制适配、视频和日志调试
 sim/mujoco_env.py
 sim/runner.py
 sim/robots/franka.py
-sim/robots/wx250s.py
 ```
 
 ## 3. MuJoCo XML 基本概念
@@ -68,15 +67,6 @@ franka_emika_panda/panda.xml
 7 个 arm position actuator
 finger_joint1 / finger_joint2 作为夹爪相关关节
 panda hand 附近插入 ee_site
-```
-
-WX250S：
-
-```text
-trossen_wx250s/wx250s.xml
-waist / shoulder / elbow / forearm_roll / wrist_angle / wrist_rotate
-left_finger / right_finger 作为夹爪相关关节
-gripper_link 附近插入 ee_site
 ```
 
 ## 5. ee_site 与 IK

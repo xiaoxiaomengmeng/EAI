@@ -1,21 +1,18 @@
 # OpenVLA 仿真推理路线规划
 
-本文定义当前工作区从单步推理到 MuJoCo 仿真、LIBERO 评测、Bridge/WidowX 实机评测的学习和实现路线。
+本文定义当前工作区从单步推理到 MuJoCo 仿真、LIBERO 评测的学习和实现路线。
 
-## 1. 三条路线的定位
+## 1. 两条路线的定位
 
 ```text
 sim      自定义 MuJoCo demo，用于工程链路验证
 LIBERO           标准 MuJoCo / robosuite benchmark，用于成功率评测
-Bridge/WidowX    真实机器人评测，不是离线仿真
 ```
 
-不要混淆三者：
+不要混淆二者：
 
 ```text
 sim 跑通不等于 LIBERO 成功率
-LIBERO 评测不等于 WidowX 实机
-Bridge/WidowX 官方脚本需要外部实机服务
 ```
 
 ## 2. 阶段 1：单步推理
@@ -53,7 +50,6 @@ export MUJOCO_GL=egl
 
 python -m sim \
   --dry-run \
-  --robot wx250s \
   --policy-steps 2 \
   --sim-steps-per-policy 2
 ```
@@ -71,18 +67,6 @@ action / target_ctrl / timing 等字段
 目标：加载真实 `openvla-7b` base，完成自定义 MuJoCo 闭环。
 
 命令：
-
-```bash
-python -m sim \
-  --robot wx250s \
-  --motion-mode ik \
-  --policy-steps 20 \
-  --sim-steps-per-policy 30 \
-  --unnorm-key bridge_orig \
-  --attn-implementation sdpa
-```
-
-Franka 对照：
 
 ```bash
 python -m sim \
@@ -172,29 +156,7 @@ python experiments/robot/libero/run_libero_eval.py \
 
 注意：LIBERO 应使用 `openvla-7b-finetuned-libero-*`，不要直接用 base `openvla-7b`。
 
-## 8. 阶段 7：Bridge/WidowX 实机评测
-
-目标：连接真实或兼容 WidowX 控制服务。
-
-入口：
-
-```text
-repos/openvla/experiments/robot/bridge/run_bridgev2_eval.py
-```
-
-需要：
-
-```text
-widowx_envs
-WidowXClient 服务
-相机 topic
-host_ip / port
-真实或兼容机器人控制端
-```
-
-这不是离线仿真，也不是仅靠当前代码目录就能跑通的任务。
-
-## 9. 当前推荐学习顺序
+## 8. 当前推荐学习顺序
 
 ```text
 1. scripts/demo_predict_action.py 单步推理
@@ -204,5 +166,4 @@ host_ip / port
 5. docs/03_MUJOCO_SIM_NOTES.md 理解 MuJoCo 和 IK
 6. LIBERO smoke test
 7. docs/07_TRAINING_AND_FINETUNING.md 理解训练和微调
-8. docs/06_BRIDGE_WIDOWX_NOTES.md 理解实机依赖边界
 ```

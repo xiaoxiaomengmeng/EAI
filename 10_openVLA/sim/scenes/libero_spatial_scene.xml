@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  LIBERO libero_spatial 场景的自建 MuJoCo 复刻 (手搭折中版)。
+
+  目标任务:
+    pick_up_the_black_bowl_from_table_center_and_place_it_on_the_plate
+    (:goal (And (On akita_black_bowl_1 plate_1)))
+
+  资产来源 (拷入 sim/assets/, 见 M0 调研):
+    - Panda 机械臂  : robosuite models/assets/robots/panda/robot.xml
+                      (原用 motor 力矩执行器, 本文件改为 position 位置执行器 + home keyframe,
+                       以对接项目自建 sim 的 mink IK 位置控制链)
+    - Panda 夹爪    : robosuite grippers/panda_gripper.xml (原生 position 执行器, 直接复用)
+    - 桌面/地面/墙  : robosuite arenas/table_arena.xml (桌面 top 标定实测在 z=0.9)
+    - 碗 / 盘        : LIBERO stable_scanned_objects/{akita_black_bowl,plate}
+                      (原始 XML 无 freejoint, 本文件补 freejoint 使其可抓可放)
+
+  M1 简化 (后续里程碑再精修):
+    - 机械臂 visual 直接复用 STL 碰撞网格 (省去 robosuite 逐 link 的多材质 OBJ), 外形一致、单一白色材质;
+    - 场景只放两个 obj_of_interest (碗 + 盘), 暂不放 cabinet/stove/cookies/ramekin 杂物;
+    - base/相机/物体/home 位姿已由 M4 标定脚本 (scripts/calibrate_libero_scene.py) 从 LIBERO
+      官方 env 沉降后提取, 固化于 sim/assets/calibration/libero_spatial_bowl_plate.json, 本文件按之对齐。
+
+  坐标约定 (LIBERO env 世界系, 与标定 JSON 一致):
+    - 桌面 top 在 z=0.9; 机器人 base 在 [-0.66, 0, 0.912] (quat 单位);
+    - agentview 用标定实测世界机位 (运行期含 base/桌面偏移, 非 bddl 源码常量);
+    - 碗/盘 freejoint qpos 即世界绝对位姿 (freejoint 平移覆盖 body pos)。
+-->
+<mujoco model="libero_spatial_scene">
+  <compiler angle="radian" meshdir="../assets" texturedir="../assets" autolimits="true"/>
+
+  <option timestep="0.002" integrator="implicitfast" cone="elliptic" impratio="10"/>
+
+  <visual>
+    <headlight ambient="0.4 0.4 0.4" diffuse="0.6 0.6 0.6" specular="0.2 0.2 0.2"/>
+    <quality shadowsize="4096"/>
+  </visual>
+
+  <default>
+    <default class="panda_arm">
+      <joint damping="0.1" armature="0.1"/>
+      <geom material="panda_white"/>
+    </default>
+  </default>
+
+  <asset>
+    <!-- ==== 机械臂 (STL, visual+collision 复用) ==== -->
+    <mesh name="link0" file="panda/meshes/link0.stl"/>
+    <mesh name="link1" file="panda/meshes/link1.stl"/>
+    <mesh name="link2" file="panda/meshes/link2.stl"/>
+    <mesh name="link3" file="panda/meshes/link3.stl"/>
+    <mesh name="link4" file="panda/meshes/link4.stl"/>
+    <mesh name="link5" file="panda/meshes/link5.stl"/>
+    <mesh name="link6" file="panda/meshes/link6.stl"/>
+    <mesh name="link7" file="panda/meshes/link7.stl"/>
+    <material name="panda_white" specular="0.5" shininess="0.45" rgba="0.9 0.92 0.93 1"/>
+
+    <!-- ==== 夹爪 ==== -->
+    <mesh name="gripper_hand" file="panda_gripper/meshes/hand.stl"/>
+    <mesh name="gripper_finger" file="panda_gripper/meshes/finger.stl"/>
+    <material name="gripper_gray" specular="0.5" shininess="0.45" rgba="0.5 0.5 0.5 1"/>
+
+    <!-- ==== 桌面/地面/墙 纹理 (来自 table_arena.xml) ==== -->
+    <texture name="skybox" type="skybox" builtin="gradient" rgb1=".9 .9 1." rgb2=".2 .3 .4" width="256" height="256"/>
+    <texture name="texplane" type="2d" file="textures/light-gray-floor-tile.png"/>
+    <material name="floorplane" texture="texplane" texrepeat="2 2" texuniform="true" reflectance="0.01" shininess="0.0" specular="0.0"/>
+    <texture name="tex-ceramic" type="cube" file="textures/ceramic.png"/>
+    <material name="table_ceramic" texture="tex-ceramic" texrepeat="1 1" reflectance="0.0" shininess="0.0" specular="0.2"/>
+    <texture name="tex-steel-brushed" type="cube" file="textures/steel-brushed.png"/>
+    <material name="table_legs_metal" texture="tex-steel-brushed" texrepeat="1 1" reflectance="0.8" shininess="0.8"/>
+    <texture name="tex-plaster" type="2d" file="textures/light-gray-plaster.png"/>
+    <material name="walls_mat" texture="tex-plaster" texrepeat="3 3" texuniform="true" reflectance="0.0" shininess="0.1" specular="0.1"/>
+
+    <!-- ==== 碗 (scale 0.7) ==== -->
+    <texture name="tex-bowl" type="2d" file="objects/akita_black_bowl/texture.png"/>
+    <material name="mat-bowl" texture="tex-bowl" texrepeat="1 1" texuniform="false" reflectance="0.5"/>
+    <mesh name="bowl_vis" file="objects/akita_black_bowl/visual/akita_black_bowl_vis.msh" scale="0.7 0.7 0.7"/>
+
+    <!-- ==== 盘 (scale 0.5) ==== -->
+    <texture name="tex-plate" type="2d" file="objects/plate/texture.png"/>
+    <material name="mat-plate" texture="tex-plate" texrepeat="1 1" texuniform="false" reflectance="0.5"/>
+    <mesh name="plate_vis" file="objects/plate/visual/model_vis.msh" scale="0.5 0.5 0.5"/>
+  </asset>
+
+  <worldbody>
+    <!-- ===== arena: 地面 / 墙 / 桌子 (桌面 top z=0.9, 对齐 LIBERO 标定 table_top_z_world) ===== -->
+    <geom name="floor" type="plane" pos="0 0 0" size="3 3 .125" condim="3" group="1" material="floorplane"/>
+    <geom name="wall_rear_visual" type="box" pos="-2 0 1.5" quat="0.5 0.5 0.5 0.5" size="1.5 1.5 0.01" contype="0" conaffinity="0" group="1" material="walls_mat"/>
+    <geom name="wall_front_visual" type="box" pos="3 0 1.5" quat="0.5 0.5 -0.5 -0.5" size="3 1.5 0.01" contype="0" conaffinity="0" group="1" material="walls_mat"/>
+
+    <body name="table" pos="0 0 0.45">
+      <geom name="table_collision" type="box" pos="0 0 0" size="0.4 0.4 0.45" group="0" friction="1 0.005 0.0001"/>
+      <geom name="table_visual" type="box" pos="0 0 0" size="0.4 0.4 0.45" contype="0" conaffinity="0" group="1" material="table_ceramic"/>
+      <site name="table_top" pos="0 0 0.45" size="0.001" rgba="0 0 0 0"/>
+    </body>
+
+    <!-- ===== LIBERO agentview 相机 (标定实测世界机位, 运行期含 base/桌面偏移, 非 bddl 源码常量) ===== -->
+    <camera name="agentview" mode="fixed" pos="0.6586131746834771 0.0 1.6103500240372424"
+            quat="0.6380177212293417 0.30484971880648903 0.30484983801576876 0.6380177212293417"/>
+
+    <!-- ===== Panda 机械臂 (base 对齐 LIBERO 标定 robot0_base=[-0.66,0,0.912], quat 单位) ===== -->
+    <body name="base" pos="-0.66 0.0 0.912">
+      <body name="link0" childclass="panda_arm">
+        <inertial pos="0 0 0.05" mass="4" diaginertia="0.4 0.4 0.4"/>
+        <geom name="link0_geom" type="mesh" mesh="link0" group="1"/>
+        <body name="link1" pos="0 0 0.333" gravcomp="1">
+          <inertial pos="0 0 -0.07" mass="3" diaginertia="0.3 0.3 0.3"/>
+          <joint name="joint1" axis="0 0 1" range="-2.8973 2.8973"/>
+          <geom name="link1_geom" type="mesh" mesh="link1" group="1"/>
+          <body name="link2" pos="0 0 0" quat="0.707107 -0.707107 0 0" gravcomp="1">
+            <inertial pos="0 -0.1 0" mass="3" diaginertia="0.3 0.3 0.3"/>
+            <joint name="joint2" axis="0 0 1" range="-1.7628 1.7628"/>
+            <geom name="link2_geom" type="mesh" mesh="link2" group="1"/>
+            <body name="link3" pos="0 -0.316 0" quat="0.707107 0.707107 0 0" gravcomp="1">
+              <inertial pos="0.04 0 -0.05" mass="2" diaginertia="0.2 0.2 0.2"/>
+              <joint name="joint3" axis="0 0 1" range="-2.8973 2.8973"/>
+              <geom name="link3_geom" type="mesh" mesh="link3" group="1"/>
+              <body name="link4" pos="0.0825 0 0" quat="0.707107 0.707107 0 0" gravcomp="1">
+                <inertial pos="-0.04 0.05 0" mass="2" diaginertia="0.2 0.2 0.2"/>
+                <joint name="joint4" axis="0 0 1" range="-3.0718 -0.0698"/>
+                <geom name="link4_geom" type="mesh" mesh="link4" group="1"/>
+                <body name="link5" pos="-0.0825 0.384 0" quat="0.707107 -0.707107 0 0" gravcomp="1">
+                  <inertial pos="0 0 -0.15" mass="2" diaginertia="0.2 0.2 0.2"/>
+                  <joint name="joint5" axis="0 0 1" range="-2.8973 2.8973"/>
+                  <geom name="link5_geom" type="mesh" mesh="link5" group="1"/>
+                  <body name="link6" pos="0 0 0" quat="0.707107 0.707107 0 0" gravcomp="1">
+                    <inertial pos="0.06 0 0" mass="1.5" diaginertia="0.1 0.1 0.1"/>
+                    <joint name="joint6" axis="0 0 1" range="-0.0175 3.7525"/>
+                    <geom name="link6_geom" type="mesh" mesh="link6" group="1"/>
+                    <body name="link7" pos="0.088 0 0" quat="0.707107 0.707107 0 0" gravcomp="1">
+                      <inertial pos="0 0 0.08" mass="0.5" diaginertia="0.05 0.05 0.05"/>
+                      <joint name="joint7" axis="0 0 1" range="-2.8973 2.8973"/>
+                      <geom name="link7_geom" type="mesh" mesh="link7" group="1"/>
+                      <!-- 夹爪挂载点 (robosuite right_hand) -->
+                      <body name="right_hand" pos="0 0 0.1065" quat="0.924 0 0 -0.383" gravcomp="1">
+                        <inertial pos="0 0 0" mass="0.5" diaginertia="0.05 0.05 0.05"/>
+                        <camera name="eye_in_hand" mode="fixed" pos="0.05 0 0" quat="0 0.707108 0.707108 0" fovy="75"/>
+                        <!-- ==== Panda 夹爪 (panda_gripper.xml) ==== -->
+                        <body name="right_gripper" pos="0 0 0" quat="0.707107 0 0 -0.707107" gravcomp="1">
+                          <inertial pos="0 0 0.04" quat="0.707107 0.707107 0 0" mass="0.3" diaginertia="0.09 0.07 0.05"/>
+                          <geom name="hand_collision" type="mesh" mesh="gripper_hand" group="1" material="gripper_gray"/>
+                          <body name="eef" pos="0 0 0.097">
+                            <site name="grip_site" pos="0 0 0" size="0.01" rgba="1 0 0 0.5" type="sphere" group="1"/>
+                          </body>
+                          <body name="leftfinger" pos="0 0 0.0524" quat="0.707107 0 0 0.707107" gravcomp="1">
+                            <inertial pos="0 0 0.05" mass="0.1" diaginertia="0.01 0.01 0.005"/>
+                            <joint name="finger_joint1" axis="0 1 0" type="slide" range="0.0 0.04" damping="100" armature="1.0" frictionloss="1.0"/>
+                            <geom name="finger1_collision" type="mesh" mesh="gripper_finger" group="1" material="gripper_gray" solref="0.02 1" friction="1 0.005 0.0001" condim="4"/>
+                          </body>
+                          <body name="rightfinger" pos="0 0 0.0524" quat="0.707107 0 0 0.707107" gravcomp="1">
+                            <inertial pos="0 0 0.05" mass="0.1" diaginertia="0.01 0.01 0.005"/>
+                            <joint name="finger_joint2" axis="0 1 0" type="slide" range="-0.04 0.0" damping="100" armature="1.0" frictionloss="1.0"/>
+                            <geom name="finger2_collision" type="mesh" mesh="gripper_finger" quat="0 0 0 1" group="1" material="gripper_gray" solref="0.02 1" friction="1 0.005 0.0001" condim="4"/>
+                          </body>
+                        </body>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <!-- ===== 物体: 碗 (table_center) 与 盘 (plate_region); 世界位姿由 home keyframe 的 freejoint qpos 决定 ===== -->
+    <body name="akita_black_bowl_1" pos="0 0 0">
+      <freejoint name="bowl_freejoint"/>
+      <geom name="bowl_geom" type="mesh" mesh="bowl_vis" material="mat-bowl"
+            density="100" friction="0.95 0.3 0.1" solimp="0.998 0.998 0.001" solref="0.001 1" condim="4"/>
+    </body>
+    <body name="plate_1" pos="0 0 0">
+      <freejoint name="plate_freejoint"/>
+      <geom name="plate_geom" type="mesh" mesh="plate_vis" material="mat-plate"
+            density="100" friction="0.95 0.3 0.1" solimp="0.998 0.998 0.001" solref="0.001 1" condim="4"/>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- 7 关节位置执行器 (替换 robosuite 原 motor 力矩执行器), 对接 mink IK 位置控制。
+         kv 为微分增益 (近似临界阻尼 kv≈2*sqrt(kp*I_joint)), 抑制欠阻尼超调:
+         robosuite OSC 是 damping_ratio=1 的临界阻尼力矩律, 无 kv 时位置执行器超调会被
+         OSC "每步从当前位姿重算 goal" 的语义累积放大 (M3 实测 B 段超调 65%)。 -->
+    <position name="actuator1" joint="joint1" kp="4500" kv="160" ctrlrange="-2.8973 2.8973" forcerange="-87 87"/>
+    <position name="actuator2" joint="joint2" kp="4500" kv="190" ctrlrange="-1.7628 1.7628" forcerange="-87 87"/>
+    <position name="actuator3" joint="joint3" kp="3500" kv="120" ctrlrange="-2.8973 2.8973" forcerange="-87 87"/>
+    <position name="actuator4" joint="joint4" kp="3500" kv="105" ctrlrange="-3.0718 -0.0698" forcerange="-87 87"/>
+    <position name="actuator5" joint="joint5" kp="2000" kv="65" ctrlrange="-2.8973 2.8973" forcerange="-12 12"/>
+    <position name="actuator6" joint="joint6" kp="2000" kv="40" ctrlrange="-0.0175 3.7525" forcerange="-12 12"/>
+    <position name="actuator7" joint="joint7" kp="2000" kv="30" ctrlrange="-2.8973 2.8973" forcerange="-12 12"/>
+    <!-- 夹爪双指位置执行器 (来自 panda_gripper.xml) -->
+    <position name="gripper_finger_joint1" joint="finger_joint1" kp="1000" ctrlrange="0.0 0.04" forcerange="-20 20"/>
+    <position name="gripper_finger_joint2" joint="finger_joint2" kp="1000" ctrlrange="-0.04 0.0" forcerange="-20 20"/>
+  </actuator>
+
+  <keyframe>
+    <!-- home: 全部来自 LIBERO 官方 env 沉降后标定 (sim/assets/calibration/libero_spatial_bowl_plate.json)。
+         顺序: 臂 joint1..7 (7) + 夹爪 finger_joint1/2 (2) + 碗 freejoint (7) + 盘 freejoint (7) = 23 (nq)。
+         臂/夹爪 = arm_qpos_after_settle / gripper_qpos_after_settle;
+         碗/盘 freejoint qpos = [xpos, quat(wxyz)] (世界系, freejoint 平移为绝对坐标, 覆盖 body pos)。 -->
+    <key name="home"
+         qpos="0.0031141317907919883 -0.18244362978307468 -0.011566509502066133 -2.4342008891957616 -0.003905737096631708 2.196058953685738 0.7798620990550589 0.03884698642951498 -0.038850264631553305  -0.07499158181372274 0.014961151087266086 0.8984070750980622 0.707106783005648 -1.3874755318181625e-05 1.6673002339121535e-06 0.7071067792293566  0.07160358130313625 0.20039036543185723 0.9025063385293991 0.7071068099946488 -1.3218930755132958e-05 5.905204027426959e-06 0.7071067522302282"
+         ctrl="0.0031141317907919883 -0.18244362978307468 -0.011566509502066133 -2.4342008891957616 -0.003905737096631708 2.196058953685738 0.7798620990550589 0.03884698642951498 -0.038850264631553305"/>
+  </keyframe>
+</mujoco>

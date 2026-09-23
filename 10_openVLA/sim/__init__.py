@@ -1,1 +1,1 @@
-# OpenVLA base + MuJoCo 闭环仿真包，支持 Franka / WX250S 双机器人。
+# OpenVLA base + MuJoCo 闭环仿真包，使用 Franka Panda（对齐 LIBERO）。
