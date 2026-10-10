@@ -49,3 +49,6 @@
 [submodule "docs/every-embodied"]
 	path = docs/every-embodied
 	url = https://github.com/datawhalechina/every-embodied.git
+[submodule "102-kingkongrobotics/jumper"]
+	path = 102-kingkongrobotics/jumper
+	url = https://github.com/KingKongRobotics/jumper.git
