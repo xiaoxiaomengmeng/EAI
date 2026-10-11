@@ -1,0 +1,86 @@
+# ws 目录重组前基线（2026-10-11）：各环境 editable 包 import 状态 + git 状态
+# 生成：<env>/bin/python scripts/check_venv_editable.py
+
+== /home/creator/ws/100-microduck/microduck_rl/.venv
+python 3.12.13, editable=0
+  (no editable packages)
+== /home/creator/ws/100-microduck/.venv
+python 3.12.13, editable=1
+  mjlab-microduck <- /home/creator/ws/100-microduck/microduck_rl [mjlab_microduck:ok]
+== /home/creator/ws/102-kingkongrobotics/jumper/.venv
+python 3.12.13, editable=1
+  mjrl-lab <- /home/creator/ws/102-kingkongrobotics/jumper [controller:ok, mjlab:ok, mjrl:ok, rsl_rl:ok, scenes:ok, tasks:ok]
+== /home/creator/ws/10_openVLA/.venv
+python 3.10.12, editable=2
+  libero <- /home/creator/ws/10_openVLA/repos/LIBERO [libero:ok]
+  openvla <- /home/creator/ws/openVLA/openvla [experiments:ok, prismatic:FAIL(ModuleNotFoundError), scripts:ok, vla-scripts:ok]
+== /home/creator/ws/11_pi_serial_models/.venv312
+python 3.12.13, editable=1
+  lerobot <- /home/creator/ws/11_pi_serial_models/repos/lerobot-main [lerobot:ok]
+== /home/creator/ws/12_cosmos/3rd/cosmos-framework/.venv
+python 3.13.15, editable=1
+  cosmos-framework <- /home/creator/ws/12_cosmos/3rd/cosmos-framework [cosmos_framework:ok]
+== /home/creator/ws/13_lingbot/lingbot-video/.venv
+python 3.10.12, editable=1
+  lingbot-video <- /home/creator/ws/lingbot-video [lingbot_video:FAIL(ModuleNotFoundError)]
+== /home/creator/ws/13_lingbot/lingbot-world-v2/.venv
+python 3.10.12, editable=0
+  (no editable packages)
+== /home/creator/ws/200_human_dexterous_teleop/frankmocap_demo/.venv
+python 3.10.12, editable=1
+  lingbot-video <- /home/creator/ws/lingbot-video [lingbot_video:FAIL(ModuleNotFoundError)]
+== /home/creator/ws/200_human_dexterous_teleop/hand_gesture_recognition/.venv
+python 3.10.12, editable=0
+  (no editable packages)
+== /home/creator/ws/200_human_dexterous_teleop/mediapipe_holistic_demo/.venv
+python 3.10.12, editable=0
+  (no editable packages)
+== /home/creator/ws/20_unitreerobotics/.venv
+2026-10-11 21:38:57.951877: I tensorflow/core/util/port.cc:110] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-11 21:38:58.000257: I tensorflow/tsl/cuda/cudart_stub.cc:28] Could not find cuda drivers on your machine, GPU will not be used.
+2026-10-11 21:38:58.272252: I tensorflow/tsl/cuda/cudart_stub.cc:28] Could not find cuda drivers on your machine, GPU will not be used.
+2026-10-11 21:38:58.273090: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2026-10-11 21:38:58.817009: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+python 3.10.12, editable=2
+  dlimp <- /home/creator/ws/20_unitreerobotics/repos/unifolm-world-model-action/external/dlimp [dlimp:FAIL(ModuleNotFoundError)]
+  unifolm_wma <- /home/creator/ws/20_unitreerobotics/repos/unifolm-world-model-action [unifolm_wma:ok]
+== /home/creator/ws/23_video/ComfyUI/.venv
+python 3.10.12, editable=0
+  (no editable packages)
+== /home/creator/miniconda3/envs/4D-humans
+python 3.10.20, editable=1
+  lingbot-video <- /home/creator/ws/lingbot-video [lingbot_video:FAIL(ModuleNotFoundError)]
+== /home/creator/miniconda3/envs/cosmos
+python 3.12.14, editable=0
+  (no editable packages)
+== /home/creator/miniconda3/envs/lingbot-depth
+python 3.10.20, editable=2
+  lingbot-video <- /home/creator/ws/lingbot-video [lingbot_video:FAIL(ModuleNotFoundError)]
+  mdm <- /home/creator/ws/lingbot-depth [mdm:ok]
+== /home/creator/miniconda3/envs/umr
+python 3.12.14, editable=0
+  (no editable packages)
+
+== git HEAD ad98cf9
+== git status --short (重组前)
+ ? 10_openVLA/repos/openvla
+ m 11_pi_serial_models/repos/lerobot-main
+ m 13_lingbot/lingbot-depth
+ m 13_lingbot/lingbot-world-v2
+ m 200_human_dexterous_teleop
+ m 21_demo/RynnBrain
+ ? 24_umr/UMR
+?? 102-kingkongrobotics/docs/
+?? docs/ws-restructure-baseline.txt
+?? docs/ws-restructure-plan.md
+?? scripts/check_venv_editable.py
+
+== 子模块内部未提交改动数（重组前）
+10_openVLA/repos/openvla: 1
+11_pi_serial_models/repos/lerobot-main: 1
+13_lingbot/lingbot-depth: 6
+13_lingbot/lingbot-world-v2: 4
+200_human_dexterous_teleop: 7
+21_demo/RynnBrain: 19
+24_umr/UMR: 3

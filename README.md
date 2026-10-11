@@ -13,10 +13,10 @@
 ```
 ws/
 ├── 09_human_dexterous_teleop/   # 人体姿态/手势/灵巧手遥操作
-├── 10_openVLA/                  # OpenVLA 视觉-语言-动作模型
-├── 11_pi_serial_models/         # Pi 系列（Pi0 / Pi0.5）与 ACT 训练评估（lerobot）
-├── 20_unitreerobotics/          # 宇树 UnifoLM-WMA 世界模型
-├── 21_demo/                     # 演示项目（RynnBrain、RynnWorld-4D）
+├── 100-openVLA/                  # OpenVLA 视觉-语言-动作模型
+├── 101-pi-serial-models/         # Pi 系列（Pi0 / Pi0.5）与 ACT 训练评估（lerobot）
+├── 104-unitreerobotics/          # 宇树 UnifoLM-WMA 世界模型
+├── 105-damo/                     # 演示项目（RynnBrain、RynnWorld-4D）
 ├── 22_lingbot/                  # Lingbot 系列（depth、video、world-v2）
 ├── colibri/                     # 纯 C GLM MoE 运行时
 ├── mujoco_menagerie/            # MuJoCo 机器人模型库
@@ -40,31 +40,31 @@ ws/
 - **当前状态**：🟡 基础可用/部分验证。
 - **备注**：MediaPipe/MuJoCo 等轻量模块可跑；完整 ROS2、真实硬件或重型动捕方案需要外设和额外环境。
 
-### `10_openVLA/`
+### `100-openVLA/`
 
 - **内容概述**：OpenVLA 7B 视觉-语言-动作模型，支持 MuJoCo 仿真推理（WX250S 机械臂）和 LIBERO 评测。
 - **Git 链接**：`git@github.com:xiaoxiaomengmeng/openvla.git`（fork）；上游 `https://github.com/openvla/openvla`
 - **当前分支**：`main`
 - **当前状态**：✅ 已验证/可运行。
-- **备注**：已完成单步推理验证（sdpa/flash_attention_2）、WX250S MuJoCo 仿真闭环；详见 `10_openVLA/README.md`。
+- **备注**：已完成单步推理验证（sdpa/flash_attention_2）、WX250S MuJoCo 仿真闭环；详见 `100-openVLA/README.md`。
 
-### `11_pi_serial_models/`
+### `101-pi-serial-models/`
 
 - **内容概述**：Pi 系列（Pi0 / Pi0.5）与 ACT 策略模型的本地训练与仿真评估，基于 lerobot-main v0.6.2（PyTorch）；含 ALOHA 双臂（MuJoCo）与 LIBERO 两条评测链路。
 - **Git 链接**：上游 `https://github.com/Physical-Intelligence/openpi`（pi 系列）、`https://github.com/huggingface/lerobot`（训练框架）
 - **当前分支**：—
 - **当前状态**：✅ 已验证/可运行（ACT 全链路；Pi 系列部分验证）。
-- **备注**：ACT 从零训练（100k 步 ≈ 46 分钟，500 轮评估成功率 79%，官方基线 83%）；pi0 LoRA 微调与 pi0.5 LIBERO 后训练链路可用；脚本已按阶段编号（预检/下载/训练/评估/可视化），详见 `11_pi_serial_models/README.md` 与 `docs/17~25`。
+- **备注**：ACT 从零训练（100k 步 ≈ 46 分钟，500 轮评估成功率 79%，官方基线 83%）；pi0 LoRA 微调与 pi0.5 LIBERO 后训练链路可用；脚本已按阶段编号（预检/下载/训练/评估/可视化），详见 `101-pi-serial-models/README.md` 与 `docs/17~25`。
 
-### `20_unitreerobotics/`
+### `104-unitreerobotics/`
 
 - **内容概述**：宇树 UnifoLM-WMA-0 世界模型-动作架构，支持视频预测 + 动作生成的自回归交互推理。
 - **Git 链接**：`git@github.com:xiaoxiaomengmeng/unifolm-world-model-action.git`（fork）；上游 `https://github.com/unitreerobotics/unifolm-world-model-action`
 - **当前分支**：`main`
 - **当前状态**：✅ 已验证/可运行。
-- **备注**：RTX 5090 兼容性修复已完成（xformers sm_120 适配）；12 步交互推理约 6 分 40 秒；详见 `20_unitreerobotics/readme.md`。
+- **备注**：RTX 5090 兼容性修复已完成（xformers sm_120 适配）；12 步交互推理约 6 分 40 秒；详见 `104-unitreerobotics/readme.md`。
 
-### `21_demo/`
+### `105-damo/`
 
 - **内容概述**：演示项目集合，包含 RynnBrain（具身多模态理解）和 RynnWorld-4D（4D 世界模型）。
 - **当前状态**：🟡 部分验证。
@@ -117,7 +117,8 @@ ws/
 | `scripts/setup_py310_cu128_rtx5090_torch2110.sh` | RTX 5090 + PyTorch cu128 统一部署脚本（py3.10 版） |
 | `scripts/setup_py312_cu128_rtx5090_torch.sh` | RTX 5090 + PyTorch cu128 统一部署脚本（py3.12 版） |
 | `scripts/setup_py312_cu130_rtx5090_torch.sh` | RTX 5090 + PyTorch cu130 统一部署脚本（py3.12 版，清华 PyPI 源） |
-| `embodied_ai_model_test_catalog.md` | 具身智能模型测试目录 |
+| `docs/embodied-ai-model-test-catalog.md` | 具身智能模型测试目录 |
+| `.qoder/rules/user-profile.md` | 用户身份设定（Qoder 规则，始终生效） |
 
 ## RTX 5090 PyTorch 环境提示
 

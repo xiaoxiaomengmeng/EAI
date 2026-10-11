@@ -1,0 +1,8 @@
+refactor: 顶层目录统一三位数编号重组，并合并各项目文档与工具更新
+
+- 13 个顶层项目目录改为三位数编号（10_openVLA→100-openVLA、20_unitreerobotics→104-unitreerobotics、modules→models 等），21 个子模块路径迁移并验证通过
+- .gitmodules 失效条目修复、gitlink 补登记，.gitignore 同步新路径，根 README 重写
+- 104-unitreerobotics: README/STUDY_NOTES/fix_readme 整理合并，学习笔记移入 docs/01-UnifoLM-WMA学习笔记.md，RTX 5090 修复记录并入 README 第 5 节
+- 302-kingkongrobotics: jumper 介绍文案（长文/500 字精简版/口播稿）与 docs/media/official 素材整理
+- 新增 scripts/check_git_config.sh（git 配置自检+常用命令速查）与 scripts/check_venv_editable.py
+- 用户偏好规则迁入 .qoder/rules/user-profile.md 并补充完善

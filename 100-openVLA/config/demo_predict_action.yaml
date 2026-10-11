@@ -1,0 +1,35 @@
+# OpenVLA 单步动作预测 demo 配置
+#
+# 用法：
+#   python scripts/demo_predict_action.py                       # 直接使用本文件的默认值
+#   python scripts/demo_predict_action.py --config other.yaml   # 指定其它配置文件
+#   python scripts/demo_predict_action.py --instruction "..."   # CLI 显式传参覆盖本文件
+#
+# 取值优先级：CLI 显式参数 > 本 YAML 文件 > 脚本内置兜底默认。
+# 留空(null)的字段会回退到"自动选择"或内置默认，行为与改造前一致。
+
+# 模型 checkpoint 路径（本地路径或 HF repo id）
+# 指向工作区统一模型目录 ws/models 下的软链（→ ModelScope 缓存）
+model_path: /home/creator/ws/models/openvla-7b
+
+# 输入 RGB 图像路径；留空(null)则生成 224x224 灰图占位，仅用于验证推理链路
+image: null
+
+# 机器人自然语言指令
+instruction: pick up the object
+
+# 动作反归一化 key（需与 checkpoint 的 norm_stats 对应；base 模型用 bridge_orig）
+unnorm_key: bridge_orig
+
+# 注意力后端：eager / sdpa / flash_attention_2
+attn_implementation: sdpa
+
+# 是否采样；false 为贪心解码（结果可复现）
+do_sample: false
+
+# 运行设备；null 为自动选择（有 CUDA 用 cuda:0，否则 cpu）。可显式写 cpu / cuda:0
+device: null
+
+# 计算精度；null 为自动选择（CUDA 用 bfloat16，否则 float32）
+# 可选：bfloat16 / float16 / float32
+dtype: null

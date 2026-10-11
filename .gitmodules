@@ -1,54 +1,63 @@
-[submodule "23_video/ComfyUI"]
-	path = 23_video/ComfyUI
+[submodule "200-video/ComfyUI"]
+	path = 200-video/ComfyUI
 	url = https://github.com/Comfy-Org/ComfyUI.git
-[submodule "200_human_dexterous_teleop"]
-	path = 200_human_dexterous_teleop
+[submodule "501-human-dexterous-teleop"]
+	path = 501-human-dexterous-teleop
 	url = https://gitee.com/zgrxmm/hand_gesture_recognition.git
-[submodule "21_demo/RynnBrain"]
-	path = 21_demo/RynnBrain
+[submodule "105-damo/RynnBrain"]
+	path = 105-damo/RynnBrain
 	url = https://github.com/xiaoxiaomengmeng/RynnBrain.git
-[submodule "22_lingbot/lingbot-depth"]
-	path = 22_lingbot/lingbot-depth
+[submodule "103-lingbot/lingbot-depth"]
+	path = 103-lingbot/lingbot-depth
 	url = https://github.com/Robbyant/lingbot-depth.git
-[submodule "22_lingbot/lingbot-world-v2"]
-	path = 22_lingbot/lingbot-world-v2
+[submodule "103-lingbot/lingbot-world-v2"]
+	path = 103-lingbot/lingbot-world-v2
 	url = https://github.com/xiaoxiaomengmeng/lingbot-world-v2.git
-[submodule "10_openVLA/repos/LIBERO"]
-	path = 10_openVLA/repos/LIBERO
+[submodule "100-openVLA/repos/LIBERO"]
+	path = 100-openVLA/repos/LIBERO
 	url = https://github.com/Lifelong-Robot-Learning/LIBERO.git
-[submodule "10_openVLA/repos/openvla"]
-	path = 10_openVLA/repos/openvla
+[submodule "100-openVLA/repos/openvla"]
+	path = 100-openVLA/repos/openvla
 	url = https://github.com/xiaoxiaomengmeng/openvla.git
-[submodule "11_pi_serial_models/repos/lerobot-main"]
-	path = 11_pi_serial_models/repos/lerobot-main
+[submodule "101-pi-serial-models/repos/lerobot-main"]
+	path = 101-pi-serial-models/repos/lerobot-main
 	url = https://github.com/huggingface/lerobot.git
-[submodule "20_unitreerobotics/repos/unifolm-world-model-action"]
-	path = 20_unitreerobotics/repos/unifolm-world-model-action
+[submodule "104-unitreerobotics/repos/unifolm-world-model-action"]
+	path = 104-unitreerobotics/repos/unifolm-world-model-action
 	url = https://github.com/xiaoxiaomengmeng/unifolm-world-model-action.git
-[submodule "21_demo/RynnWorld-4D"]
-	path = 21_demo/RynnWorld-4D
+[submodule "105-damo/RynnWorld-4D"]
+	path = 105-damo/RynnWorld-4D
 	url = https://github.com/Alibaba-DAMO-Academy/RynnWorld-4D.git
-[submodule "22_lingbot/lingbot-video"]
-	path = 22_lingbot/lingbot-video
+[submodule "103-lingbot/lingbot-video"]
+	path = 103-lingbot/lingbot-video
 	url = https://github.com/xiaoxiaomengmeng/lingbot-video.git
-[submodule "colibri"]
-	path = colibri
+[submodule "201-colibri"]
+	path = 201-colibri
 	url = https://github.com/xiaoxiaomengmeng/colibri.git
-[submodule "mujoco_menagerie"]
-	path = mujoco_menagerie
+[submodule "assets/mujoco/mujoco_menagerie"]
+	path = assets/mujoco/mujoco_menagerie
 	url = https://github.com/google-deepmind/mujoco_menagerie.git
-[submodule "100-microduck/microduck"]
-	path = 100-microduck/microduck
+[submodule "301-microduck/microduck"]
+	path = 301-microduck/microduck
 	url = https://github.com/pollen-robotics/microduck.git
-[submodule "100-microduck/microduck_rl"]
-	path = 100-microduck/microduck_rl
+[submodule "301-microduck/microduck_rl"]
+	path = 301-microduck/microduck_rl
 	url = https://github.com/pollen-robotics/microduck_rl.git
-[submodule "24_umr/UMR"]
-	path = 24_umr/UMR
+[submodule "500-umr/UMR"]
+	path = 500-umr/UMR
 	url = https://github.com/hanyang9/UMR.git
 [submodule "docs/every-embodied"]
 	path = docs/every-embodied
 	url = https://github.com/datawhalechina/every-embodied.git
-[submodule "102-kingkongrobotics/jumper"]
-	path = 102-kingkongrobotics/jumper
+[submodule "302-kingkongrobotics/jumper"]
+	path = 302-kingkongrobotics/jumper
 	url = https://github.com/KingKongRobotics/jumper.git
+[submodule "102-cosmos/3rd/RoboLab"]
+	path = 102-cosmos/3rd/RoboLab
+	url = https://github.com/NVlabs/RoboLab.git
+[submodule "102-cosmos/3rd/cosmos-framework"]
+	path = 102-cosmos/3rd/cosmos-framework
+	url = https://github.com/NVIDIA/cosmos-framework.git
+[submodule "103-lingbot/lingbot-vla-v2"]
+	path = 103-lingbot/lingbot-vla-v2
+	url = https://github.com/Robbyant/lingbot-vla-v2.git
