@@ -407,3 +407,4 @@ source .venv/bin/activate   # Python 3.10
 | 2026-10-12 | **第 5 步完成，三项用户确认**：datasets/ 只建索引不迁移（已建 datasets/README.md 登记现有 4 项，根 README 底座段同步补行）；302/deploy.md 保持原位；**git 提交由用户自行处理**，本轮全部改动留在工作区。重组第 0~5 步全部完成，余下第 6 步（空间清理，可选）与个别待定小项（4.7、conda 误装清理） |
 | 2026-10-12 | 收尾核查发现：`201-colibri`、`501-human-dexterous-teleop` 为整目录型子模块（.gitmodules path 即顶层目录），写在其内部的 START_HERE.md 不会进父仓库提交，作为子仓库未跟踪文件保留（本地链接有效；501 先前已有内部漂移，与此无关）；conventions.md 对应措辞已修正；其余 START_HERE 均在父仓库层，不受影响 |
 | 2026-10-12 | 第 6 步启动：按用户确认清理 MiniMax-H3（modelscope 缓存 97G 删除——需沙箱外权限；ComfyUI 6 条断链软链删除，子模块 status 干净）；200-video 两文档同步，顺带修复 miniMax README 的 2 处 DAMO_README 历史死链；顺手发现 RynnBrain 四个 8B 权重已在 modelscope 缓存，105-damo START_HERE 状态修正；Wan-Dancer / pi0 checkpoint / RynnMotion.zip 暂不清理 |
+| 2026-10-12 | 本轮全部改动随提交 **28b384d** 落库（24 文件：START_HERE×5、.gitignore×7、conventions / datasets / skills 索引、README 与 models 更新、103 归档 mv、误入库临时文件删除），此前各条「均未提交」备注自此失效；工作区仅剩 9 个子模块 gitlink 漂移待逐个核查（本条记录为提交后补写，随下次提交入库） |
