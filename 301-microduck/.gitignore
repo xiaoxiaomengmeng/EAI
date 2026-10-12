@@ -1,0 +1,4 @@
+# microduck/ 与 microduck_rl/ 为子模块（各自的 .venv 与训练产物自行管理）
+# 根目录 .venv 与 wandb/ 已由工作区根 .gitignore 全局忽略
+# RL 训练日志（rsl_rl 运行输出）
+logs/

@@ -10,13 +10,14 @@
 ## 启动环境（训练侧 microduck_rl）
 
 ```bash
-cd ~/ws/301-microduck/microduck_rl
-uv sync                 # 首次：拉 torch 2.9.1 / warp / mjlab（~2GB CUDA wheel），装本仓库为 editable
-uv run list-envs        # 之后一切命令走 uv run（自动用 .venv，Python 3.12）
+cd ~/ws/301-microduck
+source .venv/bin/activate   # 根目录 .venv 即训练环境：Python 3.12 · torch 2.9.1+cu128 · mjlab 1.3.0 · mjlab_microduck 为 editable（→ microduck_rl/src）
+train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 16 --agent.max_iterations 5   # 冒烟
 ```
 
-- ⚠️ 本项目用 **uv**，不是 `source .venv/bin/activate`；临时依赖用 `uv run --with <pkg>`（如 pytest）；别用 `(base)` 的 python 直接跑测试/脚本。
-- 根目录无 `.venv`（重组前 baseline 里记录的那个已失效）；Rust 侧用 `cargo build`，真机部署见 [`microduck/deploy/`](microduck/deploy)。
+- 根 `.venv` 已于 2026-10-12 目录改名后修复并实测：16 env × 1 迭代 exit 0。`train` 是 microduck_rl 覆盖版入口（`mjlab_microduck.train_cli`），`play`/`export` 走 mjlab；wandb 记录为 offline 模式，无需登录。
+- `microduck_rl/.venv` 是个空壳（只有 virtualenv 引导文件、无任何包）：在里面 `uv run` 会报 `Failed to spawn: train`；要恢复 AGENTS.md 的 uv 工作流需 `cd microduck_rl && uv sync`（重建约 2GB），不用 uv 可无视它。
+- Rust 侧用 `cargo build`，真机部署见 [`microduck/deploy/`](microduck/deploy)。
 
 ## 从这里开始
 

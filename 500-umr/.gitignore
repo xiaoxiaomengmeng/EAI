@@ -1,0 +1,4 @@
+# UMR/ 为独立克隆（retarget 数据与输出在其仓库内管理）
+# 本目录本地产物兜底
+outputs/
+logs/

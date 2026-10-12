@@ -15,7 +15,7 @@
 | **3xx** | 真机部署测试、人形机器人、趣味本地复现 |
 | **4xx** | 预留，暂时留空 |
 | **5xx** | 具身数据 infra（数据采集 / 重定向 / 遥操作） |
-| 无编号 | 公共底座：`models/`、`assets/`、`scripts/`、`docs/` |
+| 无编号 | 公共底座：`models/`、`datasets/`、`assets/`、`scripts/`、`docs/` |
 
 ## 状态说明
 
@@ -36,35 +36,36 @@
 | [`102-cosmos`](102-cosmos/) | NVIDIA Cosmos 世界模型（RoboLab + cosmos-framework）；视频预测 + 动作策略 | conda `cosmos`（3.12）+ `3rd/cosmos-framework/.venv`（3.13） | ✅ | [START_HERE](102-cosmos/START_HERE.md) |
 | [`103-lingbot`](103-lingbot/) | Lingbot 系列：depth（深度补全）/ video（MoE 视频生成）/ world-v2（交互世界模型）/ vla-v2 | 多套；depth 用 conda `lingbot-depth`，其余待定 | 🟡 | [START_HERE](103-lingbot/START_HERE.md) |
 | [`104-unitreerobotics`](104-unitreerobotics/) | 宇树 UnifoLM-WMA 世界模型-动作；视频预测 + 动作生成的自回归交互推理 | `.venv`（3.10） | ✅ | [START_HERE](104-unitreerobotics/START_HERE.md) |
-| [`105-damo`](105-damo/) | 达摩院：RynnBrain（具身多模态理解）+ RynnWorld-4D（4D 世界模型） | 待定 | 🟡 | 入口待补 |
+| [`105-damo`](105-damo/) | 达摩院：RynnBrain（具身多模态理解）+ RynnWorld-4D（4D 世界模型） | 待定 | 🟡 | [START_HERE](105-damo/START_HERE.md) |
 
 ### 2xx · 非具身模型
 
 | 目录 | 用途 | 环境 | 状态 | 入口 |
 |---|---|---|---|---|
 | [`200-video`](200-video/) | ComfyUI + MiniMax 视频生成工作流 | `ComfyUI/.venv`（3.10） | ✅ | [START_HERE](200-video/START_HERE.md) |
-| [`201-colibri`](201-colibri/) | 纯 C 的 GLM MoE 运行时（磁盘 / RAM / VRAM 分层加载专家） | 无（`make` 编译） | ⚠️ | 入口待补 |
+| [`201-colibri`](201-colibri/) | 纯 C 的 GLM MoE 运行时（磁盘 / RAM / VRAM 分层加载专家） | 无（`make` 编译） | ⚠️ | [START_HERE](201-colibri/START_HERE.md) |
 
 ### 3xx · 真机部署 / 人形机器人 / 趣味复现
 
 | 目录 | 用途 | 环境 | 状态 | 入口 |
 |---|---|---|---|---|
-| [`300-robots`](300-robots/) | RynnMotion 机器人运动框架（异构硬件统一抽象：9 家厂商真机驱动 + 12 款 MuJoCo 机械臂）+ `sim_robot` 仿真验证 | 待定（`sim_robot` 用系统 `python3` + mujoco） | 🟡 | [README](300-robots/README.md) |
-| [`301-microduck`](301-microduck/) | Microduck 微型机械臂：`microduck`（Rust 板载运行时）+ `microduck_rl`（mjlab + PPO 训练） | 待定（根 `.venv` 与 `microduck_rl/.venv`，均 3.12） | ⚠️ | [docs](301-microduck/docs/README.md) |
-| [`302-kingkongrobotics`](302-kingkongrobotics/) | 金刚机器人 `jumper`（跳跃足式机器人，mjlab + rsl_rl） | `jumper/.venv`（3.12） | ⚠️ | 入口待补 |
+| [`300-robots`](300-robots/) | RynnMotion 机器人运动框架（异构硬件统一抽象：9 家厂商真机驱动 + 12 款 MuJoCo 机械臂）+ `sim_robot` 仿真验证 | 待定（`sim_robot` 用系统 `python3` + mujoco） | 🟡 | [START_HERE](300-robots/START_HERE.md) |
+| [`301-microduck`](301-microduck/) | Microduck 微型机械臂：`microduck`（Rust 板载运行时）+ `microduck_rl`（mjlab + PPO 训练） | 待定（根 `.venv` 与 `microduck_rl/.venv`，均 3.12） | ⚠️ | [START_HERE](301-microduck/START_HERE.md) |
+| [`302-kingkongrobotics`](302-kingkongrobotics/) | 金刚机器人 `jumper`（跳跃足式机器人，mjlab + rsl_rl） | `jumper/.venv`（3.12） | ⚠️ | [START_HERE](302-kingkongrobotics/START_HERE.md) |
 
 ### 5xx · 具身数据 infra
 
 | 目录 | 用途 | 环境 | 状态 | 入口 |
 |---|---|---|---|---|
-| [`500-umr`](500-umr/) | UMR：人体动作 → 点云对应 → 机器人 qpos 重定向（实测 LAFAN1 跳舞 → Unitree G1） | conda `umr` | ⚠️ | [docs](500-umr/docs/) |
-| [`501-human-dexterous-teleop`](501-human-dexterous-teleop/) | 人体姿态 / 手势识别、灵巧手遥操作、动捕数据采集（MediaPipe / MuJoCo / ROS2） | 多套：3 个 `.venv`（3.10）+ conda `4D-humans` | 🟡 | 入口待补 |
+| [`500-umr`](500-umr/) | UMR：人体动作 → 点云对应 → 机器人 qpos 重定向（实测 LAFAN1 跳舞 → Unitree G1） | conda `umr` | ⚠️ | [START_HERE](500-umr/START_HERE.md) |
+| [`501-human-dexterous-teleop`](501-human-dexterous-teleop/) | 人体姿态 / 手势识别、灵巧手遥操作、动捕数据采集（MediaPipe / MuJoCo / ROS2） | 多套：3 个 `.venv`（3.10）+ conda `4D-humans` | 🟡 | [START_HERE](501-human-dexterous-teleop/START_HERE.md) |
 
 ### 公共底座（无编号）
 
 | 目录 | 说明 | 入口 |
 |---|---|---|
 | [`models/`](models/) | 模型权重软链统一目录（指向 `~/.cache/modelscope`、`~/.cache/huggingface`） | [README](models/README.md) |
+| [`datasets/`](datasets/) | 数据集位置索引（实体数据留各项目内：aloha / libero / pusht 等 lerobot v2） | [README](datasets/README.md) |
 | [`assets/`](assets/) | 仿真资产（`mujoco/mujoco_menagerie` 机器人模型库） | [README](assets/README.md) |
 | [`scripts/`](scripts/) | 统一部署与环境脚本（PyTorch / RTX 5090、venv editable 检查、git 配置核查） | — |
 | [`docs/`](docs/) | 工作区文档：目录重组方案、模型测试目录、具身智能资料 | — |

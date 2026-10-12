@@ -1,6 +1,6 @@
 # 模型权重统一管理目录
 
-本目录集中存放工作区所有项目的模型权重，通过项目内软链或脚本引用。**不纳入 git 版本管理**（见根级 `.gitignore`）。
+本目录集中存放工作区所有项目的模型权重，通过项目内软链或脚本引用。权重文件不纳入 git（根级 `.gitignore` 的 `*.safetensors` / `*.bin` 等）；各模型目录以 **gitlink 方式跟踪其仓库引用**，本 README 与各项目级 `.gitignore` 纳入 git。
 
 ## 模型索引
 
@@ -11,6 +11,7 @@
 | `Cosmos3-Edge-Policy-DROID` | NVIDIA / ModelScope `nv-community/Cosmos3-Edge-Policy-DROID` | 机器人边缘策略模型 | `102-cosmos` |
 | `pi0_base` | Physical-Intelligence / lerobot | π0 基础策略权重 | `101-pi-serial-models` |
 | `pi0_libero_base` | Physical-Intelligence / lerobot | π0 LIBERO 任务基础权重 | `101-pi-serial-models` |
+| `pi05_base` | Physical-Intelligence / lerobot | π0.5 基础策略权重 | `101-pi-serial-models` |
 | `pi05_libero_base` | Physical-Intelligence / lerobot | π0.5 LIBERO 任务基础权重 | `101-pi-serial-models` |
 | `openvla-7b` | ModelScope `zixiaoBios/openvla-7b` | OpenVLA base 模型（unnorm_key=bridge_orig） | `100-openVLA` |
 | `openvla-7b-finetuned-libero-spatial` | ModelScope `superpeach/openvla-7b-finetuned-libero-spatial` | OpenVLA LIBERO-spatial 微调 checkpoint（unnorm_key=libero_spatial） | `100-openVLA` |

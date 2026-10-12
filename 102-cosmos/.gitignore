@@ -1,0 +1,6 @@
+# 3rd/ 下为上游子模块（cosmos-framework 的 uv venv 等由其自身管理）
+# conda 环境 cosmos 在工作区外（~/miniconda3/envs），本目录无需忽略
+# 本地推理输出与下载缓存兜底
+outputs/
+cache/
+checkpoints/

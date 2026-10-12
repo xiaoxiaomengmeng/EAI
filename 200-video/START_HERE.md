@@ -11,7 +11,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 ```
 
 - 源码：`ComfyUI/`（子模块，已内置 MiniMax H3 节点；custom_nodes 有 ComfyUI-Manager、ComfyUI_MiniMaxH3_Director）
-- 权重：`ComfyUI/models/{diffusion_models,text_encoders,vae}/minimax_h3_*` 软链到 `~/.cache/modelscope/models/MiniMax--MiniMax-H3/`
+- 权重：MiniMax-H3 已于 2026-10-12 清理（modelscope 缓存 97G + ComfyUI 侧 6 条软链，`--quick-test-for-ci` 不依赖它）；需要时按 [miniMax/README.md](miniMax/README.md) §4 重新下载并重建软链
 
 ## 从这里开始
 

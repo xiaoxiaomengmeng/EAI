@@ -1,0 +1,5 @@
+# 各模型目录以 gitlink 方式跟踪（.gitignore 不影响已跟踪条目）
+# 防误放：本地缓存、不完整下载与临时文件
+.cache/
+*.tmp
+*.download

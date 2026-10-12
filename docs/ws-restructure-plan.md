@@ -277,7 +277,7 @@ source .venv/bin/activate   # Python 3.10
   - [x] 子模块内引用：`104-unitreerobotics/repos/unifolm-world-model-action/configs/inference/world_model_interaction.yaml:225` 的 `data_dir` 原写死 `/home/creator/ws/20_unitreerobotics/...`（fork 提交 9e82896 引入；`data.setup()` 会读该目录下 csv，`--prompt_dir` 不覆盖），按用户决定改为相对路径 `examples/world_model_interaction_prompts`（`run_wma_interaction.sh` 先 cd 到仓库根）；子模块内新增 1 处未提交改动
   - [x] 软链复核：`301-microduck/microduck_rl/wandb/offline-run-*/files/` 下 `model_0.pt`、`ws.diff`、`*.onnx` 已重建指向 `/home/creator/ws/301-microduck/...`，均可解析；`501-human-dexterous-teleop/4d-humans/4D-Humans/detectron2/detectron2/model_zoo/configs` 指向更早的 `/home/creator/ws/human_dexterous_teleop/...`，改名前就已断，未处理
   - 保留不改：`console_smoke_run.txt`（历史日志）；101 系列文档中原有的 `file:///Users/damon/...` macOS 路径
-- [ ] **第 4 步：修虚拟环境**（用户要求先修一个试点，没问题再推其余）
+- [x] **第 4 步：修虚拟环境**（用户要求先修一个试点，没问题再推其余；A 类 8/8、B 类 5/5 全部完成，4.7 决策项单独见下）
   - 只读扫描（13 个 venv）：
     - A 类（本次改名弄坏，8 个）：`100-openVLA`、`101-pi-serial-models`、`102-cosmos/3rd/cosmos-framework`、`104-unitreerobotics`、`200-video/ComfyUI`、`301-microduck`、`301-microduck/microduck_rl`、`302-kingkongrobotics/jumper`
     - B 类（改名前就已失效，5 个）：`103-lingbot/lingbot-video`、`103-lingbot/lingbot-world-v2`、`501-human-dexterous-teleop/{hand_gesture_recognition,frankmocap_demo,mediapipe_holistic_demo}`，`activate` / shebang 指向更早的 `/ws/lingbot-*`、`/ws/human_dexterous_teleop/...`
@@ -289,7 +289,7 @@ source .venv/bin/activate   # Python 3.10
     - 验证：`check_venv_editable.py` 显示 libero ok、openvla 全部 ok（基线里 `prismatic` 是 FAIL，4.7 中这一项一并修好）；设 `LIBERO_CONFIG_PATH=.libero` 后 assets / bddl / init_files 均存在，libero_spatial 10 个任务可加载；`02_libero_eval.py --help` 正常；torch 2.11.0+cu128 CUDA 可用；`repos/openvla`、`repos/LIBERO` 无新增改动
     - 已写 `100-openVLA/START_HERE.md`，文中 `source activate` + `LIBERO_CONFIG_PATH` + 入口脚本命令均实测可用
     - 发现：LIBERO 默认读 `~/.libero/config.yaml`（全局，工作区外），其中 4 行指向 `/home/creator/ws/11_pi_serial_models/.venv312/...`，被本次改名弄断，归到 101 项目处理；100-openVLA 脚本自己设 `LIBERO_CONFIG_PATH`，不受影响
-  - [ ] 4.2 其余 A 类 7 个（已完成 4/7）
+  - [x] 4.2 其余 A 类 7 个（7/7 全部完成）
     - [x] `101-pi-serial-models/.venv312`：
       - bin 80 个文件旧路径已改，残留 0；`pyvenv.cfg` 的 command 行同步改（仅说明性字段）；重装 lerobot editable（`repos/lerobot-main`），`pip freeze` 297 个包版本不变
       - `~/.libero/config.yaml`（工作区外）：4 行 `11_pi_serial_models` → `101-pi-serial-models`，改前副本在备份目录 `home-libero-config.yaml.before`
@@ -308,7 +308,21 @@ source .venv/bin/activate   # Python 3.10
       - README 修正：模型改为 3 个，软链路径改为 `~/ws/models/`；补「两套 Python 环境」表；注明 `NVIDIA/cosmos` 没有克隆、verify 脚本不覆盖 Cosmos3-Edge
       - 验证：uv venv 中 `import cosmos_framework` 指向新路径，CUDA 可用，`action_policy_server_robolab --help` 正常；conda 中 `verify_models.py` 完整跑通（Predict2.5 与 DROID 文件级全部 PASS，DROID 以 `Cosmos3OmniPipeline` 加载成功）；子模块 `3rd/*` 无新增改动
       - 已写 `102-cosmos/START_HERE.md`
-  - [ ] 4.3 B 类 5 个及 4.7 其余项（用户改为按项目编号顺序推进，已完成 2/5）
+    - [x] `301-microduck`（两个 venv，2026-10-12）：
+      - 根 `.venv`（真正的训练环境，Python 3.12 · torch 2.9.1+cu128 · mjlab 1.3.0）：bin 56 处 `100-microduck` 已 sed；`mjlab_microduck.pth`（单行路径型）与 editable 的 `direct_url.json` 同步改文本，残留 0；freeze 277 行，只有 editable 行变成 `git+https://github.com/pollen-robotics/microduck_rl.git#egg=` 形式
+      - `microduck_rl/.venv`：空壳（只有 virtualenv 引导文件，无 pip、无包、无 editable），bin 5 个文件已 sed；在里面 `uv run` 报 `Failed to spawn: train` 与路径无关（本来就没装），恢复 AGENTS.md 的 uv 工作流需 `uv sync` 重建，不常用可无视
+      - 验证：`import mjlab_microduck` 指向新路径且包内 patch 副作用正常打印，torch CUDA 可用；**实跑** `train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 16 --agent.max_iterations 1` exit 0（需 `WANDB_MODE=offline`；该 CLI 无 `--headless` 参数）；`train` 入口是 microduck_rl 覆盖版（`mjlab_microduck.train_cli`），`play` 走 mjlab
+      - 备份 `venv-301-microduck/`、`venv-301-microduck-rl/`；更新 `301-microduck/START_HERE.md`（启动环境节按实测重写：原文「根目录无 .venv」已过时）
+    - [x] `302-kingkongrobotics/jumper/.venv`（Python 3.12 · torch 2.11.0+cu130，2026-10-12）：
+      - bin 49 处 `102-kingkongrobotics` 已 sed；`__editable___mjrl_lab_0_0_1_finder.py` 的 MAPPING/NAMESPACES 与 `mjrl_lab-0.0.1.dist-info/direct_url.json` 直接改文本（纯路径型 editable，不重装）；残留 0
+      - freeze 282 行，只有 mjrl-lab editable 行变成 `git+https://github.com/KingKongRobotics/jumper.git#egg=` 形式
+      - 验证：`import mjlab, rsl_rl, scenes` 通过，`scripts/train.py --list` 任务注册表完整；**实跑** `--task jumper.flat --num_envs 16 --max-iterations 1 --headless --no-tensorboard` exit 0（1 迭代 0.45s，日志无 Traceback）
+      - 备份 `venv-302-jumper/`；新建 `302-kingkongrobotics/START_HERE.md`
+    - [x] `501-human-dexterous-teleop` 三个 venv（B 类，均 Python 3.10，2026-10-12）：
+      - 旧串统一是 `/home/creator/ws/human_dexterous_teleop`（无 `200_` 前缀的更早目录名）：hand_gesture 13 处、frankmocap 8 处、mediapipe 13 处，只 sed `bin/`，三个都没有 editable；残留 0
+      - freeze（167/476/160 行）前后零差异；import 验证：cv2 5.0.0 / mediapipe 0.10.14 / torch 2.11.0+cu128 CUDA 可用；demo 需摄像头/视频输入，未做无头冒烟
+      - 备份 `venv-501-hand-gesture/`、`venv-501-frankmocap/`、`venv-501-mediapipe/`；新建 `501-human-dexterous-teleop/START_HERE.md`
+  - [x] 4.3 B 类 5 个（按项目编号顺序推进，5/5 全部完成）；4.7 其余待定项单独见下
     - [x] `103-lingbot`（用户确认「三个全修」）：
       - `lingbot-video/.venv`：bin 33 个文件（指向更早的 `/ws/lingbot-video/.venv`）已 sed；环境里 setuptools 只有 59.6，低于构建要求的 ≥69，所以用默认隔离构建 `pip install -e . --no-deps`（清华源）重装；finder MAPPING、direct_url 已是新路径，`.venv` 残留 0；freeze 只有 editable 那行的写法变了（改成 git+ssh 形式）；`check_venv_editable` 显示 lingbot_video ok，CUDA 可用
       - `lingbot-world-v2/.venv`：bin 36 个文件已 sed；没有 editable；freeze 不变；`which python/pip` 和 shebang 正确，torch 2.11.0+cu128 CUDA 可用
@@ -332,16 +346,16 @@ source .venv/bin/activate   # Python 3.10
       - 发现（未处理）：`miniMax/README.md` 第 4、47 行引用的 `100-openVLA/DAMO_README.md` 早在提交 `1cb6bbd` 就已删除，是改名前就存在的死链
       - 备份 `venv-200-video-ComfyUI/`；已写 `200-video/START_HERE.md`
 - [ ] **第 5 步：文档与索引**
-  - [ ] 根 README 按 1xx/2xx/3xx/5xx/底座重写为纯索引（每目录一行，链接各自 `START_HERE.md`）
-  - [ ] 新建 `docs/conventions.md`（第 7.2 节命名规范）
-  - [ ] 新建 `.qoder/skills/README.md` 索引（第 7.3 节）
-  - [ ] `models/README.md` 补齐 18 个 ModelScope + 3 个 HF 模型
-  - [ ] 新建 `datasets/` 及索引（aloha、libero、pusht、HF parquet）
-  - [ ] 散落文档归入各项目 `docs/`
-  - [ ] 更新 `.gitignore` 注释
-  - [ ] 各项目根目录新增 `START_HERE.md`（见第 6 节；已提前到第 4 步逐个写，此处只做最终核对：13 个顶层项目目录都有）
+  - [x] 根 README 按 1xx/2xx/3xx/5xx/底座重写为纯索引（每目录一行，链接各自 `START_HERE.md`）（2026-10-12，提交 785ff7b；入口列中 105-damo、201-colibri、301-microduck、302-kingkongrobotics 标「待补」，随 START_HERE 待写同步）
+  - [x] 新建 `docs/conventions.md`（第 7.2 节命名规范，2026-10-12）：目录编号分段、文件/文档三层、git 与子模块、Qoder 扩展四节
+  - [x] 新建 `.qoder/skills/README.md` 索引（第 7.3 节；当前暂无 skill，目录与登记格式已建）
+  - [x] `models/README.md` 完善覆盖（2026-10-12）：补 `pi05_base` 行，9 个已下载模型目录全部在表；修正开头「不纳入 git」的过时描述（现为 gitlink 跟踪仓库引用 + README/gitignore 纳入 git）；「18 个 ModelScope + 3 个 HF」为规划全量清单，未下载部分无从列出，下载后追加
+  - [x] 新建 `datasets/` 及索引（2026-10-12，用户确认**只建索引不迁移**）：datasets/README.md 登记现有 4 项（101 的 aloha×4 / libero 1.9G / pusht 均为 lerobot v2 格式，501 演示视频 6.9M），实体数据留原位；工作区外依赖（~/.libero 等）一并注明
+  - [x] 散落文档归入各项目 `docs/`（2026-10-12 结案）：扫描仅 2 份——103 顶层的 LingBot-VLA-v2 架构详解已 `git mv` 至 `103-lingbot/docs/`（START_HERE 引用同步）；`302-kingkongrobotics/deploy.md` 用户确认**保持原位**（官方素材提取来源，避免断链）
+  - [x] `.gitignore` 体系（2026-10-12，用户要求每个项目目录一份）：新建 7 份项目级——102-cosmos、105-damo、301-microduck、302-kingkongrobotics、500-umr + 底座 models、assets（规则按身份定制：models/assets 的 gitlink 不受影响，仅防误放杂物；301 忽略实测存在的 `logs/`；501 为独立克隆用其自身 .gitignore，jumper/UMR/RynnBrain 同理不动）；根 .gitignore 注释改为全量清单；check-ignore 全部验证通过，已跟踪条目无变化
+  - [x] 各项目根目录新增 `START_HERE.md`（见第 6 节；已提前到第 4 步逐个写；2026-10-12 **13/13 完成**——最后 4 个 105-damo、201-colibri、300-robots、500-umr 已写，无 venv 项目入口含上游引用与本地产物说明）；根 README 索引的入口列同步全部指向 START_HERE（含 300/301/500 三行从 README/docs 改链）
 - [ ] **第 6 步（可选，单独决定）：空间清理**
-  - [ ] MiniMax-H3 / Wan-Dancer-14B / pi0 中间 checkpoint / RynnMotion.zip
+  - [x] MiniMax-H3（2026-10-12 用户确认清理）：`~/.cache/modelscope/models/MiniMax--MiniMax-H3`（97G）删除 + ComfyUI 侧 6 条断链软链删除，ComfyUI 子模块 status 保持干净；200-video START_HERE 与 miniMax README 同步（顺带修复 2 处 DAMO_README 历史死链）；Wan-Dancer-14B / pi0 中间 checkpoint / RynnMotion.zip 用户确认**暂不清理**
   - [ ] lingbot 项目内权重迁到 modelscope 缓存后软链回去
 
 ## 9. 待确认事项
@@ -384,4 +398,12 @@ source .venv/bin/activate   # Python 3.10
 | 2026-10-11 | **执行 4.2 之 102-cosmos**：conda `cosmos` 无需修；uv venv `3rd/cosmos-framework/.venv` 修复（bin 151 个 + .pth/direct_url）；`verify_models.py` 的 MODELS_DIR 改为 `~/ws/models`；README 修正，写 START_HERE.md；验证通过，均未提交 |
 | 2026-10-11 | 按用户要求改为按编号顺序推进：**执行 103-lingbot**（B 类）——lingbot-video / lingbot-world-v2 两个 .venv 与 conda lingbot-depth 修复，lingbot-video、mdm 重装为 editable；lingbot-depth example 实跑通过；写 START_HERE.md；均未提交 |
 | 2026-10-11 | **执行 104-unitreerobotics**：.venv bin 61 个文件 + 2 个 editable 的 .pth/finder/direct_url 用 sed 修复；查明基线中 dlimp FAIL 是缺 `tensorflow_datasets`，不是路径问题，未补装；WMA 推理短跑通过；写 START_HERE.md；均未提交 |
-| 2026-10-12 | 按用户要求删除 `103-lingbot` 下两个 `.venv`（共约 15G），START_HERE 同步改为「待定」。**执行 200-video/ComfyUI**：bin 32 个文件 sed，quick-test 通过；写 START_HERE.md；均未提交 |
+| 2026-10-12 | **执行 200-video/ComfyUI**：bin 32 个文件 sed，quick-test 通过；写 START_HERE.md；均未提交 |
+| 2026-10-12 | 第 0~3 步与第 4 步已完成部分随提交 39afaa2 落库（含 104 文档整理合并、scripts/check_git_config.sh、用户偏好规则迁入 .qoder/rules），此前各条「均未提交」备注自此失效 |
+| 2026-10-12 | 第 5 步之根 README 索引完成（提交 785ff7b，用户重写）：按编号段分组，每目录一行含用途/环境/状态/入口；4 个项目入口列标注「待补」 |
+| 2026-10-12 | **第 4 步主体完成**：301-microduck（根 .venv 修复+训练冒烟 exit 0；microduck_rl/.venv 空壳修路径，`uv run` 失败与路径无关）、302-jumper（mjrl_lab finder 改文本+训练冒烟 exit 0）、501 三个 B 类 venv（freeze 零差异+import 通过）；A 类 8/8、B 类 5/5。START_HERE：更新 301、新建 302/501（累计 9/13）；均未提交 |
+| 2026-10-12 | 第 5 步之 .gitignore 落地：按用户要求每个项目目录一份，新建 7 份（102/105/301/302/500 + 底座 models/assets，按 gitlink/独立克隆身份定制），根 .gitignore 注释改为全量清单；check-ignore 验证生效，已跟踪 gitlink 不受影响；均未提交 |
+| 2026-10-12 | **第 5 步主体完成**：新建 docs/conventions.md（命名规范四节）；新建 .qoder/skills/README.md（暂无 skill，格式先行）；models/README.md 补 pi05_base 并修正 git 描述；**START_HERE 13/13 全部完成**（新增 105/201/300/500 四份）；散落文档归档：103 顶层的 LingBot-VLA-v2 详解 git mv 至 103-lingbot/docs/（START_HERE 引用同步），302/deploy.md 按上游素材来源保持原位；根 README 7 行入口列全部指向 START_HERE；待用户确认：datasets/ 方案与 push；均未提交 |
+| 2026-10-12 | **第 5 步完成，三项用户确认**：datasets/ 只建索引不迁移（已建 datasets/README.md 登记现有 4 项，根 README 底座段同步补行）；302/deploy.md 保持原位；**git 提交由用户自行处理**，本轮全部改动留在工作区。重组第 0~5 步全部完成，余下第 6 步（空间清理，可选）与个别待定小项（4.7、conda 误装清理） |
+| 2026-10-12 | 收尾核查发现：`201-colibri`、`501-human-dexterous-teleop` 为整目录型子模块（.gitmodules path 即顶层目录），写在其内部的 START_HERE.md 不会进父仓库提交，作为子仓库未跟踪文件保留（本地链接有效；501 先前已有内部漂移，与此无关）；conventions.md 对应措辞已修正；其余 START_HERE 均在父仓库层，不受影响 |
+| 2026-10-12 | 第 6 步启动：按用户确认清理 MiniMax-H3（modelscope 缓存 97G 删除——需沙箱外权限；ComfyUI 6 条断链软链删除，子模块 status 干净）；200-video 两文档同步，顺带修复 miniMax README 的 2 处 DAMO_README 历史死链；顺手发现 RynnBrain 四个 8B 权重已在 modelscope 缓存，105-damo START_HERE 状态修正；Wan-Dancer / pi0 checkpoint / RynnMotion.zip 暂不清理 |

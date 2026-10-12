@@ -31,9 +31,11 @@ dist/
 !.qoder/skills/
 
 # 项目特定的忽略规则已分散到各项目目录的 .gitignore：
-#   100-openVLA/.gitignore, 101-pi-serial-models/.gitignore,
-#   103-lingbot/.gitignore, 104-unitreerobotics/.gitignore,
-#   200-video/.gitignore, 300-robots/.gitignore
+#   1xx：100-openVLA、101-pi-serial-models、102-cosmos、103-lingbot、104-unitreerobotics
+#   2xx：200-video
+#   3xx：300-robots、301-microduck、302-kingkongrobotics
+#   5xx：500-umr（501 为独立克隆，用其自身 .gitignore）
+#   底座：models、assets
 
 # Large local model/checkpoint artifacts
 *.ckpt

@@ -1,0 +1,4 @@
+# RynnBrain / RynnWorld-4D 为 gitlink 子模块（模型、数据等大产物在其各自仓库内管理）
+# 本目录本地产物兜底
+outputs/
+logs/

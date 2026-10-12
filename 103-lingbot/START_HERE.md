@@ -16,5 +16,5 @@
 
 ## 从这里开始
 
-- 架构笔记：[LingBot-VLA-v2_架构与运行逻辑详解.md](LingBot-VLA-v2_架构与运行逻辑详解.md)
+- 架构笔记：[docs/LingBot-VLA-v2_架构与运行逻辑详解.md](docs/LingBot-VLA-v2_架构与运行逻辑详解.md)
 - 各子目录 README；lingbot-video 的 5090 实操见 `lingbot-video/README_PRACTICE.md`

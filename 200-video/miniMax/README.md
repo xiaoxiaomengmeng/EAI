@@ -1,7 +1,7 @@
 # MiniMax H3 音视频生成模型本地部署指南（RTX 5090 32G）
 
 > 本文档针对本机环境：**Ubuntu 22.04 + RTX 5090 32G (sm_120) + Python 3.10 + PyTorch 2.11.0 cu128 + CUDA Toolkit 12.8**。
-> 参考 [100-openVLA/DAMO_README.md](file:///home/creator/ws/100-openVLA/DAMO_README.md) 的环境搭建模式。
+> ⚠️ 状态（2026-10-12）：MiniMax-H3 权重已清理（modelscope 缓存 97G + ComfyUI 侧 6 条软链同步删除，`--quick-test-for-ci` 不依赖它）；需要时按 §4 重新下载 ModelScope INT8 量化版并重建软链。
 
 ---
 
@@ -44,7 +44,7 @@
 
 ### 3.1 创建 Python 3.10 虚拟环境
 
-参考 [100-openVLA/DAMO_README.md#L113-146](file:///home/creator/ws/100-openVLA/DAMO_README.md#L113-L146) 的结构：
+虚拟环境放在 ComfyUI 仓库根（结构如下）：
 
 ```bash
 cd /home/creator/ws/200-video/ComfyUI
