@@ -238,6 +238,20 @@ uv run train Mjlab-Velocity-Flat-Backlash-MicroDuck --env.scene.num-envs 4096 # 
 
 完整列表 `uv run list-envs`。
 
+### 7.5 训练曲线怎么看：tensorboard / wandb
+
+训练日志由 rsl_rl 的 logger 统一处理（`rsl_rl/utils/logger.py`），**支持三种、一次只选一个**：`tensorboard` / `wandb` / `neptune`，传别的值直接 `ValueError`。用 `--agent.logger <值>` 切换；这些 microduck 任务**默认 wandb**（§7 不带该参数时走的就是 wandb，任务 cfg 里写着 `wandb_project="mjlab_microduck"`）。
+
+**tensorboard（纯本地、不联网、免账号）**：事件文件 `events.out.tfevents.*` 落在该 run 目录 `logs/rsl_rl/<experiment_name>/<日期_时间>_<run_name>/`（和 §7.3 的 checkpoint 同一个目录）。环境里已装 tensorboard 2.20，直接开：
+
+```bash
+uv run tensorboard --logdir logs/rsl_rl        # 指父目录 → 一个面板对比所有 run
+```
+
+然后浏览器打开 <http://localhost:6006>。只看单次 run 就把 `--logdir` 指到那个具体的 run 目录。§6 smoke test 用的正是 `--agent.logger tensorboard`，那次的曲线现在也能这样翻出来。
+
+> ⚠️ 一次只 new 一个 writer，**没法 wandb + tensorboard 同时开**；想两个都看只能分别跑两次，或跑完用 TB 翻本地事件文件。
+
 ---
 
 ## 8. 训练时该盯什么
@@ -363,9 +377,66 @@ uv run train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 4096
 
 跑通这三条，整个栈（uv → torch/CUDA → warp → mjlab → BAM → mdp 补丁 → wandb → checkpoint）就都验证过了。之后玩其他任务就是改一下 task id 的事。
 
+
+
 ---
 
-## 11. 故障速查
+## 11. 训练中断后续训（断电 / 重启 / Ctrl+C）
+
+长跑中途机器重启、断电、或手滑 `Ctrl+C`——**不用从头训**。`save_interval=250`，只要跑过了 250 的整数倍，磁盘上就落了 checkpoint，从最新那个接着跑即可（通用模板见 §7.3）。
+
+### 11.1 判断能不能续 + 续训命令
+
+先看最新 checkpoint 落在哪个 run、第几 iter（一条命令同时给出 `--agent.load-run` 和 `--agent.load-checkpoint` 要填的值）：
+
+```bash
+ls -t logs/rsl_rl/<experiment_name>/*/*.pt | head -1
+# 例：logs/rsl_rl/ball_kick_right/2026-10-12_17-41-31_ball_kick_right/model_3250.pt
+```
+
+有 `model_250.pt` 及以上就能续；只有 `model_0.pt` 或一个 `.pt` 都没有 = 崩在首个存档前，只能重开。显式钉死 run + checkpoint 最稳（`<...>` 换成上面查到的值）：
+
+```bash
+cd ~/ws/301-microduck/microduck_rl
+uv run train <TASK> --env.scene.num-envs 4096 \
+    --agent.resume True \
+    --agent.load-run <timestamp_run_name> \
+    --agent.load-checkpoint model_<iter>.pt \
+    --agent.run-name resume
+```
+
+偷懒只给 `--agent.resume True` 也行：`get_checkpoint_path` 默认 `load_run=".*"`（字母序取最新 run）+ `load_checkpoint="model_.*.pt"`（文件名补零到 15 位再排 = 数值序取最高 iter），自动命中最新 run 的最高 checkpoint。**实测**：BallKick 训到一半电脑重启、存到 `model_3250.pt`，默认解析精确命中它——
+
+```bash
+uv run train Mjlab-BallKick-Flat-MicroDuck --env.scene.num-envs 4096 \
+    --agent.resume True --agent.load-run 2026-10-12_17-41-31_ball_kick_right \
+    --agent.load-checkpoint model_3250.pt --agent.run-name resume
+```
+
+### 11.2 续训会发生什么（+ 一个坑）
+
+- `runner.load()` 恢复权重 **+ iteration 计数器**，从断点（如 3250）继续跑到 `max_iterations`，**不是从 0 重来**。
+- 新建一个 `<新时间戳>_resume/` 目录写后续 checkpoint，**老目录原封不动**（不覆盖）。
+- 默认 logger 是 wandb → 会开一个**新的 wandb run**（非接续云端旧 run）；想本地看加 `--agent.logger tensorboard`（见 §7.5）。
+
+> ⚠️ **别设 `MICRODUCK_WARM_START=1`**。若加载时打印 `Patch 5 active: MICRODUCK_WARM_START=1 restarts curricula after checkpoint load`，说明它会在载入 checkpoint 后**把 curriculum 重置从头**——那是给「拿训好的步态热启动一个新任务」用的，崩溃续训带上它 curriculum 就白走了。
+
+### 11.3 先别急着续：可能已经训够
+
+按 §7.1，BallKick / Roulade 这类 episodic trick **~1000 iter 通常就收敛**。断点若已远超（如 3250），先 `play` 看效果，够用就直接进 §9 导出，别再烧几小时：
+
+```bash
+uv run play Mjlab-BallKick-Flat-MicroDuck \
+    --checkpoint-file logs/rsl_rl/ball_kick_right/2026-10-12_17-41-31_ball_kick_right/model_3250.pt
+```
+
+> ⚠️ `play` 的加载参数和 `train` **不一样**，别搞混：`train` 用 `--agent.load-checkpoint <文件名>`（在 experiment 目录里正则匹配）；`play` 用 **`--checkpoint-file <路径>`**（`Path().exists()` 直接校验，必须给到 run 目录的完整相对路径，光给文件名会在 CWD 找不到），且 `play` 没有 `--agent.*` 那组参数。`scripts/play_latest.py` 则是基于 **wandb 云端**找最新 run（默认 `--user coralie`），不适用本地 checkpoint。
+
+动作还差点意思，再用 §11.1 续。
+
+---
+
+## 12. 故障速查
 
 | 症状 | 原因 / 修法 |
 |---|---|
@@ -382,7 +453,7 @@ uv run train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 4096
 
 ---
 
-## 12. 延伸阅读
+## 13. 延伸阅读
 
 - [`README.md`](../../../microduck_rl/README.md) — 项目全景、任务清单、actuator 模型、robot 模型变体、publish 流程
 - [`AGENTS.md`](../../../microduck_rl/AGENTS.md) — env-building workflow、reward 设计规则、curriculum 规则、sim2real footguns（**读完再改 env cfg**）
