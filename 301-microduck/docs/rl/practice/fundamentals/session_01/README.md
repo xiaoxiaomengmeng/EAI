@@ -1,6 +1,6 @@
 # session_01 · 前置基础：PyTorch 地基 + MLP 训 MNIST
 
-> 对应 [`learning_roadmap.md`](../../docs/learning_roadmap.md) **阶段 0（第 1–2 周）** 的动手产出。
+> 对应 [`learning_roadmap.md`](../../../learning_roadmap.md) **阶段 0（第 1–2 周）** 的动手产出。
 > 目标：扫清「PyTorch 不会用 / 梯度是什么」的障碍，并把一个 MLP 在 MNIST 上训到 **>97%**——通过阶段 0 的硬检查点。
 
 这是整条 RL 学习路线的**第一节课**。它不讲 RL，只补 RL 之前必须先会的深度学习地基：
@@ -29,7 +29,7 @@ roadmap 的心法第 1 条是「每学一个概念立刻实现一遍」，本目
 ### 方式 A · uv（推荐，本目录已用它建好 `.venv`）
 
 ```bash
-cd 301-microduck/learning_RL/session_01
+cd 301-microduck/docs/rl/practice/fundamentals/session_01
 uv venv --python 3.11            # 建虚拟环境（若已存在可跳过）
 source .venv/bin/activate
 uv pip install -r requirements.txt
@@ -240,7 +240,7 @@ shape:  (B,1,28,28) →(B,10)          →(B,10)                                
 
 ## 下一站
 
-阶段 0 通过后，进入 [`learning_roadmap.md`](../../docs/learning_roadmap.md) **阶段 1（入门）**：
+阶段 0 通过后，进入 [`learning_roadmap.md`](../../../learning_roadmap.md) **阶段 1（入门）**：
 MDP → tabular Q-learning → 实现 DQN。届时会新建 `session_02/`。
 
 ---

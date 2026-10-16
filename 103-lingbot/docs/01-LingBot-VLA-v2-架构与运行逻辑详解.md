@@ -118,13 +118,13 @@ LingbotVlaV2Policy (PreTrainedModel)          ← 对外接口：forward 算 los
 ```
 
 对应源码：
-- [`LingbotVlaV2Policy`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1198)
-- [`FlowMatchingV2`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L429)
-- [`QwenvlWithExpertV2Model`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L121)
+- [`LingbotVlaV2Policy`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1198)
+- [`FlowMatchingV2`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L429)
+- [`QwenvlWithExpertV2Model`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L121)
 
 ### 2.3 双流逐层联合注意力（最核心的设计）
 
-[`QwenvlWithExpertV2Model.forward`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L311) 是整个模型的引擎。两个子模型**层数必须相等（都是 36 层）**，每一层做三件事：
+[`QwenvlWithExpertV2Model.forward`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L311) 是整个模型的引擎。两个子模型**层数必须相等（都是 36 层）**，每一层做三件事：
 
 1. 各流独立算出自己的 Q/K/V（`i==1` 是动作专家流，会额外注入时间条件 `ada_cond`）；
 2. **把两流的 Q/K/V 沿序列维 `torch.cat` 起来，做一次统一注意力**（先 `apply_mrope` 加旋转位置编码，再走 FlexAttention）；
@@ -227,24 +227,24 @@ LingbotVlaV2Policy (PreTrainedModel)          ← 对外接口：forward 算 los
 **关键区分：这里有两层「policy」，别混淆。**
 
 #### (1) 模型层的 policy —— `LingbotVlaV2Policy`
-它是 [`nn.Module`/`PreTrainedModel`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1198)，就是神经网络本身。在强化学习语义里，「policy（策略）」= 给定观测输出动作的映射 `π(a|o)`。这个类的两个方法正好对应策略的两种用法：
+它是 [`nn.Module`/`PreTrainedModel`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1198)，就是神经网络本身。在强化学习语义里，「policy（策略）」= 给定观测输出动作的映射 `π(a|o)`。这个类的两个方法正好对应策略的两种用法：
 - `forward(...)`：训练用，输入含真值 `actions`，输出 loss；
 - `sample_actions(...)`：推理用，输入观测，**采样**出一段动作块（Flow Matching 去噪）。
 
 #### (2) 部署层的 policy 封装 —— `LingbotVLAv2Server`
-[`deploy/lingbot_vla_v2_policy.py`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py) 把裸模型包装成**能被机器人/仿真调用的服务**，它才是部署语境下的「policy 对象」。里面有三个角色：
+[`deploy/lingbot_vla_v2_policy.py`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py) 把裸模型包装成**能被机器人/仿真调用的服务**，它才是部署语境下的「policy 对象」。里面有三个角色：
 
 | 类 | 作用 |
 |----|------|
-| [`PolicyPreprocessMixin`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L56) | 提供 `select_action` / `sample_actions_batch`：把观测搬上 GPU、选 dtype、调 `sample_actions`、反归一化 |
-| [`LingBotVlaV2InferencePolicy`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L180) | `class ...(PolicyPreprocessMixin, LingbotVlaV2Policy): pass` —— 用多继承把「预处理能力」混入「模型本体」 |
-| [`LingbotVLAv2Server`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L184) | 真正的部署封装：加载权重、管理动作块缓存、对外暴露 `infer()` |
+| [`PolicyPreprocessMixin`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L56) | 提供 `select_action` / `sample_actions_batch`：把观测搬上 GPU、选 dtype、调 `sample_actions`、反归一化 |
+| [`LingBotVlaV2InferencePolicy`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L180) | `class ...(PolicyPreprocessMixin, LingbotVlaV2Policy): pass` —— 用多继承把「预处理能力」混入「模型本体」 |
+| [`LingbotVLAv2Server`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L184) | 真正的部署封装：加载权重、管理动作块缓存、对外暴露 `infer()` |
 
 `LingbotVLAv2Server` 做的三件核心事：
 
-**① 加载与初始化**（[`load_vla`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L272)）：从 `hf_ckpt` 的上层目录读回训练时的 `lingbotvla_cli.yaml`，据此重建 `LingbotVLAV2Config`；把推理 attention 切成 `eager`（比 flex 更快）、`use_cache=True`（KV 缓存必需）；合并 Qwen3-VL 的 text/vision config；用 `safetensors` 加载权重（`strict=True`）。可选 `torch.compile` 加速。
+**① 加载与初始化**（[`load_vla`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L272)）：从 `hf_ckpt` 的上层目录读回训练时的 `lingbotvla_cli.yaml`，据此重建 `LingbotVLAV2Config`；把推理 attention 切成 `eager`（比 flex 更快）、`use_cache=True`（KV 缓存必需）；合并 Qwen3-VL 的 text/vision config；用 `safetensors` 加载权重（`strict=True`）。可选 `torch.compile` 加速。
 
-**② 动作块缓存与分块执行**（[`infer`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L461)）：这是部署 policy 的精髓。模型一次前向产出的是**一整段动作 chunk（如 50 步）**，但机器人每拍只需要一个动作。`infer` 用 `should_forward` 判断是否要重新推理：
+**② 动作块缓存与分块执行**（[`infer`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L461)）：这是部署 policy 的精髓。模型一次前向产出的是**一整段动作 chunk（如 50 步）**，但机器人每拍只需要一个动作。`infer` 用 `should_forward` 判断是否要重新推理：
 
 ```python
 should_forward = (
@@ -258,7 +258,7 @@ should_forward = (
 - `chunk_ret=True`：整块返回，由上层（仿真/机器人）自己消费；
 - `chunk_ret=False`：从缓存的 chunk 里按 `step_idx = global_step % use_length` 取**当前这一步**动作返回，`use_length` 步后才重新前向。这就是 VLA 常见的 **action chunking（动作分块）** 执行策略——减少推理次数、平滑动作。
 
-**③ 特征变换**（[`_prepare_model_input`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L401) / [`_unapply_batched_actions`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L374)）：进来时 `FeatureTransform.apply` 把原始观测编码成模型输入；出去时 `unapply` 把归一化的动作还原回机器人真实关节空间。`reset()` 时会根据 `robo_name` 重新加载对应机器人的 `robot_configs/<name>.yaml` 和归一化统计。
+**③ 特征变换**（[`_prepare_model_input`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L401) / [`_unapply_batched_actions`](../lingbot-vla-v2/deploy/lingbot_vla_v2_policy.py#L374)）：进来时 `FeatureTransform.apply` 把原始观测编码成模型输入；出去时 `unapply` 把归一化的动作还原回机器人真实关节空间。`reset()` 时会根据 `robo_name` 重新加载对应机器人的 `robot_configs/<name>.yaml` 和归一化统计。
 
 > **一句话理解**：模型层 policy = 神经网络 `π(a|o)`；部署层 policy = 「权重加载 + 预处理 + 动作分块缓存 + WebSocket 服务」的运行时封装，让模型能被真实机器人以「每拍一个动作」的方式调用。
 
@@ -269,14 +269,14 @@ should_forward = (
 先厘清一个**重要事实**：`embed_prefix` 本身**不计算深度**，深度只以「**查询 token（query token）占位符**」的形式被拼进 prefix 序列。真正的深度预测发生在模型 forward 之后的蒸馏头里。
 
 #### (1) image 在 prefix 里是什么
-[`embed_prefix`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L499) 里，图像走完整的视觉编码：
+[`embed_prefix`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L499) 里，图像走完整的视觉编码：
 ```python
 img_emb, deepstack_embs = self.qwenvl_with_expert.embed_image(images, flat_grid_thw)
 ```
 即经 Qwen3-VL 的 ViT 编码成 patch token，再包上 `vision_start_token` / `vision_end_token` 边界（`qwen3vl_use_vision_boundaries=True`）。**image 携带真实像素信息**，是模型的核心观测输入。
 
 #### (2) depth 在 prefix 里是什么
-depth 不是像素，而是一组**可学习的空白查询向量**，作为「占位符」插入序列。当 `use_depth_align and align_type=="query"` 时（[582 行起](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L582)）：
+depth 不是像素，而是一组**可学习的空白查询向量**，作为「占位符」插入序列。当 `use_depth_align and align_type=="query"` 时（[`embed_prefix` 的 depth-query 分支](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L582)）：
 
 ```python
 current_task = _get_align_tokens(self.depth_align_embs)   # 可学习参数
@@ -285,9 +285,9 @@ parts = [img_emb]                                          # 图像块打头
 # 之后按 prefix_query_segments 顺序追加：language / current_depth / future_depth / future_video ...
 ```
 
-`self.depth_align_embs` 是 [`init_depth_heads`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L799) 里注册的 `nn.Parameter`（形状 `[num_backbone_tokens, dim_out]`，如 256×2560）。`_get_align_tokens` 把它们 reshape 成 `num_task_tokens`（如 8）个 token。这些 token **初始时不含任何深度信息**，它们只是「预留座位」——在双流注意力里，它们能读到 image/lang token，于是被「训练成」承载场景几何的表征。
+`self.depth_align_embs` 是 [`init_depth_heads`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L799) 里注册的 `nn.Parameter`（形状 `[num_backbone_tokens, dim_out]`，如 256×2560）。`_get_align_tokens` 把它们 reshape 成 `num_task_tokens`（如 8）个 token。这些 token **初始时不含任何深度信息**，它们只是「预留座位」——在双流注意力里，它们能读到 image/lang token，于是被「训练成」承载场景几何的表征。
 
-段的排列顺序由 [`prefix_query_segments`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L97) 决定：`language → current_depth → (future_video_cls) → (future_video) → future_depth`，future_depth 永远放最后（便于后续 mask 阻断）。
+段的排列顺序由 [`prefix_query_segments`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L97) 决定：`language → current_depth → (future_video_cls) → (future_video) → future_depth`，future_depth 永远放最后（便于后续 mask 阻断）。
 
 #### (3) image 与 depth 的本质区别
 
@@ -300,7 +300,7 @@ parts = [img_emb]                                          # 图像块打头
 | 训练信号 | 无直接监督（靠动作 loss 反传） | 有**深度 teacher 蒸馏 loss** 直接监督 |
 
 #### (4) depth 到底在哪算、怎么监督
-在 [`FlowMatchingV2.forward`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L846) 拿到主干输出 `outputs_embeds` 后，调 [`depth_emb_forward`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1418)：
+在 [`FlowMatchingV2.forward`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L846) 拿到主干输出 `outputs_embeds` 后，调 [`depth_emb_forward`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1418)：
 ```python
 align_embs = self._current_depth_task_tokens(hidden_states, ...)  # 取出 current_depth 那几个 token
 align_embs = torch.cat([image_embs, align_embs], dim=1)
@@ -325,8 +325,8 @@ u_t = noise - actions                                          # 目标速度场
 ```
 
 而且连**时间采样**和**积分方向**都一样：
-- `sample_time` 都用 `sample_beta(1.5, 1.0)` 再 `*0.999+0.001`（V1 [1055 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1055)、pi0 1935 行）；
-- 采样都从 `t=1`（纯噪声）向 `t=0`（干净动作）做 Euler 积分，`dt = -1/num_steps`，默认 10 步（[sample_actions](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L971)、pi0 2151 行）。
+- `sample_time` 都用 `sample_beta(1.5, 1.0)` 再 `*0.999+0.001`（V1 [`sample_time`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1055)、pi0 1935 行）；
+- 采样都从 `t=1`（纯噪声）向 `t=0`（干净动作）做 Euler 积分，`dt = -1/num_steps`，默认 10 步（[sample_actions](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L971)、pi0 2151 行）。
 
 这就是「原理相似」的原因——它们是**同一套 Rectified-Flow / Flow-Matching 动作生成范式**。
 
@@ -341,7 +341,7 @@ u_t = noise - actions                                          # 目标速度场
 | **辅助任务** | 无 | **双查询蒸馏**：depth + future-video 两个代理 loss |
 | **注意力实现** | flex | **flex_cached**（预建 BlockMask 跨层复用） |
 
-其中「时间步注入」值得展开：π₀ 和 LingBot 都在 [`embed_suffix`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1126) 里把正弦时间编码与 noisy action 拼接后过 MLP（`action_time_mlp_in/out`）。但 LingBot **额外**通过 `ada_cond=time_embs` 把时间送进动作专家每层的 `AdaRMSNorm`（[QwenvlWithExpertV2Model.forward 342 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L342)），即 DiT 风格的 FiLM 调制 `(1+γ)·x̂+β`。π₀ 无此机制。
+其中「时间步注入」值得展开：π₀ 和 LingBot 都在 [`embed_suffix`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1126) 里把正弦时间编码与 noisy action 拼接后过 MLP（`action_time_mlp_in/out`）。但 LingBot **额外**通过 `ada_cond=time_embs` 把时间送进动作专家每层的 `AdaRMSNorm`（[QwenvlWithExpertV2Model.forward 342 行](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L342)），即 DiT 风格的 FiLM 调制 `(1+γ)·x̂+β`。π₀ 无此机制。
 
 > **一句话理解**：把 Flow Matching 想成「同一款发动机」，π₀ 和 LingBot-VLA 2.0 用的是同款发动机；区别在于 LingBot 换了更强的车头（Qwen3-VL）、加了多档变速箱（MoE 专家）、统一了轮距（55 维动作）、还装了两套辅助训练轮（深度 + 未来视频蒸馏）。
 
@@ -349,7 +349,7 @@ u_t = noise - actions                                          # 目标速度场
 
 ### 问题 4：MoE 动作专家如何路由
 
-MoE 只装在**动作专家（qwen_expert）**里，不在 VLM 主干里。[`_install_moe_blocks`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L170) 把 `token_moe_layers` 指定的层（robotwin 配置是全部 36 层）的 MLP 替换成 [`Qwen2TokenMoeBlock`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/qwen2_action_expert.py#L222)。
+MoE 只装在**动作专家（qwen_expert）**里，不在 VLM 主干里。[`_install_moe_blocks`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L170) 把 `token_moe_layers` 指定的层（robotwin 配置是全部 36 层）的 MLP 替换成 [`Qwen2TokenMoeBlock`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/qwen2_action_expert.py#L222)。
 
 #### (1) 路由五步（`Qwen2TokenMoeBlock.forward`，L274）
 ```python
@@ -372,12 +372,12 @@ routing_weights = routing_weights * self.routed_scaling_factor    # ×4.0
 - **token 级路由**：每个 token 独立选专家（不是每序列），32 选 4；
 - **gate 用 fp32**：注释明确说 bf16 logits 会在分数接近时翻转 top-k，造成「轮换死专家」；
 - **打分与选择解耦**：`sigmoid` 分数既用于选择（加 bias 后 topk），也用于加权（用未加 bias 的原分数 gather）；
-- **共享专家（shared expert）**：[356 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/qwen2_action_expert.py#L356) 所有 token 都过一个 `shared_expert`，与路由专家输出相加——这就是 README 说的「shared expert isolation」，让通用先验和特化模式共存。
+- **共享专家（shared expert）**：[`Qwen2TokenMoeBlock.forward`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/qwen2_action_expert.py#L356) 所有 token 都过一个 `shared_expert`，与路由专家输出相加——这就是 README 说的「shared expert isolation」，让通用先验和特化模式共存。
 
 #### (2) 负载均衡：两种机制并存
 MoE 的老大难是「专家旱涝不均/死专家」。本项目提供两条路：
 
-**A. Loss-free 均衡（无辅助 loss，靠 bias 纠偏）** —— [`moe_load_balance.py`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/moe_load_balance.py)
+**A. Loss-free 均衡（无辅助 loss，靠 bias 纠偏）** —— [`moe_load_balance.py`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/moe_load_balance.py)
 注册成 optimizer 的 pre-hook，每次 `optimizer.step()` 前执行（DeepSeek-V3 风格）：
 ```python
 mean_load = tpe.float().mean()
@@ -386,12 +386,12 @@ block.e_score_correction_bias.add_(-coeff * deviation)   # 过载专家 bias↓�
 ```
 `coeff = bias_update_speed`。robotwin 后训练里 `bias_update_speed: 0`（即关闭 loss-free，走下面的 B）。
 
-**B. 辅助 loss 均衡** —— [`_moe_losses_and_metrics`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1073)
+**B. 辅助 loss 均衡** —— [`_moe_losses_and_metrics`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1073)
 - **序列级均衡 loss**（`sequence_wise_loss_coeff=1e-3`，`mode=per_sequence`）：在每个样本自己的 T 个 token 内平衡专家使用（Triton kernel `triton_sequence_wise_balance_loss`）；
 - **router z-loss**（`router_z_loss_coeff=1e-4`）：`logsumexp(logits)²` 抑制 logits 爆炸。
 
 #### (3) 专家并行（EP）
-[`get_parallel_plan`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1204) 把 `experts.gate_proj/up_proj/down_proj` 按 `Shard(0)` 切到不同 GPU；`moe_implementation=fused` 时用 `Qwen2FusedExperts` 做 group-gemm，推理无梯度时还能走 `robby_moe_forward` 融合 kernel。
+[`get_parallel_plan`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1204) 把 `experts.gate_proj/up_proj/down_proj` 按 `Shard(0)` 切到不同 GPU；`moe_implementation=fused` 时用 `Qwen2FusedExperts` 做 group-gemm，推理无梯度时还能走 `robby_moe_forward` 融合 kernel。
 
 > **一句话理解**：每个动作 token 经 fp32 gate 打分（sigmoid）→ 加纠偏 bias 选 top-4 专家 → 用原始分数加权求和，再叠加一个所有 token 共享的 shared expert；负载用「bias 纠偏（loss-free）」或「序列级均衡 loss + z-loss」来防止死专家。
 
@@ -405,7 +405,7 @@ block.e_score_correction_bias.add_(-coeff * deviation)   # 过载专家 bias↓�
 - **深度 teacher**：MoGe-2 / MoRGBD，输入当前帧（和未来帧），输出深度图；
 - **视频 teacher**：DINO-Video，输入 `[warmup, current, future]` 帧序列，输出语义 patch/cls 特征。
 
-它们在训练循环里以 `torch.no_grad()` 现场计算 target（[`train_lingbotvla.py` 763-791 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/tasks/vla/train_lingbotvla.py#L763)）：
+它们在训练循环里以 `torch.no_grad()` 现场计算 target（[`train_lingbotvla.py` 763-791 行](../lingbot-vla-v2/tasks/vla/train_lingbotvla.py#L763)）：
 ```python
 depth_targets, cls_token = get_depth_target(depth_model_type, (moge_model, morgbd_model), pil_images)
 future_depth_targets, _  = get_depth_target(..., future_pil_images)      # 未来帧深度
@@ -421,7 +421,7 @@ future_video_target_bundle = get_video_target(video_teacher, pil_images, future_
 它们在 `embed_prefix` 里被拼进 prefix 序列（顺序见 `prefix_query_segments`），在双流注意力中「吸收」图像/语言信息。
 
 #### (3) 用头解码 + 算蒸馏 loss
-模型 forward 后，[`FlowMatchingV2.forward` 846-889 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L846)：
+模型 forward 后，[`FlowMatchingV2.forward` 846-889 行](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L846)：
 ```python
 loss_depth, loss_future_depth, depth_preds, future_depth_preds = \
     self.depth_emb_forward(outputs_embeds, depth_targets, img_masks, future_depth_targets)
@@ -434,14 +434,14 @@ if self.use_future_video:
     # 可选：当前帧视频对齐 current_video_emb_forward
     loss_future_video = video_total_loss * video_weight       # 0.004
 ```
-- [`depth_emb_forward`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1418)：取出 depth query token → 拼上 image 特征 → 过 `depth_align_head`（`TaskTokenDepthHead`）解码 → 与 teacher 深度算 loss；
+- [`depth_emb_forward`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1418)：取出 depth query token → 拼上 image 特征 → 过 `depth_align_head`（`TaskTokenDepthHead`）解码 → 与 teacher 深度算 loss；
 - `video_emb_forward`：取出 video query token → 过视频头 → 与 DINO teacher 特征算 loss（支持 patch loss / cosine loss / cls loss）。
 
 #### (4) 关键工程细节
 - **loss 权重很小（0.004）**：蒸馏是「辅助任务」，不能盖过主动作 loss；
 - **detach 图像特征**：`detach_future_image_feats=True`，未来分支不回传梯度到图像编码，省显存、稳定训练；
 - **共享 query 投影**：`share_future_depth_query` / `use_shared_future_task_proj` 让未来深度与未来视频共用查询，减少参数；
-- **attention 阻断**：`block_future_depth_to_action` / `block_suffix_to_future_video` 可切断「动作 suffix → 未来 query」的注意力边（用 [`block_suffix_to_fv_`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L172) 在已建好的 2D mask 上把矩形块置 False），保证未来预测不「泄漏」给当前动作生成，维持因果性；
+- **attention 阻断**：`block_future_depth_to_action` / `block_suffix_to_future_video` 可切断「动作 suffix → 未来 query」的注意力边（用 [`block_suffix_to_fv_`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L172) 在已建好的 2D mask 上把矩形块置 False），保证未来预测不「泄漏」给当前动作生成，维持因果性；
 - **推理不需要 teacher**：`align_params` 只在训练用；推理时这些 query token 仍参与前向（因为权重已训练进去），但不算 loss、不需要 MoGe/DINO。
 
 > **一句话理解**：在 prefix 里插两组「空白查询 token」，让它们在注意力中吸收观测信息；训练时用深度头/视频头把它们解码，分别与 MoGe 深度、DINO 视频特征对齐（小权重辅助 loss）。等于用两个现成 teacher 免费教会模型「看懂 3D 几何」和「预判未来变化」，推理时不需要 teacher。
@@ -450,7 +450,7 @@ if self.use_future_video:
 
 ### 问题 6：`base_dataset.py`（152-153）如何处理输入数据，输入包含什么
 
-**先回答「输入包含什么」**：π₀ 主要是 image + language（+ state/action）。LingBot-VLA 2.0 的模态明显更丰富。[`VLADataset.getitem`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L268) 经 `FeatureTransform.apply` 后，[最终 batch_dict](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/data/vla_data/utils.py#L468) 包含：
+**先回答「输入包含什么」**：π₀ 主要是 image + language（+ state/action）。LingBot-VLA 2.0 的模态明显更丰富。[`VLADataset.getitem`](../lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L268) 经 `FeatureTransform.apply` 后，[最终 batch_dict](../lingbot-vla-v2/lingbotvla/data/vla_data/utils.py#L468) 包含：
 
 | 字段 | 含义 | π₀ 是否有 |
 |------|------|-----------|
@@ -468,18 +468,18 @@ if self.use_future_video:
 
 #### 数据处理链路（`VLADataset`）
 
-**① 底层 LeRobot 数据集**（[`LeRobotDataset`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L71)）
+**① 底层 LeRobot 数据集**（[`LeRobotDataset`](../lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L71)）
 继承 LeRobot 的 `LeRobotDataset`，兼容 v2/v3 API。`__getitem__` 里：
 - 用 `delta_indices` 取一个时间窗的多帧 state/action；
 - `_query_videos` 按时间戳从 mp4 解码视频帧（v3 里多 episode 存在共享 mp4，需加 `from_timestamp` 偏移）；
 - 对相机帧做 `image_transforms`（Resize）。
 
-**② 时间窗构造**（[`get_delta_timestamps`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L231) / [`get_video_delta_timestamps`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L242)）
+**② 时间窗构造**（[`get_delta_timestamps`](../lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L231) / [`get_video_delta_timestamps`](../lingbot-vla-v2/lingbotvla/data/vla_data/base_dataset.py#L242)）
 - 动作：取 `[0, 1, ..., chunk_size-1]` 帧（一整段未来动作）；
 - 若 `actions_convert_from_state`（用 state 差分当 action）：取 `chunk_size+1` 帧 state；
 - 若 `use_future_image`：视频额外取 `[0, (chunk_size-1)/fps]` 两个时刻（当前帧 + 未来帧），供蒸馏。
 
-**③ 特征变换**（`FeatureTransform.apply`，[utils.py 375 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/data/vla_data/utils.py#L375)）
+**③ 特征变换**（`FeatureTransform.apply`，[`utils.py`](../lingbot-vla-v2/lingbotvla/data/vla_data/utils.py#L375)）
 这是「原始 LeRobot 数据 → 模型输入」的核心，四步：
 1. `convert_features`：按 `robot_configs/<name>.yaml` 把原始 key（如 `observation.state` 的 0-6 维）映射到统一命名（`observation.state.arm.position` 等）；
 2. `action -= state`（若 `subtract_state`）：把绝对动作转成相对当前 state 的增量（末端位姿还支持四元数相对）；
@@ -499,16 +499,16 @@ if self.use_future_video:
 #### (1) FSDP2 —— 分布式显存分片
 FSDP（Fully Sharded Data Parallel）2 是 PyTorch 的分片数据并行。核心思想：把每个 transformer 层的**参数、梯度、优化器状态**切成 N 份分到 N 张卡，需要时才 all-gather 拼回来算，算完立刻释放。这样单卡只存 1/N，能塞下大模型。
 
-[`build_parallelize_model`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/distributed/torch_parallelize.py#L80) 做的事：
+[`build_parallelize_model`](../lingbot-vla-v2/lingbotvla/distributed/torch_parallelize.py#L80) 做的事：
 - 用 `torch.distributed._composable.fsdp.fully_shard` **逐层包裹**（decoder block 粒度），而不是整模型一刀切；
-- `vlm_fsdp=True`：给 Qwen3-VL 主干的 decoder 层和 vision block 单独分片（[340 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/distributed/torch_parallelize.py#L340)）；
+- `vlm_fsdp=True`：给 Qwen3-VL 主干的 decoder 层和 vision block 单独分片（[`vlm_fsdp` 分支](../lingbot-vla-v2/lingbotvla/distributed/torch_parallelize.py#L340)）；
 - **MoE 专家单独分片（EP）**：`Qwen2FusedExperts` 用 `fully_shard(expert_mod, ep_fsdp_kwargs)`，并 `set_gradient_divide_factor`；还建 `_ep_param_set` 供专门的 EP 梯度裁剪（`ep_fsdp2_clip_grad_norm`）；
 - 混合精度 `MixedPrecisionPolicy`，可选激活重计算（gradient checkpointing）省显存。
 
 配置里 `data_parallel_mode: fsdp2`、`module_fsdp_enable: true`、`ulysses_parallel_size`（序列并行）都是这套体系。**分布式 Muon**（`robotwin_dist_muon.yaml`）进一步把 Muon 的正交化计算也分摊到各卡并与通信重叠。
 
 #### (2) Muon —— 一种新的优化器（替代 AdamW）
-AdamW 对每个参数做逐元素的一阶/二阶矩估计。**Muon 的核心是「对梯度做正交化」**：把梯度矩阵 `G` 通过 **Newton-Schulz 迭代**（[`batched_newton_schulz`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/optim/muon.py#L79)）近似变成正交矩阵 `U`（`U ≈ UVᵀ`，来自 SVD 分解 `G=UΣVᵀ`），再用 `U` 更新参数：
+AdamW 对每个参数做逐元素的一阶/二阶矩估计。**Muon 的核心是「对梯度做正交化」**：把梯度矩阵 `G` 通过 **Newton-Schulz 迭代**（[`batched_newton_schulz`](../lingbot-vla-v2/lingbotvla/optim/muon.py#L79)）近似变成正交矩阵 `U`（`U ≈ UVᵀ`，来自 SVD 分解 `G=UΣVᵀ`），再用 `U` 更新参数：
 
 ```python
 # 五次 Newton-Schulz 迭代（a,b,c 为固定系数）
@@ -519,14 +519,14 @@ for _ in range(ns_steps):
 ```
 直觉：正交化把各方向的更新幅度拉平（谱归一化），对矩阵型参数（Linear 权重）收敛更好、loss 更低。
 
-**但不是所有参数都用 Muon**——[`split_muon_adamw_params`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/optim/muon.py#L144) 做划分：
+**但不是所有参数都用 Muon**——[`split_muon_adamw_params`](../lingbot-vla-v2/lingbotvla/optim/muon.py#L144) 做划分：
 - **走 Muon**：2D 权重矩阵、3D MoE 专家堆叠（`gate_proj/up_proj/down_proj`）；
 - **走 AdamW**：`nn.Embedding`、`lm_head`、`embed_tokens`、以及各种 1D 参数（norm/bias）——因为这些不适合正交化。
 
-`DistributedMuon`（[muon.py 顶部注释](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/optim/muon.py#L1)）针对 FSDP2 分片做了优化：**同形状参数 mega-batch**——堆叠成一个张量、一次 NCCL all-gather、一次批量 NS 迭代、再 scatter 回本地，避免逐参数通信。
+`DistributedMuon`（[muon.py 顶部注释](../lingbot-vla-v2/lingbotvla/optim/muon.py#L1)）针对 FSDP2 分片做了优化：**同形状参数 mega-batch**——堆叠成一个张量、一次 NCCL all-gather、一次批量 NS 迭代、再 scatter 回本地，避免逐参数通信。
 
 #### (3) 两者如何协作
-训练一步里（[`train_lingbotvla.py` 880-894 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/tasks/vla/train_lingbotvla.py#L880)）：
+训练一步里（[`train_lingbotvla.py` 880-894 行](../lingbot-vla-v2/tasks/vla/train_lingbotvla.py#L880)）：
 ```python
 grad_norm = ep_fsdp2_clip_grad_norm(model, max_grad_norm)  # FSDP2/EP 感知的梯度裁剪
 optimizer.step()      # Muon 对矩阵参数正交化更新 + AdamW 对 embedding 等更新
@@ -544,7 +544,7 @@ MoE 专家还有独立 LR 缩放（`get_moe_param_groups`，scale=√(num_expert
 FlexAttention 是 PyTorch 2.5+ 的可编程注意力，允许用「mask 函数」表达任意稀疏注意力模式，并编译成高效 kernel。本项目的 mask 构造分**两层**：先造语义 2D mask，再转成 FlexAttention 的 BlockMask。
 
 #### (1) 第一层：`make_att_2d_masks` 造语义 mask（prefix-LM 风格）
-[`make_att_2d_masks`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L64) 借自 big_vision，用一个 `mask_ar`（即 `att_masks`）的**前缀和**技巧表达多种注意力：
+[`make_att_2d_masks`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L64) 借自 big_vision，用一个 `mask_ar`（即 `att_masks`）的**前缀和**技巧表达多种注意力：
 ```python
 cumsum = torch.cumsum(att_masks, dim=1)
 att_2d_masks = cumsum[:, None, :] <= cumsum[:, :, None]   # 累积 mask_ar 小于等于自己 → 可见
@@ -556,12 +556,12 @@ att_2d_masks = att_2d_masks & pad_2d_masks                # 再 AND 上 padding 
 
 在本项目里：
 - **prefix**（图/文/蒸馏 query）：`vlm_causal=True` 时全 1（因果），否则全 0（双向）；
-- **suffix**（state + action）：[`embed_suffix`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1164) 里 `att_masks[:, :2]=True`，即 state token 和第一个 action token 立因果边界，**动作 token 之间双向**、但 **prefix 看不到 suffix**（保证生成动作时不污染观测编码）。
+- **suffix**（state + action）：[`embed_suffix`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla.py#L1164) 里 `att_masks[:, :2]=True`，即 state token 和第一个 action token 立因果边界，**动作 token 之间双向**、但 **prefix 看不到 suffix**（保证生成动作时不污染观测编码）。
 
 这套 cumsum 方案表达不了「某 query 不能看它前面的某段」，所以有了下面的补丁。
 
 #### (2) 补丁：矩形阻断（蒸馏因果隔离）
-[`block_suffix_to_fv_`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L172) 直接在已建好的 2D mask 上把某个矩形块置 False：
+[`block_suffix_to_fv_`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/utils.py#L172) 直接在已建好的 2D mask 上把某个矩形块置 False：
 ```python
 att_2d_masks[:, suffix_row_start:, fv_start:fv_end] = False
 ```
@@ -570,15 +570,15 @@ att_2d_masks[:, suffix_row_start:, fv_start:fv_end] = False
 #### (3) 第二层：转成 FlexAttention 的 BlockMask
 2D bool mask 不能直接喂 kernel，要转成块稀疏的 `BlockMask`。有两条路径：
 
-**A. `flex_attention_forward`（每层现算，`attention_implementation="flex"`）** —— [34 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/flex_attention.py#L34)
+**A. `flex_attention_forward`（每层现算，`attention_implementation="flex"`）** —— [`flex_attention.py`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/flex_attention.py#L34)
 1. Q/K/V transpose 成 `[B,H,L,D]` 并转 fp32；
 2. 序列长度 pad 到 `FLEX_SPARSE_BLOCK_SIZE=128` 的整数倍（FlexAttention 要求）；
 3. `precomputed_mask_factory` 把预计算 mask 包成 `mask_mod(b,h,q_idx,kv_idx)` 函数；
 4. `create_mask` 生成稠密 4D mask → `create_block_mask` 压成块稀疏 BlockMask；
 5. `flex_attention(..., block_mask, enable_gqa=True)` 执行（GQA：32 query 头 / 8 KV 头）。
 
-**B. `build_block_mask` + `flex_attention_with_block_mask`（预建复用，`attention_implementation="flex_cached"`，V2 默认）** —— [133 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/flex_attention.py#L133)
-关键优化：mask 在整个 forward 里**所有 36 层都一样**，没必要每层重建。于是在 [`QwenvlWithExpertV2Model.forward` 363-374 行](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L363)：
+**B. `build_block_mask` + `flex_attention_with_block_mask`（预建复用，`attention_implementation="flex_cached"`，V2 默认）** —— [`flex_attention.py`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/flex_attention.py#L133)
+关键优化：mask 在整个 forward 里**所有 36 层都一样**，没必要每层重建。于是在 [`QwenvlWithExpertV2Model.forward` 363-374 行](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L363)：
 ```python
 if layer_idx == 0:                        # 只在第 0 层建一次
     _full_block_mask = build_block_mask(attention_mask, num_heads, L, L)
@@ -587,7 +587,7 @@ att_output = flex_attention_with_block_mask(q, k, v, _full_block_mask, L)  # 后
 `build_block_mask` 用 `@torch.compiler.disable` 标注（建 mask 是控制流重的操作，不宜编译），`flex_attention_with_block_mask` 则省掉每次 `create_mask` 的显存分配，直接复用。
 
 #### (4) 推理时的 mask 差异
-推理去噪循环里（[`predict_velocity`](file:///Users/damon/Documents/10_code/openSources/ws/lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1004)），prefix 已缓存进 KV cache，suffix 只需对 prefix 全可见 + suffix 内部按规则可见，mask 拼成：
+推理去噪循环里（[`predict_velocity`](../lingbot-vla-v2/lingbotvla/models/vla/lingbot_vla/modeling_lingbot_vla_v2.py#L1004)），prefix 已缓存进 KV cache，suffix 只需对 prefix 全可见 + suffix 内部按规则可见，mask 拼成：
 ```python
 prefix_pad_2d_masks = prefix_pad_masks[:,None,:].expand(B, suffix_len, prefix_len)  # suffix 能看全部有效 prefix
 full_att_2d_masks = torch.cat([prefix_pad_2d_masks, suffix_att_2d_masks], dim=2)

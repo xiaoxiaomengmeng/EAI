@@ -92,7 +92,7 @@
 
 ### 4.5 文档散落
 - `20_unitreerobotics/` 根目录：`error.log`、`fix_readme.md`、`STUDY_NOTES.md`
-- `13_lingbot/` 根目录：`LingBot-VLA-v2_架构与运行逻辑详解.md`
+- `13_lingbot/` 根目录：`LingBot-VLA-v2_架构与运行逻辑详解.md`（已修正：移入 `103-lingbot/docs/` 并改名为 `01-LingBot-VLA-v2-架构与运行逻辑详解.md`）
 - `102-kingkongrobotics/deploy.md` 不在 `docs/` 下
 - `11_pi_serial_models/docs/` 下 `墨奇.txt`、`数据.txt` 不符合 `NN-主题.md` 命名
 
@@ -327,7 +327,7 @@ source .venv/bin/activate   # Python 3.10
       - `lingbot-video/.venv`：bin 33 个文件（指向更早的 `/ws/lingbot-video/.venv`）已 sed；环境里 setuptools 只有 59.6，低于构建要求的 ≥69，所以用默认隔离构建 `pip install -e . --no-deps`（清华源）重装；finder MAPPING、direct_url 已是新路径，`.venv` 残留 0；freeze 只有 editable 那行的写法变了（改成 git+ssh 形式）；`check_venv_editable` 显示 lingbot_video ok，CUDA 可用
       - `lingbot-world-v2/.venv`：bin 36 个文件已 sed；没有 editable；freeze 不变；`which python/pip` 和 shebang 正确，torch 2.11.0+cu128 CUDA 可用
       - conda `lingbot-depth`（工作区外）：mdm 的 editable 指向 `/ws/lingbot-depth`（基线里写的 ok 是误判：mdm 是命名空间包，路径不存在也能 import 成功）；`pip install -e . --no-deps --no-build-isolation` 重装后 MAPPING 已是新路径；**实跑** `example.py --example 0` 通过（输出到 `/tmp/lingbot_depth_verify`）；子模块 git status 不变
-      - 未处理（已记录）：lingbot-depth 环境里装错的 lingbot-video editable（仍指向 `/ws/lingbot-video`）；子模块 lingbot-video 已提交的 `scripts/download_models/*.sh` 有 4 处 `MODEL_DIR` 写死 `/home/creator/ws/lingbot-video/models/...`（运行脚本 `run_demo_5090.sh` 用的是相对路径，不受影响）；`README_PRACTICE.md`、lingbot-depth `fix_readme.md`（历史日志）、`LingBot-VLA-v2_架构与运行逻辑详解.md` 里的 macOS 路径都不改
+      - 未处理（已记录）：lingbot-depth 环境里装错的 lingbot-video editable（仍指向 `/ws/lingbot-video`）；子模块 lingbot-video 已提交的 `scripts/download_models/*.sh` 有 4 处 `MODEL_DIR` 写死 `/home/creator/ws/lingbot-video/models/...`（运行脚本 `run_demo_5090.sh` 用的是相对路径，不受影响）；`README_PRACTICE.md`、lingbot-depth `fix_readme.md`（历史日志）里的 macOS 路径不改（注：`LingBot-VLA-v2_架构与运行逻辑详解.md` 后已移入 `103-lingbot/docs/` 并改名为 `01-LingBot-VLA-v2-架构与运行逻辑详解.md`，其 52 处 macOS 死链已统一修为相对路径）
       - lingbot-vla-v2 本机还没有环境，START_HERE 里写「待定」
       - 备份：`venv-103-lingbot-video/`、`venv-103-lingbot-world-v2/`、`conda-lingbot-depth/`；已写 `103-lingbot/START_HERE.md`
       - **后续（用户要求）**：`lingbot-video/.venv`（7.1G）、`lingbot-world-v2/.venv`（7.9G）已删除（删前确认没有进程在用；子模块 git status 不受影响），共释放约 15G；START_HERE 中这两项改为「待定」；conda `lingbot-depth` 不是 venv，保留
@@ -408,3 +408,4 @@ source .venv/bin/activate   # Python 3.10
 | 2026-10-12 | 收尾核查发现：`201-colibri`、`501-human-dexterous-teleop` 为整目录型子模块（.gitmodules path 即顶层目录），写在其内部的 START_HERE.md 不会进父仓库提交，作为子仓库未跟踪文件保留（本地链接有效；501 先前已有内部漂移，与此无关）；conventions.md 对应措辞已修正；其余 START_HERE 均在父仓库层，不受影响 |
 | 2026-10-12 | 第 6 步启动：按用户确认清理 MiniMax-H3（modelscope 缓存 97G 删除——需沙箱外权限；ComfyUI 6 条断链软链删除，子模块 status 干净）；200-video 两文档同步，顺带修复 miniMax README 的 2 处 DAMO_README 历史死链；顺手发现 RynnBrain 四个 8B 权重已在 modelscope 缓存，105-damo START_HERE 状态修正；Wan-Dancer / pi0 checkpoint / RynnMotion.zip 暂不清理 |
 | 2026-10-12 | 本轮全部改动随提交 **28b384d** 落库（24 文件：START_HERE×5、.gitignore×7、conventions / datasets / skills 索引、README 与 models 更新、103 归档 mv、误入库临时文件删除），此前各条「均未提交」备注自此失效；工作区仅剩 9 个子模块 gitlink 漂移待逐个核查（本条记录为提交后补写，随下次提交入库） |
+| 2026-10-16 | **103-lingbot 架构详解文档收尾**：`103-lingbot/docs/LingBot-VLA-v2_架构与运行逻辑详解.md` ①review 核实 9 处源码结论（Flow Matching/flex_cached/MoE 路由/π₀ 逐行对比等）均属实；②修复 52 处指向他人 macOS `/Users/damon/...` 的死链，统一改为相对路径 `../lingbot-vla-v2/...`；③按 `NN-主题.md` 约定改名 `01-LingBot-VLA-v2-架构与运行逻辑详解.md`（shell mv 规避中文名 git mv 坑）；④弱化 7 处裸行号链接文字为语义符号（行号降为 URL 锚点）；⑤同步 START_HERE.md 链接与本文档 4.5、L330 两处旧文件名引用；原文件备份于 `/tmp/`；均未提交 |

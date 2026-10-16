@@ -9,7 +9,7 @@
 >
 > - 总览（本文）：`microduck` 的整体架构、IPC 契约、代码布局、设计不变量、路线图、构建测试
 > - 模块详解骨架：见 [`modules.md`](modules.md) —— `microduck` 每个模块一小节，留待逐个展开
-> - `microduck_rl` 学习笔记：见 [`microduck_rl/`](../microduck_rl/) 子目录（RL 训练侧，与 `modules/` 平行）——**从 [`microduck_rl/README.md`](../microduck_rl/README.md) 进入**（导航 + 认知阶梯 + 学习路线图）。该目录按学习顺序编号：`00-primer/`(预备知识) · `01-quickstart/`(部署上手) · `02-architecture/`(架构与概念词典) · `03-walkthrough/`(全链路实战教程，**初学者主线**) · `04-modules/`(模块击破) · `05-source-walkthrough/`(源码走读) · `06-topics/`(专题深挖) · `07-reference/`(入口地图)。
+> - `microduck_rl` 学习笔记：见 [`rl/`](../rl/) 子目录（RL 训练侧，与 `modules/` 平行）——**从 [`rl/README.md`](../rl/README.md) 进入**（导航 + 认知阶梯 + 学习路线图）。该目录按学习顺序编号：`00-primer/`(预备知识) · `01-quickstart/`(部署上手) · `02-architecture/`(架构与概念词典) · `03-walkthrough/`(全链路实战教程，**初学者主线**) · `04-modules/`(模块击破) · `05-source-walkthrough/`(源码走读) · `06-topics/`(专题深挖) · `07-reference/`(入口地图)。
 
 ---
 

@@ -4,7 +4,7 @@
 >
 > 系列原则：**一页只讲一个 norm**，讲透它自己（定义、数学形式、性质、数值例子），**不横向对比其他 norm**——其他归一化（BatchNorm / RMSNorm / GroupNorm 等）后续各自单独成页。
 >
-> 生成物存本目录 `docs/diagrams/`，命名 `norm-NN-<主题>-poster.{svg,png}`。
+> 生成物存本目录 `diagrams/`，命名 `norm-NN-<主题>-poster.{svg,png}`。
 
 ---
 

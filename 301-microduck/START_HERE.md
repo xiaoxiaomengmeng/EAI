@@ -21,8 +21,8 @@ train Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 16 --agent.max_iteratio
 
 ## 从这里开始
 
-- ⭐ **训练全链路**（本机 RTX 5090 已实测跑通 §1~§6）：[docs/microduck_rl/01-quickstart/desktop_quickstart.md](docs/microduck_rl/01-quickstart/desktop_quickstart.md) —— 装 → 验证 → smoke → 正式训练 → 导出 ONNX；赶时间直接看末尾 §10 三条命令 TL;DR。
-- **文档中心总索引**：[docs/README.md](docs/README.md)（中文学习笔记，分 microduck / microduck_rl / diagrams 三块）；RL 认知阶梯 [docs/microduck_rl/README.md](docs/microduck_rl/README.md)（00→07）与路线图 [docs/learning_roadmap.md](docs/learning_roadmap.md)。
-- **Rust 运行时**：[docs/microduck/README.md](docs/microduck/README.md)（架构 / IPC 契约 / robotd / updater）；上游说明 [microduck/README.md](microduck/README.md)。
-- **RL 入门练习**：[learning_RL/](learning_RL)（session_01 PyTorch 基础、session_02 MDP · Q-learning · DQN）。
+- ⭐ **训练全链路**（本机 RTX 5090 已实测跑通 §1~§6）：[docs/rl/01-quickstart/desktop_quickstart.md](docs/rl/01-quickstart/desktop_quickstart.md) —— 装 → 验证 → smoke → 正式训练 → 导出 ONNX；赶时间直接看末尾 §10 三条命令 TL;DR。
+- **文档中心总索引**：[docs/README.md](docs/README.md)（中文学习笔记，分 deploy 端侧部署 / rl 强化学习两类，diagrams 已移至与 docs 同级）；RL 认知阶梯 [docs/rl/README.md](docs/rl/README.md)（00→07）与路线图 [docs/rl/learning_roadmap.md](docs/rl/learning_roadmap.md)。
+- **Rust 运行时**：[docs/deploy/README.md](docs/deploy/README.md)（架构 / IPC 契约 / robotd / updater）；上游说明 [microduck/README.md](microduck/README.md)。
+- **RL 入门练习**：[docs/rl/practice/](docs/rl/practice/)（fundamentals/session_01 PyTorch 基础、session_02 MDP · Q-learning · DQN）。
 - 任务认准 `-MicroDuck` 后缀（`uv run list-envs` 共 45 个，其余为 mjlab 内置的 Cartpole / Unitree / Yam）；首推 walking `Mjlab-Velocity-Flat-MicroDuck`。

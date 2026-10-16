@@ -5,6 +5,8 @@
 > `microduck_rl` 是 microduck 双足鸭子机器人的**策略训练场**——用 GPU 并行物理仿真 + PPO 算法，训练出"会走、会滚、会翻身、会踢球"的运动策略，导出成 ONNX，再交给隔壁 Rust 仓库 [`microduck`](../../microduck/)（机器人运行时）在真机板子上加载执行。
 >
 > **这个 README 是整个体系的唯一入口。** 先花 5 分钟读完它，你就会知道：该按什么顺序读、每份文档解决什么问题、目录为什么这么分、以及未来新文档往哪里长。读完其他代码库时，第六节的「方法论」也能直接套用。
+>
+> **本类分两半（物理分开）**：【总结文档】= 理解型 markdown（`00→07` 认知阶梯 + [`learning_roadmap.md`](learning_roadmap.md) + [`mdp_principles.md`](mdp_principles.md)）；【本地复现】= 动手型内容（[`practice/`](practice/)：可运行的通用 RL 基础课 + 未来复现 microduck 已有任务的脚本与记录）。
 
 ---
 
@@ -20,24 +22,28 @@
 | 查"某个命令的代码入口在哪个文件" | [`07-reference/entry_points_map.md`](07-reference/entry_points_map.md) | 三类入口（插件/命令/脚本）速查 |
 | 深入某个源码模块（robot/tasks/export…） | `04-modules/`（**#5 velocity 精讲已上线**，余见第五节） | 以 velocity 为脊柱逐个击破 |
 | 我是纯 RL 小白，术语都不懂 | 先读 walkthrough 的「第 0 部分 · 预备知识」 | 未来会独立成 `00-primer/` |
+| 只想快速搞懂 MDP 的数学原理 | [`mdp_principles.md`](mdp_principles.md) | 【总结】纯原理笔记（+ 同名海报），不绑定代码 |
+| **动手练通用 RL 基础**（PyTorch/MLP、DQN/CartPole） | [`practice/fundamentals/`](practice/fundamentals/) | 【复现】可运行的 session_01 / session_02 |
 
 ---
 
 ## 二、文档地图（现有 + 规划）
 
-编号即学习顺序：**00 → 07 由浅入深、从整体到局部、最后到专题**。
+分两半：【总结文档】按编号 **00 → 07 由浅入深、从整体到局部、最后到专题**；【本地复现】统一收在 `practice/`。
 
-| 目录 | 文档 | 定位（一句话职责） | 状态 |
-|---|---|---|---|
-| （本目录） | [`learning_roadmap.md`](learning_roadmap.md) | **几个月怎么学**（约 12 个月周计划 + 每阶段硬检查点，把编号阶梯拉成时间表） | ✅ 现有 |
-| `00-primer/` | RL 零基础预备 | 强化学习 / 仿真 / sim2real 扫盲 | 🚧 规划（内容暂并入 walkthrough 第 0 部分） |
-| `01-quickstart/` | [`desktop_quickstart.md`](01-quickstart/desktop_quickstart.md) · [`sim_deploy_rl_reproduce_guide.md`](01-quickstart/sim_deploy_rl_reproduce_guide.md) | **怎么跑起来 + 坏了怎么办**（命令与故障权威）；后者是无真机的仿真部署+训练复现指南 | ✅ 现有 |
-| `02-architecture/` | [`architecture_and_glossary.md`](02-architecture/architecture_and_glossary.md) | **是什么 / 为什么**（架构总览 §1–11 + 概念词典 A–F） | ✅ 现有 |
-| `03-walkthrough/` | [`training_walkthrough.md`](03-walkthrough/training_walkthrough.md) | **跟着实例走一遍全链路**（阶段 0–8，velocity 贯穿） | ✅ 现有 ⭐主线 |
-| `04-modules/` | 13 份模块导读（#5 已完成） | **逐个吃透源码模块**（以 velocity 为脊柱） | 🚧 1/13 · [#5 velocity 精讲](04-modules/05-velocity-deep-dive.md) ✅ |
-| `05-source-walkthrough/` | velocity 端到端源码走读（规划） | **一条命令串起所有模块**的源码级走读 | 🚧 规划 |
-| `06-topics/` | sim2real / reward 设计 / 案例复盘（规划） | **专题深挖难点**，串联仓库自带的 specs/plans | 🚧 规划 |
-| `07-reference/` | [`entry_points_map.md`](07-reference/entry_points_map.md) | **代码入口速查**（想跑某功能从哪进） | ✅ 现有 |
+| 目录 | 文档 | 定位（一句话职责） | 属哪半 | 状态 |
+|---|---|---|---|---|
+| （本目录） | [`learning_roadmap.md`](learning_roadmap.md) | **几个月怎么学**（约 12 个月周计划 + 每阶段硬检查点，把编号阶梯拉成时间表） | 总结 | ✅ 现有 |
+| （本目录） | [`mdp_principles.md`](mdp_principles.md) | **MDP 纯原理**（五元组 / 马尔可夫性 / Bellman）+ 同名海报 png/svg | 总结 | ✅ 现有 |
+| `00-primer/` | RL 零基础预备 | 强化学习 / 仿真 / sim2real 扫盲 | 总结 | 🚧 规划（内容暂并入 walkthrough 第 0 部分） |
+| `01-quickstart/` | [`desktop_quickstart.md`](01-quickstart/desktop_quickstart.md) · [`sim_deploy_rl_reproduce_guide.md`](01-quickstart/sim_deploy_rl_reproduce_guide.md) | **怎么跑起来 + 坏了怎么办**（命令与故障权威）；后者是无真机的仿真部署+训练复现指南 | 总结 | ✅ 现有 |
+| `02-architecture/` | [`architecture_and_glossary.md`](02-architecture/architecture_and_glossary.md) | **是什么 / 为什么**（架构总览 §1–11 + 概念词典 A–F） | 总结 | ✅ 现有 |
+| `03-walkthrough/` | [`training_walkthrough.md`](03-walkthrough/training_walkthrough.md) | **跟着实例走一遍全链路**（阶段 0–8，velocity 贯穿） | 总结 | ✅ 现有 ⭐主线 |
+| `04-modules/` | 13 份模块导读（#5 已完成） | **逐个吃透源码模块**（以 velocity 为脊柱） | 总结 | 🚧 1/13 · [#5 velocity 精讲](04-modules/05-velocity-deep-dive.md) ✅ |
+| `05-source-walkthrough/` | velocity 端到端源码走读（规划） | **一条命令串起所有模块**的源码级走读 | 总结 | 🚧 规划 |
+| `06-topics/` | sim2real / reward 设计 / 案例复盘（规划） | **专题深挖难点**，串联仓库自带的 specs/plans | 总结 | 🚧 规划 |
+| `07-reference/` | [`entry_points_map.md`](07-reference/entry_points_map.md) | **代码入口速查**（想跑某功能从哪进） | 总结 | ✅ 现有 |
+| `practice/` | [`README.md`](practice/README.md) + `fundamentals/`（session_01 / session_02） | **本地复现**：动手跑通——通用 RL 基础课 + 未来 microduck 已有任务的复现脚本/记录 | 复现 | ✅ 现有（fundamentals 已就位；任务复现待补） |
 
 > **仓库自带的一手资料**（不是本笔记，但学习时要配合看）：
 > [`README.md`](../../microduck_rl/README.md)（项目全景）、[`AGENTS.md`](../../microduck_rl/AGENTS.md)（改 env 前必读的规则）、[`docs/superpowers/specs/`](../../microduck_rl/docs/superpowers/specs/)（每个任务的设计文档）、[`docs/superpowers/plans/`](../../microduck_rl/docs/superpowers/plans/)（实现计划含验收标准）、[`docs/roller_standup_policy_summary.md`](../../microduck_rl/docs/roller_standup_policy_summary.md)（一个策略从设计到调试的完整复盘）。
@@ -150,12 +156,12 @@
 
 ## 七、维护约定（写给未来的自己 / 新增文档时遵守）
 
-- **新文档放哪**：按认知阶梯对号入座——模块导读进 `04-modules/`、专题进 `06-topics/`、速查进 `07-reference/`。文件名用小写连字符（如 `04-modules/05-velocity-deep-dive.md`）。
-- **相对路径约定**（本目录 = `docs/microduck_rl/`）：
+- **新文档放哪**：理解型文档按认知阶梯对号入座——模块导读进 `04-modules/`、专题进 `06-topics/`、速查进 `07-reference/`；**动手复现型（可运行代码 / 复现记录）进 `practice/`**。文件名用小写连字符（如 `04-modules/05-velocity-deep-dive.md`）。
+- **相对路径约定**（本目录 = `docs/rl/`）：
   - 指向 **RL 仓库代码**：`../../microduck_rl/...`（子目录里的文档要多一层 `../../../microduck_rl/...`）
   - 指向 **Rust 仓库**：`../../microduck/...`（子目录里 `../../../microduck/...`）
   - 指向 **兄弟文档**：`../NN-目录名/文件.md`
-  - 指向 **上层 docs**：`../README.md`、`../modules/robotd.md`（子目录里 `../../`）
+  - 指向 **上层 docs / 端侧部署类**：`../README.md`、`../deploy/modules/robotd.md`（子目录里 `../../`）
 - **保留案例与推理**：梳理原始资料时，保留原作者的技术例子、问题背景、推理过程、run 编号、踩坑复盘；**不要抽象成空泛的架构提纲**。
 - **改完验证死链**：移动/新增文档后，跑一次死链扫描（提取所有 markdown 相对链接的目标路径，逐个 `test -e` 确认文件存在），确保 `dead=0` 再收工。
 

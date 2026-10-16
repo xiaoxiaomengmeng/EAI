@@ -4,11 +4,11 @@
 > 1. **软件架构图**——有哪些模块、之间怎么通讯；
 > 2. **硬件爆炸图**——按实物结构展开：电路板、舵机、音频、嘴、脚等。
 >
-> 所有事实均忠于仓库：软件侧依据 [`microduck/docs/design/architecture.md`](../../microduck/docs/design/architecture.md) 与代码；硬件侧依据运动学模型 [`robot_walk.xml`](../../microduck/kinematics/assets/alpha/robot_walk.xml)、[`deploy/`](../../microduck/deploy/) 与 `duck-control` 常量。生成后的图片建议存到本目录 `docs/diagrams/`，并在 [`docs/README.md`](../README.md) 引用。
+> 所有事实均忠于仓库：软件侧依据 [`microduck/docs/design/architecture.md`](../microduck/docs/design/architecture.md) 与代码；硬件侧依据运动学模型 [`robot_walk.xml`](../microduck/kinematics/assets/alpha/robot_walk.xml)、[`deploy/`](../microduck/deploy/) 与 `duck-control` 常量。生成后的图片建议存到本目录 `diagrams/`，并在 [`docs/README.md`](../docs/README.md) 引用。
 
 ---
 
-## 系列索引与编号约定（docs/diagrams/）
+## 系列索引与编号约定（diagrams/）
 
 | 编号 | 文件 | 内容 |
 |---|---|---|
@@ -249,7 +249,7 @@ documentation aesthetic, high detail, 3:2.
 
 1. **软件图**：优先用 §1.2 的 Mermaid（或 `fireworks-tech-graph` 技能）导出 **SVG**，文字精确、可随代码演进 diff；要海报感时再用 §1.3。
 2. **硬件图**：用 §2.2 英文提示词喂文生图；先出**低分辨率草稿**确认构图与部件齐全，再出高清；标签建议后期手动叠加（§2.2 提示）。
-3. 生成物存到 `docs/diagrams/`（如 `01-software-architecture.svg`、`05-hardware-exploded.png`），并在 [`docs/README.md`](../README.md) 第 2 节引用。
+3. 生成物存到 `diagrams/`（如 `01-software-architecture.svg`、`05-hardware-exploded.png`），并在 [`docs/README.md`](../docs/README.md) 第 2 节引用。
 4. 迭代顺序：**先软件图（信息密度高、需准确）→ 再硬件图（艺术化、可多版择优）**。
 
 ### 4.1 实测渲染要点（fireworks-tech-graph 踩坑记录，2026-09 验证）
@@ -259,9 +259,9 @@ documentation aesthetic, high detail, 3:2.
 ```bash
 SKILL_ROOT="/Users/damon/.qoder/skills/fireworks-tech-graph"
 python3 "$SKILL_ROOT/scripts/generate-from-template.py" architecture \
-  docs/diagrams/01-software-architecture.svg < docs/diagrams/01-software-architecture.json
-bash "$SKILL_ROOT/scripts/validate-svg.sh" docs/diagrams/01-software-architecture.svg
-python3 -c "import cairosvg; cairosvg.svg2png(url='docs/diagrams/01-software-architecture.svg', write_to='docs/diagrams/01-software-architecture.png', output_width=2560)"
+  diagrams/01-software-architecture.svg < diagrams/01-software-architecture.json
+bash "$SKILL_ROOT/scripts/validate-svg.sh" diagrams/01-software-architecture.svg
+python3 -c "import cairosvg; cairosvg.svg2png(url='diagrams/01-software-architecture.svg', write_to='diagrams/01-software-architecture.png', output_width=2560)"
 ```
 
 踩过的坑与解法（都是 cairosvg / 生成器的真实行为，非猜测）：
