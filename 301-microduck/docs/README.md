@@ -2,7 +2,7 @@
 
 > 本目录（`docs/`）是对 [`microduck/`](../microduck/)（Rust 运行时）与 [`microduck_rl/`](../microduck_rl/)（RL 训练）两个仓库的**学习与梳理笔记**——中文书写、关键术语保留英文，**非仓库自带的权威文档**。
 >
-> 组织方式：**按用途两类分治**——**端侧部署**（[`deploy/`](deploy/)）与**强化学习**（[`rl/`](rl/)）。架构图 / 海报提示词独立在**与 `docs/` 同级**的 [`../diagrams/`](../diagrams/)。
+> 组织方式：**按用途两类分治**——**端侧部署**（[`deploy/`](deploy/)）与**强化学习**（[`rl/`](rl/)）。**动手复现代码**独立在与 `docs/` 同级的 [`../practice/`](../practice/)；架构图 / 海报提示词在同级的 [`../diagrams/`](../diagrams/)。
 
 ---
 
@@ -20,14 +20,16 @@
 │   │       ├── robotd.md      控制守护进程：50Hz 循环 / 电机总线 / 策略 / 安全层
 │   │       └── updater.md     更新引擎：签名验证 / 原子切换 / 健康门 / 三层回滚网
 │   │
-│   └── rl/                  ← 类②：强化学习（GPU 仿真 + PPO 训练场）——总结文档 + 本地复现
-│       ├── README.md          ⭐ 唯一入口：两半导航（总结文档 / 本地复现）+ 认知阶梯
+│   └── rl/                  ← 类②：强化学习（GPU 仿真 + PPO 训练场）——只做总结文档
+│       ├── README.md          ⭐ 唯一入口：认知阶梯导航（00→07）+ 路线图
 │       ├── learning_roadmap.md  从入门到大师：约 12 个月周计划 + 每阶段硬检查点
 │       ├── mdp_principles.md  MDP 纯原理笔记（+ 同名 poster png/svg）
-│       ├── 00-primer/ … 07-reference/   【总结文档】按学习顺序编号的认知阶梯
-│       └── practice/          【本地复现】动手侧
-│           ├── README.md        复现导航
-│           └── fundamentals/    通用 RL 基础课（session_01 PyTorch/MLP · session_02 MDP/Q-learning/DQN）
+│       └── 00-primer/ … 07-reference/   【总结文档】按学习顺序编号的认知阶梯
+│
+├── practice/                ← 与 docs 同级：【本地复现】动手侧（可运行代码 + 复现记录）
+│   ├── README.md              复现导航
+│   ├── fundamentals/          通用 RL 基础课（session_01 PyTorch/MLP · session_02 MDP/Q-learning/DQN）
+│   └── tasks/ball_kick/       microduck 任务复现：踢球看能踢多高（高踢 reward 变体，不改子模块）
 │
 └── diagrams/                ← 与 docs 同级：架构图 / 海报提示词 + 生成物 + 素材
     ├── 00-prompts.md          microduck 软件架构图 + 硬件爆炸图提示词
@@ -63,9 +65,9 @@
 | 深入某个源码模块（robot/tasks/export…） | [`rl/04-modules/`](rl/04-modules/README.md) | 总结 |
 | 代码入口速查 | [`rl/07-reference/entry_points_map.md`](rl/07-reference/entry_points_map.md) | 总结 |
 | **在本机把鸭子跑起来 / 复现训练** | [`rl/01-quickstart/desktop_quickstart.md`](rl/01-quickstart/desktop_quickstart.md) · [`sim_deploy_rl_reproduce_guide.md`](rl/01-quickstart/sim_deploy_rl_reproduce_guide.md) | 复现 |
-| **动手练通用 RL 基础**（PyTorch/DQN） | [`rl/practice/fundamentals/`](rl/practice/fundamentals/) | 复现 |
+| **动手练通用 RL 基础**（PyTorch/DQN） | [`../practice/fundamentals/`](../practice/fundamentals/) | 复现 |
 
-> **从 [`rl/README.md`](rl/README.md) 进入**——它是该类的唯一入口，详解「总结文档（00→07 认知阶梯）」与「本地复现（`practice/`）」两半如何配合。
+> **从 [`rl/README.md`](rl/README.md) 进入**——它是该类的唯一入口，详解「总结文档（00→07 认知阶梯）」与「本地复现（项目顶层 [`../practice/`](../practice/)）」两半如何配合。
 
 ### 附：[`../diagrams/`](../diagrams/) — 图与提示词（与 docs 同级）
 
@@ -89,7 +91,7 @@ MuJoCo Warp 仿真 + PPO 训练                    robotd 50Hz 控制循环
 
 ## 维护约定
 
-- **两类分治**：新增端侧部署笔记进 [`deploy/`](deploy/)；RL 笔记进 [`rl/`](rl/)——理解型文档按 00→07 编号对号入座，动手复现进 `rl/practice/`。图与提示词进**与 docs 同级**的 [`../diagrams/`](../diagrams/)。顶层只放本索引。
+- **两类分治**：新增端侧部署笔记进 [`deploy/`](deploy/)；RL 笔记进 [`rl/`](rl/)——理解型文档按 00→07 编号对号入座，动手复现进**项目顶层** [`../practice/`](../practice/)（与 docs 同级，不放 docs 内）。图与提示词进**与 docs 同级**的 [`../diagrams/`](../diagrams/)。顶层只放本索引。
 - **相对路径**（本文 = `docs/README.md`）：指向 Rust 仓库 `../microduck/…`、RL 仓库 `../microduck_rl/…`；指向类内文档 `deploy/…`、`rl/…`；指向图目录 `../diagrams/…`。子块内文档的路径约定见各自 README。
 - **每个主题只有一个权威文档**，其余链接过去，不复制。
 - **改完验证死链**：移动/新增文档后跑一次相对链接扫描，确保 `dead=0`。

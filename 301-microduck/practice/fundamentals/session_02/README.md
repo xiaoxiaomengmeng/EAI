@@ -1,6 +1,6 @@
 # session_02 · 阶段 1：MDP 建模 + 从零 DQN
 
-> 对应 [`learning_roadmap.md`](../../../learning_roadmap.md) **阶段 1（第 3–8 周）** 的动手产出。
+> 对应 [`learning_roadmap.md`](../../../docs/rl/learning_roadmap.md) **阶段 1（第 3–8 周）** 的动手产出。
 > 目标：**真正理解 RL 的问题建模（MDP），亲手实现第一个深度 RL 算法（DQN）**，并让 `CartPole-v1` 稳定撑到 500 步——通过阶段 1 的硬检查点。
 
 这是整条 RL 学习路线的**第二节课**。session_01 练的是「深度学习零件」（张量 / autograd / 四步循环 / MLP），
@@ -34,7 +34,7 @@ PyTorch 目前最高支持到 Python 3.12，**不要用系统 3.14**（无 torch
 ### 方式 A · uv（推荐，本目录已用它建好 `.venv`）
 
 ```bash
-cd 301-microduck/docs/rl/practice/fundamentals/session_02
+cd 301-microduck/practice/fundamentals/session_02
 uv venv --python 3.11            # 建虚拟环境（若已存在可跳过）
 source .venv/bin/activate
 uv pip install -r requirements.txt
@@ -216,7 +216,7 @@ python 03_dqn_cartpole.py --no-target-net --curve /tmp/notarget.csv   # ③ 关�
 
 ## 下一站
 
-阶段 1 通过后，进入 [`learning_roadmap.md`](../../../learning_roadmap.md) **阶段 2**：
+阶段 1 通过后，进入 [`learning_roadmap.md`](../../../docs/rl/learning_roadmap.md) **阶段 2**：
 **手写 PPO**（policy gradient → actor-critic → GAE → PPO-clip），把本课的 value-based 经验迁移到 policy-based，
 最终对齐 microduck_rl 的 `rsl_rl` PPO 实现。届时会新建 `session_03/`。
 

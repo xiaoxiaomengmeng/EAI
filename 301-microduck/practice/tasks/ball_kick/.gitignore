@@ -1,0 +1,14 @@
+# 训练 / 回放产物（体积大，不入库）：checkpoint、onnx、tensorboard events、params、录像
+logs/
+*.mp4
+
+# 场景预览 / 回放离屏渲染产物（可再生，不入库）
+preview_scene.png
+_contact.png
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store

@@ -6,7 +6,7 @@
 >
 > **这个 README 是整个体系的唯一入口。** 先花 5 分钟读完它，你就会知道：该按什么顺序读、每份文档解决什么问题、目录为什么这么分、以及未来新文档往哪里长。读完其他代码库时，第六节的「方法论」也能直接套用。
 >
-> **本类分两半（物理分开）**：【总结文档】= 理解型 markdown（`00→07` 认知阶梯 + [`learning_roadmap.md`](learning_roadmap.md) + [`mdp_principles.md`](mdp_principles.md)）；【本地复现】= 动手型内容（[`practice/`](practice/)：可运行的通用 RL 基础课 + 未来复现 microduck 已有任务的脚本与记录）。
+> **总结与复现物理分开**：【总结文档】= 本目录 `docs/rl/` 下的理解型 markdown（`00→07` 认知阶梯 + [`learning_roadmap.md`](learning_roadmap.md) + [`mdp_principles.md`](mdp_principles.md)）；【本地复现】= 动手型内容，已独立到**项目顶层** [`practice/`](../../practice/)（可运行的通用 RL 基础课 + microduck 任务复现脚本与记录）。
 
 ---
 
@@ -23,13 +23,13 @@
 | 深入某个源码模块（robot/tasks/export…） | `04-modules/`（**#5 velocity 精讲已上线**，余见第五节） | 以 velocity 为脊柱逐个击破 |
 | 我是纯 RL 小白，术语都不懂 | 先读 walkthrough 的「第 0 部分 · 预备知识」 | 未来会独立成 `00-primer/` |
 | 只想快速搞懂 MDP 的数学原理 | [`mdp_principles.md`](mdp_principles.md) | 【总结】纯原理笔记（+ 同名海报），不绑定代码 |
-| **动手练通用 RL 基础**（PyTorch/MLP、DQN/CartPole） | [`practice/fundamentals/`](practice/fundamentals/) | 【复现】可运行的 session_01 / session_02 |
+| **动手练通用 RL 基础**（PyTorch/MLP、DQN/CartPole） | [`practice/fundamentals/`](../../practice/fundamentals/) | 【复现】项目顶层，可运行的 session_01 / session_02 |
 
 ---
 
 ## 二、文档地图（现有 + 规划）
 
-分两半：【总结文档】按编号 **00 → 07 由浅入深、从整体到局部、最后到专题**；【本地复现】统一收在 `practice/`。
+分两半：【总结文档】按编号 **00 → 07 由浅入深、从整体到局部、最后到专题**；【本地复现】统一收在**项目顶层** `../../practice/`（与本 docs 同级）。
 
 | 目录 | 文档 | 定位（一句话职责） | 属哪半 | 状态 |
 |---|---|---|---|---|
@@ -43,7 +43,7 @@
 | `05-source-walkthrough/` | velocity 端到端源码走读（规划） | **一条命令串起所有模块**的源码级走读 | 总结 | 🚧 规划 |
 | `06-topics/` | sim2real / reward 设计 / 案例复盘（规划） | **专题深挖难点**，串联仓库自带的 specs/plans | 总结 | 🚧 规划 |
 | `07-reference/` | [`entry_points_map.md`](07-reference/entry_points_map.md) | **代码入口速查**（想跑某功能从哪进） | 总结 | ✅ 现有 |
-| `practice/` | [`README.md`](practice/README.md) + `fundamentals/`（session_01 / session_02） | **本地复现**：动手跑通——通用 RL 基础课 + 未来 microduck 已有任务的复现脚本/记录 | 复现 | ✅ 现有（fundamentals 已就位；任务复现待补） |
+| `../../practice/` | [`README.md`](../../practice/README.md) + `fundamentals/` + `tasks/` | **本地复现**（项目顶层）：动手跑通——通用 RL 基础课 + microduck 任务复现脚本/记录 | 复现 | ✅ 现有（fundamentals + tasks/ball_kick） |
 
 > **仓库自带的一手资料**（不是本笔记，但学习时要配合看）：
 > [`README.md`](../../microduck_rl/README.md)（项目全景）、[`AGENTS.md`](../../microduck_rl/AGENTS.md)（改 env 前必读的规则）、[`docs/superpowers/specs/`](../../microduck_rl/docs/superpowers/specs/)（每个任务的设计文档）、[`docs/superpowers/plans/`](../../microduck_rl/docs/superpowers/plans/)（实现计划含验收标准）、[`docs/roller_standup_policy_summary.md`](../../microduck_rl/docs/roller_standup_policy_summary.md)（一个策略从设计到调试的完整复盘）。
@@ -156,7 +156,7 @@
 
 ## 七、维护约定（写给未来的自己 / 新增文档时遵守）
 
-- **新文档放哪**：理解型文档按认知阶梯对号入座——模块导读进 `04-modules/`、专题进 `06-topics/`、速查进 `07-reference/`；**动手复现型（可运行代码 / 复现记录）进 `practice/`**。文件名用小写连字符（如 `04-modules/05-velocity-deep-dive.md`）。
+- **新文档放哪**：理解型文档按认知阶梯对号入座——模块导读进 `04-modules/`、专题进 `06-topics/`、速查进 `07-reference/`；**动手复现型（可运行代码 / 复现记录）进项目顶层 `../../practice/`**（与本 docs 同级，不放 docs 内）。文件名用小写连字符（如 `04-modules/05-velocity-deep-dive.md`）。
 - **相对路径约定**（本目录 = `docs/rl/`）：
   - 指向 **RL 仓库代码**：`../../microduck_rl/...`（子目录里的文档要多一层 `../../../microduck_rl/...`）
   - 指向 **Rust 仓库**：`../../microduck/...`（子目录里 `../../../microduck/...`）

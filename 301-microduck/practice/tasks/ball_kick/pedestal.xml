@@ -1,0 +1,36 @@
+<mujoco model="microduck_pedestal">
+    <compiler angle="radian" autolimits="true"/>
+
+    <worldbody>
+        <!-- 垫高细桩 tee（practice 侧，配合 high_kick_cfg.py 使用）。
+
+             为什么要垫高：microduck 的脚是扁平 sole，球贴地时球底与地面零缝隙，
+             脚插不进球下方 → 无法「从下往上铲」，只能水平推球滚动（贴地版实测
+             ball_height≈0）。
+
+             为什么必须是「细桩」而不是实体 box（v1 踩过的坑）：v1 用 3cm 见方的
+             实体 box 垫球，300 iter 训练后 rollout 实测球 z 硬卡在起始高 0.08、
+             一次都没被挑高，只会被脚「拍落/推下」基座（drop 181/4800、lift 0/4800）。
+             根因：实体 box 顶面正好堵死球的正下方，脚依旧只能碰到球的侧面/上半部，
+             接触力竖直分量必然向下 → 和贴地版被地板挡住是同一个几何陷阱，只是把
+             「地板」搬到了球底下。
+
+             细桩修法：把支撑换成半径仅 0.010m 的细圆柱，球的赤道下方（z≈0.055~0.07）
+             在细桩外侧空出一条 ~18mm 的槽，扁平 toe 能从侧面扫进球的下方做真正的
+             「斜向上挑」——挑高这才几何可达。顶面仍 z=0.045、球心仍 0.08（与 reward
+             基准一致），只把截面从 30mm 收到 20mm 直径、且改成圆形（各方向都能进 toe）。
+
+             为什么做成 5kg 重块 + freejoint 而非 static welded：复用 ball 已验证
+             可行的 dynamic entity 机制（规避 mjlab 对 static welded entity 的支持
+             不确定性）；5kg 是球(15g)的 333 倍，踢球时细桩几乎不动。
+
+             reset_ball_on_pedestal 事件每回合把细桩摆到右脚正前方、球同心摆到桩顶
+             （桩与球同 xy，故 ±15mm 放置噪声不会让球偏出桩顶）。 -->
+        <body name="pedestal" pos="0 0 0.0225">
+            <freejoint name="pedestal_free"/>
+            <inertial pos="0 0 0" mass="5.0" diaginertia="0.000969 0.000969 0.00025"/>
+            <geom type="cylinder" name="pedestal_geom" size="0.010 0.0225"
+                  rgba="0.40 0.40 0.45 1" friction="0.8 0.005 0.0001"/>
+        </body>
+    </worldbody>
+</mujoco>
