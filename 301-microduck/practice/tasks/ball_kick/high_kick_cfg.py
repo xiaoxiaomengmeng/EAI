@@ -86,6 +86,18 @@ W_ACTION_RATE = -0.05        # action_rate_l2 原 -0.1（且 curriculum 会 ramp
 W_BODY_ANG_VEL = -0.01       # body_ang_vel 原 -0.05
 W_ANG_MOMENTUM = -0.005      # angular_momentum 原 -0.02
 
+# ── v5「机制感知」开关（保留 v4 原样，可切换对照重训）──────────────────────
+# 探针坐实 v4 那 12cm「挑高」是脖子夹球（reward hacking）而非脚踢。v5 用门控+惩罚
+# 废掉该 exploit。用环境变量切换，无需改代码：
+#   HIGH_KICK_REWARD_MODE=v4  → 机制盲（原 ball_lift / ball_vertical_velocity）
+#   HIGH_KICK_REWARD_MODE=v5  → 门控+颈接触惩罚（默认，实现见 high_kick_rewards.py）
+# 注：reward 只在训练时生效，回放旧 checkpoint（play_to_video / play_high_kick）不受影响。
+REWARD_MODE = os.environ.get("HIGH_KICK_REWARD_MODE", "v5").strip().lower()
+
+NECK_LINKS = ("neck", "neck_pitch", "jaw_soft", "trunk_base")  # 颈/头/躯干组（夹球判定）
+NECK_CONTACT_DIST = 0.075    # 球心到颈组 link 原点 < 此值视为「被脖子夹/顶」（探针验证阈值）
+W_BALL_NECK_PENALTY = -5.0   # v5 新增：ball-颈接触惩罚权重（负）
+
 # pedestal.xml 与本文件同目录。
 _PEDESTAL_XML = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pedestal.xml")
 
@@ -196,26 +208,51 @@ def make_high_kick_env_cfg(play: bool = False, kick_foot: str = KICK_FOOT):
     cfg.rewards.pop("ball_speed_overshoot", None)    # −4.0，压制猛踢，与踢高冲突
     cfg.rewards.pop("ball_forward_velocity", None)   # 12.0，主动引导水平推滚，是元凶
 
+    # 主/辅奖励：按 REWARD_MODE 选「机制盲」(v4) 或「机制感知门控」(v5) 版本。
+    #   v4 = 原样保留（只测球高/球速，脖子夹球也算分——已被探针坐实是 reward hacking）；
+    #   v5 = 只在球脱离颈组接触（真·腾空）时计分 + 额外惩罚 ball-颈接触，废掉夹球 exploit。
+    if REWARD_MODE == "v5":
+        lift_func, vert_func = hk.ball_lift_clean, hk.ball_vertical_velocity_clean
+        gate = {"neck_links": NECK_LINKS, "contact_dist": NECK_CONTACT_DIST, "robot_name": "robot"}
+    else:
+        lift_func, vert_func = hk.ball_lift_above_start, hk.ball_vertical_velocity
+        gate = {}
+
     # 主奖励：球心超过初始垫高高的增量（基准 BALL_START_Z，静止在基座顶时 = 0，不白给）。
     cfg.rewards["ball_lift"] = RewardTermCfg(
-        func=hk.ball_lift_above_start,
+        func=lift_func,
         weight=W_BALL_LIFT,
         params={
             "asset_name":   "ball",
             "start_height": BALL_START_Z,
             "max_lift":     MAX_LIFT,
+            **gate,
         },
     )
 
     # 辅奖励：球向上的速度分量（只奖 vz>0，起球瞬间给梯度，是最早的稠密 bootstrap）。
     cfg.rewards["ball_vertical_velocity"] = RewardTermCfg(
-        func=hk.ball_vertical_velocity,
+        func=vert_func,
         weight=W_BALL_VERT_VEL,
         params={
             "asset_name": "ball",
             "max_speed":  VERT_VEL_MAX_SPEED,
+            **gate,
         },
     )
+
+    # v5 专属：球贴着颈/头/躯干（夹球驮运）时扣分，与门控互补，主动推离脖子 exploit。
+    if REWARD_MODE == "v5":
+        cfg.rewards["ball_neck_contact"] = RewardTermCfg(
+            func=hk.ball_neck_contact_penalty,
+            weight=W_BALL_NECK_PENALTY,
+            params={
+                "asset_name":   "ball",
+                "neck_links":   NECK_LINKS,
+                "contact_dist": NECK_CONTACT_DIST,
+                "robot_name":   "robot",
+            },
+        )
 
     # 盲区修复：把球向下击落那一刻扣分（事件型，球落地静止后不累积）。
     # v4 删除：接触自由化——不再罚「碰球」，方向完全交给 lift / vertvel 塑造，
@@ -243,7 +280,8 @@ def make_high_kick_env_cfg(play: bool = False, kick_foot: str = KICK_FOOT):
 # ── RL runner cfg：deepcopy 官方 PPO 超参，只改 experiment/run/迭代数 ─────────
 # experiment_name 决定日志目录 logs/rsl_rl/<experiment_name>/，务必与贴地版区分。
 # max_iterations 默认给小规模验证值，可被 CLI --agent.max-iterations 覆盖。
+_EXP_PREFIX = {"v4": "ball_kick_aggr", "v5": "ball_kick_clean"}.get(REWARD_MODE, "ball_kick_aggr")
 HIGH_KICK_RL_CFG = deepcopy(MicroduckBallKickRlCfg)
-HIGH_KICK_RL_CFG.experiment_name = f"ball_kick_aggr_{KICK_FOOT}"
-HIGH_KICK_RL_CFG.run_name = f"ball_kick_aggr_{KICK_FOOT}"
+HIGH_KICK_RL_CFG.experiment_name = f"{_EXP_PREFIX}_{KICK_FOOT}"
+HIGH_KICK_RL_CFG.run_name = f"{_EXP_PREFIX}_{KICK_FOOT}"
 HIGH_KICK_RL_CFG.max_iterations = 300

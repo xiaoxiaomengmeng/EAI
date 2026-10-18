@@ -112,3 +112,98 @@ def ball_drop_penalty(
     below = (z < drop_z).to(vz.dtype)           # 真掉落（低于容差带）才罚
     down = (-vz).clamp(min=0.0)                 # 只罚向下速度
     return torch.nan_to_num(down * below, nan=0.0).clamp(0.0, max_speed)
+
+
+# ── v5「机制感知」reward：只认脚踢/干净飞行，废掉脖子夹球 exploit ────────────────
+# 探针坐实（8 envs×300 步，model_23750.pt）：v4 那 12cm「挑高」100% 是脖子
+# (neck_pitch×7 / trunk_base×1) 夹着球升起，脚组 0 次；高挑高(>5cm) 的 1097 个
+# env-step 里 100% 球贴着颈组、0% 贴脚组。
+# 根因：ball_lift / ball_vertical_velocity 只测「球多高 / 多快向上」这个结果，不测
+# 「是谁把它弄高的」（机制盲）。脖子由 neck_pitch 直接驱动、位置本就贴桩顶球高、
+# jaw_soft 还能兜住 15g 轻球，scoop 起来再站起，比单脚支撑甩腿向上挑容易一个数量级
+# → PPO 理性地选了脖子这条 exploit。修法（用户拍板：门控+惩罚）：
+#   · 门控：球贴着颈组（夹球驮运）时 lift / vertvel 一律记 0，只有脱离身体的腾空才计分；
+#   · 惩罚：额外对 ball-颈接触给负分，让「夹球」变净亏损，加速策略放弃、转去探索脚踢。
+# v4 的四个函数（ball_height_above_ground / ball_vertical_velocity / ball_lift_above_start
+# / ball_drop_penalty）保持原样不动，v5 全部是新增，靠 high_kick_cfg.REWARD_MODE 切换。
+
+NECK_LINKS_DEFAULT = ("neck", "neck_pitch", "jaw_soft", "trunk_base")
+
+
+def _neck_contact_mask(
+    env: ManagerBasedRlEnv,
+    asset_name: str = "ball",
+    neck_links: tuple = NECK_LINKS_DEFAULT,
+    contact_dist: float = 0.075,
+    robot_name: str = "robot",
+) -> torch.Tensor:
+    """球心是否贴着颈/头/躯干组：返回 [num_envs] 的 0/1（1=夹球接触）。
+
+    用世界坐标距离做纯几何代理（不依赖接触传感器）：球心到颈组任一 link 原点
+    距离 < contact_dist 即判「被脖子夹/顶」。contact_dist=0.075 ≈ 球半径 0.035 +
+    颈部 link 尺度 ~0.04。该阈值已用探针验证：v4 高挑高时段 mask 恒为 1（100%）。
+    """
+    ball: Entity = env.scene[asset_name]
+    bp = ball.data.root_link_pos_w                     # [N,3] world
+    m = env.sim.mj_model
+    xpos = env.sim.data.xpos                           # [N, nbody, 3] world
+    mask = torch.zeros(bp.shape[0], device=bp.device, dtype=torch.bool)
+    for link in neck_links:
+        bid = m.body(f"{robot_name}/{link}").id
+        d = torch.norm(bp - xpos[:, bid, :], dim=-1)   # [N]
+        mask |= d < contact_dist
+    return mask.to(bp.dtype)
+
+
+def ball_lift_clean(
+    env: ManagerBasedRlEnv,
+    asset_name: str = "ball",
+    start_height: float = 0.08,
+    max_lift: float = 0.5,
+    neck_links: tuple = NECK_LINKS_DEFAULT,
+    contact_dist: float = 0.075,
+    robot_name: str = "robot",
+) -> torch.Tensor:
+    """【v5 门控主奖励】= ball_lift_above_start × (1 − 颈组接触 mask)。
+
+    球贴着脖子（夹球驮运）→ mask=1 → lift 记 0；球被脚挑飞、脱离身体腾空 →
+    mask=0 → 按增量正常计分。基准 start_height / 天花板 max_lift 与 v4 完全一致，
+    只多了一个门控因子，把脖子 exploit 的收益清零。
+    """
+    lift = ball_lift_above_start(env, asset_name, start_height, max_lift)
+    clean = 1.0 - _neck_contact_mask(env, asset_name, neck_links, contact_dist, robot_name)
+    return lift * clean
+
+
+def ball_vertical_velocity_clean(
+    env: ManagerBasedRlEnv,
+    asset_name: str = "ball",
+    max_speed: float = 3.0,
+    neck_links: tuple = NECK_LINKS_DEFAULT,
+    contact_dist: float = 0.075,
+    robot_name: str = "robot",
+) -> torch.Tensor:
+    """【v5 门控辅奖励】= ball_vertical_velocity × (1 − 颈组接触 mask)。
+
+    同 ball_lift_clean 的门控：脖子夹球上升的 vz 不计分，只有脱离颈组的向上速度
+    （脚挑射爆发 / 腾空）才给稠密 bootstrap。
+    """
+    vv = ball_vertical_velocity(env, asset_name, max_speed)
+    clean = 1.0 - _neck_contact_mask(env, asset_name, neck_links, contact_dist, robot_name)
+    return vv * clean
+
+
+def ball_neck_contact_penalty(
+    env: ManagerBasedRlEnv,
+    asset_name: str = "ball",
+    neck_links: tuple = NECK_LINKS_DEFAULT,
+    contact_dist: float = 0.075,
+    robot_name: str = "robot",
+) -> torch.Tensor:
+    """【v5 显式惩罚】球贴着颈/头/躯干时返回 1（cfg 里乘负权重）。
+
+    与门控互补：门控把脖子 exploit 的收益清零（不再「划算」），本项再给负分让
+    「夹球」变净亏损，加速策略放弃这条路、转去探索脚踢。返回非负 0/1 幅度，
+    与官方 overshoot 惩罚同约定（权重取负）。
+    """
+    return _neck_contact_mask(env, asset_name, neck_links, contact_dist, robot_name)

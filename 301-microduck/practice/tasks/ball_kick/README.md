@@ -1,10 +1,11 @@
-# ball_kick 高踢任务 · RL 全链路实战（v4：0 → 12cm 挑高 → plateau 全记录）
+# ball_kick 高踢任务 · RL 全链路实战（v4 脖子夹球 12cm → v5 机制感知干净踢射 ~70cm）
 
 > **本地复现侧**（`practice/`）的第一个 microduck 任务复现。以「microduck 踢球，看能踢多高」为脊柱，
 > 把 RL 全链路走一遍：环境搭建 → 任务注册 → reward 设计 → PPO 训练 → 回放/预览可视化。
 >
-> 这不是一份「一次成功」的教程，而是一份**四版迭代排查实录**：v1→v4 踩了三个坑（几何不可达 ×2、奖励被站姿支配 ×1），
-> 直到 v4 才让球真正被挑起来：小训（300 iter）先破 2cm，**大训（4096 envs × 23875 iter）冲到 12cm 挑高**（球心齐机身头顶），但 it3000 即 plateau。踩坑与判据全部写进[第六章](#六reward-设计与四版排查实录v1v4)，这才是最有价值的部分。
+> 这不是一份「一次成功」的教程，而是一份**五版迭代排查实录**：v1→v4 踩了三个坑（几何不可达 ×2、奖励被站姿支配 ×1），
+> v4 让球被挑到 12cm 但 it3000 即 plateau，且回放暴露这 12cm 实为**脖子夹球**（reward hacking）；v5 用「机制感知 reward」（门控+颈接触惩罚）废掉 exploit，
+> **仅 1000 iter 就把干净踢射顶到 mean ~70cm、14/16 ≥50cm、机制 16/16 脚腿**。踩坑与判据全部写进[第六章](#六reward-设计与五版排查实录v1v5)，这才是最有价值的部分。
 >
 > 上级导航：[`practice/README.md`](../../README.md) ｜ 总结侧入口：[`docs/rl/README.md`](../../../docs/rl/README.md)
 >
@@ -84,7 +85,7 @@
 | 文件 | 作用 | 关键技术 |
 |---|---|---|
 | [`high_kick_cfg.py`](high_kick_cfg.py) | **组装层核心**：造 env cfg（覆盖 entities/events/rewards/terminations/curriculum）+ deepcopy 官方 rl cfg 改名 | `mujoco.MjSpec.from_file`、`EntityCfg`、`RewardTermCfg`、`EventTermCfg`、`deepcopy`、yaw-frame 坐标变换 |
-| [`high_kick_rewards.py`](high_kick_rewards.py) | **reward 函数库**：4 个纯 torch 函数（离地高度 / 向上速度 / 超起始高增量 / 击落惩罚），返回 `[num_envs]` | `ball.data.root_link_pos_w[:,2]`、`root_link_lin_vel_w[:,2]`、`clamp`、`nan_to_num` |
+| [`high_kick_rewards.py`](high_kick_rewards.py) | **reward 函数库**：v4 机制盲 4 函数（离地高度 / 向上速度 / 超起始高增量 / 击落惩罚）+ v5 机制感知 4 函数（颈接触 mask / 门控 lift / 门控向上速度 / 颈接触惩罚），返回 `[num_envs]` | `ball.data.root_link_pos_w[:,2]`、`root_link_lin_vel_w[:,2]`、`clamp`、`nan_to_num`、`sim.data.xpos` 世界坐标距离 |
 | [`pedestal.xml`](pedestal.xml) | **场景资产**：垫高用的细桩 tee（圆柱 r=10mm、顶面 z=0.045），把球架到脚够得着又能从下方挑的高度 | MJCF、`freejoint` + 5kg 重块（dynamic entity，规避 static welded 的不确定性） |
 | [`train_high_kick.py`](train_high_kick.py) | **训练入口**：注册变体 task → tyro 解析 → 复用官方训练管线 | `register_mjlab_task`、`tyro.cli(TrainConfig)`、`launch_training`、`MUJOCO_GL=egl` |
 | [`play_high_kick.py`](play_high_kick.py) | **回放入口**：复用 train 的注册函数 → 从本地 checkpoint 回放 | `run_play(TASK_ID, PlayConfig(checkpoint_file=...))`、native/viser viewer |
@@ -168,9 +169,9 @@ MUJOCO_GL=egl ../../../.venv/bin/python preview_scene.py
 
 ---
 
-## 六、reward 设计与四版排查实录（v1→v4）
+## 六、reward 设计与五版排查实录（v1→v5）
 
-这是本文档的核心。**目标学不动时怎么系统排查**，比「最后配对了什么权重」更值得记。四版演化：
+这是本文档的核心。**目标学不动时怎么系统排查**，比「最后配对了什么权重」更值得记。五版演化：
 
 ### 6.1 v1 贴地版 —— 失败于「几何不可达」
 
@@ -228,6 +229,22 @@ MUJOCO_GL=egl ../../../.venv/bin/python preview_scene.py
 
 **当前状态（v4 终局）**：①②已过、已执行（大训 23875 iter）——峰值挑高冲到 **12cm**，但 **it3000 即 plateau**，③ 的收益已吃满。再往上（12cm→30~50cm）是**新天花板**：探索熵坍缩 / 细桩单击物理上限 / 数值不稳定，需换杠杆（喂球位姿诊断、峰值高度 reward、重启探索），**不是加 iter**。
 
+### 6.6 v5 机制感知奖励 —— 废掉脖子夹球，干净踢射 ~70cm（第四类瓶颈：奖励机制盲）
+
+- **触发**：v4 大训回放截图暴露「12cm 挑高」实为**脖子夹着球升高**，不是脚踢。rollout 探针（model_23750.pt，8 envs×300 步）坐实：峰值时刻最近 link **颈组 8/8**（neck_pitch×7、trunk_base×1）、脚组 0/8；>5cm 的 1097 个 env-step **100% 贴颈组、0% 贴脚组**。
+- **根因**：v4 的 `ball_lift`/`ball_vertical_velocity` 只测**结果**（球多高/向上多快）不测**机制**（是谁弄高的）。脖子（neck_pitch 直驱、位置贴桩顶、jaw 兜住 15g 轻球）scoop 站起比单脚甩腿挑容易一个数量级 → 策略理性选脖子。**目标项达标 ≠ 机制正确。**
+- **排除钝杠杆**：改球尺寸/质量同时增大两条路径难度、不选择性废 exploit；限 neck_pitch 关节则 trunk 仍可驮球。故选**机制感知 reward**。
+- **做法**（v4 四函数一字不改，新增一套可切换；`HIGH_KICK_REWARD_MODE=v4|v5`，默认 v5）：
+  1. `_neck_contact_mask()`：球心距颈组任一 link（neck/neck_pitch/jaw_soft/trunk_base）< 0.075m 判「被夹」，纯几何代理、不依赖接触传感器；
+  2. `ball_lift_clean` = lift × (1−mask)、`ball_vertical_velocity_clean` 同款门控 → 脖子路径恒 0 分；
+  3. `ball_neck_contact_penalty`（w=−5）= mask → 显式负分，与门控互补；
+  4. 实验名按模式分开：v4→`ball_kick_aggr_right`、v5→`ball_kick_clean_right`（日志/ckpt 互不覆盖，可对照重训）。
+- **决定性验证（旧 ckpt 喂新 reward）**：把 v4 夹球策略 model_23750.pt 喂进 v5 奖励，高挑高时段 8.9cm→**0.06cm（清零 99%）**、颈接触 mask 0.990 → exploit 被彻底废掉后才开训。
+- **v5 训练终局（4096 envs × 1000 iter，用户手动停于 it1000）**：
+  - 曲线：`ball_lift` 0→0.13(it100)→0.78(it200)→1.1(it400)→**1.35(it1000)** 高位缓爬未硬 plateau；`ball_neck_contact` 全程≈0（mean last100 = −0.0006）；`ball_vertical_velocity`→1.13；`Mean action std` **卡 1.57 走平（未结晶）**；`action_rate_l2`≈−2.56（稳定极抖）。
+  - rollout 探针（model_1000.pt，16 envs×300 步）：峰值挑高 **mean 69.9 / median 71.6 / max 96.4 / min 26.1 cm**；**≥30cm 15/16、≥50cm 14/16**；机制归属 **16/16 全 LEG/FOOT、贴颈=0**。对比 model_500（mean 62.1、1 个 18cm 离群、1 个 NECK）更稳更干净。
+- **结论**：v5 用 **1/24 的训练量**（1000 vs 23875 iter）把挑高从 12cm 顶到 **~70cm**，且机制正确、一致性好。**剩余短板是动作形态**：暴力翻扑 launch、std 未结晶、action 极抖——影响「受控/可部署」而非「高」。v6 改进方向见[第十章](#十验证阶梯与后续路线)。
+
 ---
 
 ## 七、怎么跑
@@ -255,51 +272,121 @@ MUJOCO_GL=egl ../../../.venv/bin/python preview_scene.py my.png     # 指定输�
 
 > ⚠️ 两个已知坑：① `native` 需要 `DISPLAY`，headless 机器起不来；② `viser` 网页 viewer 在官方 play 管线的 velocity-command slider 处有 assert bug（`add_slider` 的 `max>=value>=min`）会崩，本任务暂不可用——所以 headless 一律走 `preview_scene.py`。
 
-### 7.2 训练（先冒烟，再逐步加大）
+### 7.2 训练（先冒烟，再逐步加大；v4/v5 用环境变量切换）
+
+reward 版本由环境变量 `HIGH_KICK_REWARD_MODE` 切换（[high_kick_cfg.py](high_kick_cfg.py) 读取，**默认 v5**）：`v4`=机制盲四函数（实验名 `ball_kick_aggr_right`）、`v5`=门控+颈接触惩罚（实验名 `ball_kick_clean_right`）。两者日志/ckpt 目录独立，可对照重训互不覆盖。
 
 ```bash
 # 链路冒烟：64 envs × 1 iter，约 1 分钟，确认能跑起来（看 EXIT=0 + 日志出现 ball_lift）
 WANDB_MODE=offline MUJOCO_GL=egl ../../../.venv/bin/python train_high_kick.py --env.scene.num-envs 64 --agent.max-iterations 1
 
-# v4 已验证配置：512 envs × 300 iter（约 4 分钟，ball_lift 0→0.159 陡升）
-WANDB_MODE=offline MUJOCO_GL=egl ../../../.venv/bin/python train_high_kick.py --env.scene.num-envs 512 --agent.max-iterations 300
+# v4（机制盲，复现「脖子夹球 12cm」那条线）：4096 envs × 23875 iter
+HIGH_KICK_REWARD_MODE=v4 WANDB_MODE=offline MUJOCO_GL=egl ../../../.venv/bin/python train_high_kick.py --env.scene.num-envs 4096 --agent.max-iterations 23875
 
-# 推荐下一步：加轮数 + 加 envs，把「2cm 轻挑」顶成真正的挑射
-WANDB_MODE=offline MUJOCO_GL=egl ../../../.venv/bin/python train_high_kick.py --env.scene.num-envs 2048 --agent.max-iterations 1500
+# v5（机制感知；复现「干净踢射 ~70cm」那条线）：4096 envs × 1000 iter 已足够达标
+HIGH_KICK_REWARD_MODE=v5 WANDB_MODE=offline MUJOCO_GL=egl ../../../.venv/bin/python train_high_kick.py --env.scene.num-envs 4096 --agent.max-iterations 1000
+# 等价写法（默认即 v5，环境变量可省略）：
+WANDB_MODE=offline MUJOCO_GL=egl ../../../.venv/bin/python train_high_kick.py --env.scene.num-envs 4096 --agent.max-iterations 1000
 ```
 
-产物落在 `./logs/rsl_rl/ball_kick_aggr_right/<时间戳>/`（`model_N.pt` / `*.onnx` / `events.out.tfevents.*` / `params/*.yaml`），已被本目录 `.gitignore` 忽略。
+产物落在 `./logs/rsl_rl/<实验名>/<时间戳>/`（v4=`ball_kick_aggr_right`、v5=`ball_kick_clean_right`；内含 `model_N.pt` / `*.onnx` / `events.out.tfevents.*` / `params/*.yaml`），已被本目录 `.gitignore` 忽略。`./wandb/offline-run-<时间戳>-<id>/` 与日志目录同起始时间戳，可互相对照（如 `offline-run-20261017_212745-*` ↔ `2026-10-17_21-27-41_*`）。
 
 ### 7.3 看训练曲线（TensorBoard）
 
 ```bash
-../../../.venv/bin/tensorboard --logdir logs/rsl_rl/ball_kick_aggr_right --port 6006
+../../../.venv/bin/tensorboard --logdir logs/rsl_rl --port 6006    # 同时看 v4(aggr) 与 v5(clean) 两条线
 ```
 
-**v4 唯一该盯的是 `Episode_Reward/ball_lift` 有没有持续往上爬**（不是 mean_reward——站姿被我们主动砍了，总分会比 v3 低，这是预期不是退步）。辅助看 `Episode_Reward/ball_vertical_velocity`、`Episode_Metrics/mean_action_acc`（动作从乱抖变有目的会下降）。注意 `fell_over` 终止已删，日志里不再有摔倒率统计。
+**v4/v5 唯一该盯的是 `Episode_Reward/ball_lift` 有没有持续往上爬**（不是 mean_reward——站姿被我们主动砍了，总分会比 v3 低，这是预期不是退步）；v5 额外盯 `Episode_Reward/ball_neck_contact` **绝对值往 0 走**（很负=又在夹球）。辅助看 `Episode_Reward/ball_vertical_velocity`、`Policy/mean_std`（v5 若卡高位不降=策略没结晶）、`Episode_Metrics/mean_action_acc`。注意 `fell_over` 终止已删，日志里不再有摔倒率统计。每次 iteration 控制台那一整块里**每个字段的含义与代码出处**见 [7.5](#75-读懂训练日志每个字段什么意思从哪行代码来)。
 
 ### 7.4 如何 Play（回放训练好的策略，看那一挑）
 
-最终 checkpoint：`logs/rsl_rl/ball_kick_aggr_right/2026-10-17_01-15-28_ball_kick_aggr_right/model_23750.pt`（大训练最新，峰值挑高 ~12cm）。分带屏 / 不带屏两种。
+两个版本的最终 checkpoint（回放时按版本选）：
+
+| 版本 | checkpoint | 实测峰值挑高 | 机制 |
+|---|---|---|---|
+| v4 机制盲 | `logs/rsl_rl/ball_kick_aggr_right/2026-10-17_01-15-28_ball_kick_aggr_right/model_23750.pt` | ~12cm | ❌ 脖子夹球 |
+| v5 机制感知 | `logs/rsl_rl/ball_kick_clean_right/2026-10-17_21-27-41_ball_kick_clean_right/model_1000.pt` | mean ~70cm / max 96cm | ✅ 16/16 脚腿 |
+
+分带屏 / 不带屏两种。
 
 **不带屏幕（headless，本机推荐）**：官方 `run_play` 最后必进 `viewer.run()`（native 要 DISPLAY、viser 有 slider bug），headless 跑不通；改用 [`play_to_video.py`](play_to_video.py) 把训练好的策略 rollout **逐帧离屏渲染成 H.264 mp4**（相机水平跟球、叠加 step/球高/峰值标注）：
 
 ```bash
-MUJOCO_GL=egl ../../../.venv/bin/python play_to_video.py                   # 默认 model_23750.pt → ./play_high_kick.mp4
+MUJOCO_GL=egl ../../../.venv/bin/python play_to_video.py                   # 默认 v4 model_23750.pt → ./play_high_kick.mp4
 MUJOCO_GL=egl ../../../.venv/bin/python play_to_video.py <ckpt.pt> my.mp4  # 指定 checkpoint / 输出
+# v5 干净踢射回放（本文所有 ~70cm 截图/视频的来源）：
+MUJOCO_GL=egl ../../../.venv/bin/python play_to_video.py \
+  logs/rsl_rl/ball_kick_clean_right/2026-10-17_21-27-41_ball_kick_clean_right/model_1000.pt play_v5_it1000.mp4
 ```
 
-产物 `play_high_kick.mp4`（640×480@50fps、libx264/yuv420p 通用可播、~6s 含一次完整挑球）已 gitignore。
+产物 `*.mp4`（640×480@50fps、libx264/yuv420p 通用可播、~6s 含一次完整挑球）已 gitignore。
 
 **带屏幕（有 DISPLAY）**：官方交互 viewer，可拖拽 / 热换 checkpoint；`--no-terminations` 让回合不被摔倒/超时打断、看完整动作；`--video True` 另录 mp4 到 `<run>/videos/play/`：
 
 ```bash
-CKPT=logs/rsl_rl/ball_kick_aggr_right/2026-10-17_01-15-28_ball_kick_aggr_right/model_23750.pt
+CKPT=logs/rsl_rl/ball_kick_clean_right/2026-10-17_21-27-41_ball_kick_clean_right/model_1000.pt   # 或 v4 的 model_23750.pt
 ../../../.venv/bin/python play_high_kick.py --checkpoint-file $CKPT --viewer native --num-envs 1
 ../../../.venv/bin/python play_high_kick.py --checkpoint-file $CKPT --viewer native --no-terminations --video True
 ```
 
 > ⚠️ headless 别用 `play_high_kick.py`（必崩）；它只适合有 DISPLAY 的交互回放。纯看几何（不看动作）用 7.1 的 `preview_scene.py`。
+
+### 7.5 读懂训练日志（每个字段什么意思、从哪行代码来）
+
+每次 iteration 控制台会打印一大块（以 v5 `ball_kick_clean_right` it99 那屏为例）。这块由 **rsl_rl 的 `Logger.log()`**（`.venv/.../rsl_rl/utils/logger.py`）拼出来，数据来自三处：PPO 算法（损失/std）、Logger 自己的 buffer（回报/回合长度/耗时）、以及 **mjlab 各 manager 塞进 `info` 的 extras**（`Episode_Reward/*`、`Episode_Termination/*`、`Curriculum/*`、`Metrics/*`、`Episode_Metrics/*`）。按五组读：
+
+**A. 头部与性能**（`logger.py::Logger.log`）
+
+| 字段 | 含义 | 代码出处 |
+|---|---|---|
+| `Learning iteration 99/3000` | 当前 iter / 总 iter | `it/total_it`，total=`--agent.max-iterations` |
+| `Run name` | 实验名（=日志目录名） | `cfg["run_name"]`，即 `HIGH_KICK_RL_CFG.run_name` |
+| `Total steps` | 累计采集的环境步数 | `tot_timesteps += num_steps_per_env×num_envs` |
+| `Steps per second` | 采样+学习总吞吐（FPS） | `fps = collection_size/(collect+learn)` |
+| `Collection time` | 环境 rollout 采样耗时 | `collect_time` |
+| `Learning time` | PPO 网络更新耗时 | `learn_time` |
+| `Iteration time / Time elapsed / ETA` | 单 iter 耗时 / 已跑 / 预计剩余 | 底部 footer |
+
+**B. PPO 损失与探索度**（`loss_dict` 由 `rsl_rl/algorithms/ppo.py::update()` 返回，logger 打 `Mean {key} loss`）
+
+| 字段 | 含义 | 怎么读 |
+|---|---|---|
+| `Mean value loss` | critic 价值损失（V(s) 与实测 return 的 MSE） | 反映价值拟合；持续很大=价值没学好 |
+| `Mean surrogate loss` | PPO clip 策略梯度目标 | 通常为负，越负=本批更新收益越大 |
+| `Mean entropy loss` | 策略高斯分布的熵（探索度） | 与 action std 同向；**掉太快=探索坍缩**（v5 要盯） |
+| `Mean action std` | 策略输出高斯 std 均值（可学习参数） | 从 ~0.5 缓慢下降=变确定；**v5 早期别让它塌到 ~0**（还需探索脚踢） |
+
+**C. 总体回报**（Logger 的 `rewbuffer`/`lenbuffer`，各存最近 100 个**完成回合**）
+
+| 字段 | 含义 | 怎么读 |
+|---|---|---|
+| `Mean reward` | 最近 100 回合**总回报**均值 | 训练主曲线；v4/v5 主动砍了站姿，绝对值比 v3 低是**预期**不是退步 |
+| `Mean episode length` | 最近 100 回合步数均值 | 本任务删了 `fell_over`，几乎全靠 `time_out` 结束 → 应≈上限（截图 250.00） |
+
+**D. 逐 reward 项 `Episode_Reward/<term>`**（mjlab `managers/reward_manager.py`）
+
+代码语义：`compute()` 每步累加 `value = func(env)×weight×dt` 到 `_episode_sums`；回合 reset 时 `Episode_Reward/term = mean(_episode_sums)/max_episode_length_s`（`reward_manager.py:108`）。即**该回合内「weight×原始reward」对时间的平均（每秒平均贡献）**，不是单步瞬时值。本任务各项：
+
+| 字段 | 组 | 怎么读 |
+|---|---|---|
+| `ball_lift` | **主目标**（v5=`ball_lift_clean` 门控版） | **唯一硬指标，要持续往上爬**；v5 里只有「脱离脖子的干净腾空」才计分 |
+| `ball_vertical_velocity` | 辅目标（v5=门控版） | 起球爆发力，与 lift 同向爬 |
+| `ball_neck_contact` | **v5 新增惩罚**（w=−5） | **绝对值要往 0 走**；持续很负=策略还在脖子夹球（exploit 没死） |
+| `support_foot_grounded`/`pose_stand_legs`/`pose_stand_neck`/`height_stand` | 站姿软偏好（×0.25） | 正分，参考即可，不应压过 ball_lift |
+| `action_rate_l2`/`body_ang_vel`/`angular_momentum` | 动作/角速度约束 | 负=违反程度；猛踢时为负属正常 |
+| `dof_pos_limits`/`self_collisions` | 关节限位/自碰 | 负分；`self_collisions` 大幅变负要留意 |
+
+**E. 课程 / 指令 / 终止 / 步级 metric**（mjlab 各 manager 的 extras）
+
+| 前缀 | 含义 | 代码出处 |
+|---|---|---|
+| `Curriculum/<term>` | 域随机化课程当前 level（`com_range`/`head_com_range`/`push_magnitude` 的幅度） | `curriculum_manager.py:103/107` |
+| `Metrics/<name>/<metric>` | 速度指令跟踪误差（`twist/error_vel_xy`、`error_vel_yaw`）；本任务不追指令，参考 | `command_manager.py:246` |
+| `Episode_Termination/<term>` | 本 iter 平均每次 reset 因该项结束的 **env 个数**；`time_out`≈16.8 正常，**`nan_state`>0 要警惕数值爆炸** | `termination_manager.py:95` |
+| `Episode_Metrics/<key>` | 步级 metric 的回合平均（如 `mean_action_acc` 动作跟踪精度；从乱抖变有目的会先降后稳） | `metrics_manager.py:109` |
+
+> **v5 这一屏怎么读（it99 示例）**：`ball_lift=0.1214` 已非零（门控后仍有干净挑高，好苗头）、`ball_neck_contact=−0.0011` 几乎不触发（早期随机策略还没形成夹球）、`Mean action std=0.49` 探索充足、`Mean episode length=250` 确认无摔倒终止。**接下来盯三条**：`ball_lift`↑、`ball_vertical_velocity`↑、`ball_neck_contact`→0；若 `ball_lift` 死贴 0 而 std 先塌，则是探索不足，上 entropy / action-noise 杠杆而非加 iter。
 
 ---
 
@@ -317,6 +404,9 @@ CKPT=logs/rsl_rl/ball_kick_aggr_right/2026-10-17_01-15-28_ball_kick_aggr_right/m
 | 场景几何核实 | 球质量 15g（机器人 737g 的 1/49，一碰必飞）；球下半部 4.5~8cm 落在脚从地面(2.3cm)摆到髋(9.7cm)的包络内 | ✅ 够得着、不太重 |
 | **v4 目标学起来了** | 512×300：`ball_lift` 0→0.159 陡升未饱和；rollout 探针球峰值挑高 2.1cm、drop 率 0.015% | ✅ **突破** |
 | **v4 大训练终局** | 4096×23875：峰值挑高 12.1cm(mean)/13.0cm(max)、球心峰 0.21m；it3000 后 plateau；15 个负尖峰不致命 | ✅ **12cm 挑高 + plateau 定位** |
+| **v4 的 12cm 是脖子夹球** | rollout 探针（model_23750）：峰值最近颈组 8/8、脚组 0/8；>5cm 的 1097 step 100% 贴颈 | ✅ **reward hacking 坐实** |
+| **v5 门控清零 exploit** | v4 ckpt 喂 v5 奖励：高挑高 8.9→0.06cm（清零 99%）、颈接触 mask 0.990 | ✅ **exploit 废掉** |
+| **v5 训练终局** | 4096×1000：`ball_lift`→1.35 未饱和、`ball_neck_contact`≈0；探针 model_1000 峰值挑高 mean 69.9/max 96.4cm、≥50cm 14/16、机制 16/16 脚腿 | ✅ **干净踢射达标** |
 | **子模块零改动** | `git -C ../../../microduck_rl status --short` | ✅ **空（干净）** |
 
 ---
@@ -325,9 +415,9 @@ CKPT=logs/rsl_rl/ball_kick_aggr_right/2026-10-17_01-15-28_ball_kick_aggr_right/m
 
 ```
 ball_kick/
-├── README.md              ← 本文档：框架图 + 模块讲解 + 新增 task 教程 + 四版排查实录
+├── README.md              ← 本文档：框架图 + 模块讲解 + 新增 task 教程 + 五版排查实录 + v6 路线
 ├── high_kick_cfg.py       ← 【组装层】造 env cfg / rl cfg，覆盖 entities/events/rewards/terminations/curriculum
-├── high_kick_rewards.py   ← 【reward 库】4 个 torch 函数（离地高度/向上速度/超起始增量/击落惩罚）
+├── high_kick_rewards.py   ← 【reward 库】v4 机制盲 4 函数 + v5 机制感知 4 函数（颈接触门控/惩罚）
 ├── pedestal.xml           ← 【场景资产】垫高细桩 tee MJCF（圆柱 r=10mm、5kg、freejoint，顶面 z=0.045）
 ├── train_high_kick.py     ← 【训练入口】注册新 task + 复用 launch_training
 ├── play_high_kick.py      ← 【回放入口】本地 checkpoint 交互回放（复用 run_play，需 DISPLAY）
@@ -346,16 +436,27 @@ ball_kick/
 1. ✅ **链路通**：注册可见 + reward 覆盖正确 + 1 iter EXIT=0 + 子模块零污染
 2. ✅ **几何可达**：细桩 tee 让 toe 能扫进球下方（v3 修好，v4 rollout 探针确认球被向上挑而非拍落）
 3. ✅ **奖励支配破除**：v4 重平衡后 `ball_lift` 0→0.159 陡升未饱和（球峰值挑高 2cm）
-4. ✅ **加训练量（已执行并终止）**：4096 envs × 23875 iter → 峰值挑高 **12cm**（远超 10cm 目标），但 it3000 即 plateau、后 17000 iter 零增益，用户手动终止
-5. ⏭️ **破 12cm 局部最优（当前）**：三选一诊断——给 actor 喂球位姿验证可学性 / 加峰值高度·滞空 reward / 重启探索（提初始 entropy、action noise curriculum）；并压数值不稳定（接触 damping、限力）
-6. **对比实验**：挂载备用 `ball_height_above_ground` / 实现峰值高度 reward，对比行为差异
+4. ✅ **加训练量（已执行并终止）**：4096 envs × 23875 iter → 峰值挑高 **12cm**，但 it3000 即 plateau；回放进一步暴露这 12cm 是**脖子夹球**（reward hacking，见 6.6）
+5. ✅ **机制感知 reward v5（已执行并达标）**：门控+颈接触惩罚废掉 exploit；4096 envs × **1000 iter** → 干净踢射 **mean ~70cm / max 96cm / ≥50cm 14/16 / 机制 16/16 脚腿**
+6. ⏭️ **v6：从「踢得高」到「踢得受控」（当前）**：见下方 10.1 改进方向
 7. **（可选）导出**：复用子模块 `export.py` 导出 ONNX，理解 sim2real 的 normalizer 烘焙
+
+### 10.1 v6 改进方向（按优先级）
+
+v5 已解决「高」和「机制正确」，剩「受控 / 结晶 / 可迁移」。按杠杆性价比排序：
+
+0. **确定性探针（先诊断再动训练）**：把采样换成**均值动作** rollout model_1000——若挑高大幅塌缩，说明技能依赖噪声（std 卡 1.57），v6 第一任务是「结晶」；若保持，则直接进形态塑形。这是一次性探针，不改训练。
+1. **结晶策略（去噪声依赖）**：`Mean action std` 卡 1.57 走平=探索没收敛。杠杆：降 `init_std` / 加 std 衰减 schedule / 后程降 entropy coef。判据：确定性探针挑高 ≈ 随机探针。
+2. **形态塑形（受控踢射替代翻扑）**：抬 `body_ang_vel`/`angular_momentum` 权重压全身翻腾；新增「接触瞬间躯干直立」reward（球向上速度>阈值的窗口内 trunk pitch 近 0 才给分）；新增「支撑脚着地」强制单腿踢站姿。目标：挑高可略降，先换动作可迁移。
+3. **高度梯度重构（若还要更高）**：`max_lift=0.5` cap 使 >50cm 无梯度（94~114cm 属无引导过冲）；改 log/soft cap，或加**滞空时间（airtime）** reward 奖励「持续高」而非「瞬时高」。
+4. **成功率 metric + 数值稳定**：`Episode_Metrics` 加二值成功 metric（峰值≥X cm）盯成功率而非只看均值；盯 `nan_state` 与 mean_reward 负尖峰（v4 曾 −1.99e8），必要时接触 damping/限力。
+5. **sim2real 准备（远期）**：15g 球过轻不真实，加球质量/摩擦 DR；翻扑形态无法上真机，#2 是前提；必要时接触瞬间给 actor 喂球位姿验证上限。
 
 ---
 
 ## 十一、预期管理（物理边界）
 
 - microduck 是 25cm / 737g 双足，球 70mm / **15g**（极轻，一碰必飞）。踢「远」（水平）比踢「高」（垂直挑射）容易得多——高踢要求摆动脚有向上的速度分量，单脚支撑时向上摆腿会破坏平衡。
-- **v4 已证明「垂直挑高」物理可达且能学**：大训练把峰值挑高从 2cm 顶到 **12cm**（球心 0.21m、齐机身头顶）、方向向上。但 **it3000 即 plateau**——12cm 是当前配方/几何/探索的局部最优，**再加 iter 无效**。
-- 「比官方轻触版踢得明显更高、并说清楚为什么」已经稳了（12cm vs 官方滚地）；「垂直挑射到 0.3~0.5m」是需**换杠杆**（非加训练量）的 stretch goal。
-```
+- **v4 证明「垂直挑高」物理可达且能学**（12cm，但实为脖子夹球）；**v5 证明废掉 exploit 后脚腿踢射能更高**：1000 iter 即 mean ~70cm / max 96cm，已越过当初 0.3~0.5m stretch goal 的下半段。
+- 当前边界不再是「高度」而是**形态与可部署性**：翻扑 launch、std 未结晶、action 极抖——v6 的主战场是「受控、结晶、可迁移」，而非继续加高度。
+- 球 15g 是仿真便利（1/49 体重、一碰必飞），与真球手感差异大；sim→real 迁移结论需经球质量 DR 重验。

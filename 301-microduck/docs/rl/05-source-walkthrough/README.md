@@ -31,4 +31,7 @@ entry point (tasks/__init__.py 的 import 副作用)
 
 ## 现状
 
-🚧 **待写。** 返回 [总导航 README](../README.md)。
+- ✅ [01-train_high_kick-walkthrough.md](01-train_high_kick-walkthrough.md)：以 practice 侧实测跑通的 high kick 入口为标本，从 `python train_high_kick.py` 逐行跟到注册表/tyro/launch_training（含 `_REGISTRY` 数据结构与误区清单）。
+- 🚧 待写：velocity end-to-end 走读（上文规划）；02 high_kick_cfg 组装层、03 reward 数据流（见 01 篇末预告）。
+
+返回 [总导航 README](../README.md)。

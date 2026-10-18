@@ -5,6 +5,7 @@ logs/
 # 场景预览 / 回放离屏渲染产物（可再生，不入库）
 preview_scene.png
 _contact.png
+_v5_frames.png
 
 # Python 缓存
 __pycache__/
