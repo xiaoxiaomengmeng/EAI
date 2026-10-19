@@ -98,3 +98,17 @@ RTX 5090 对应 `sm_120`，旧版 PyTorch/CUDA wheel 可能出现架构不支持
 python -c "import torch; print(f'PyTorch {torch.__version__}, CUDA: {torch.cuda.is_available()}, GPU: {torch.cuda.get_device_name(0)}')"
 # 期望: PyTorch 2.11.0+cu1xx, CUDA: True, GPU: NVIDIA GeForce RTX 5090
 ```
+
+## 子模块按需拉取
+
+21 个子模块默认不随 `git clone` 下载，按需拉取；完整路径清单见 [`.gitmodules`](.gitmodules)。
+
+```bash
+cd /home/damorobot/ws
+
+# 拉取全部子模块
+git submodule update --init --recursive
+
+# 只拉取指定的某一个（示例：101 的 lerobot）
+git submodule update --init 101-pi-serial-models/repos/lerobot-main
+```

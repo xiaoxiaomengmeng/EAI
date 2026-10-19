@@ -1,18 +1,3 @@
-[submodule "200-video/ComfyUI"]
-	path = 200-video/ComfyUI
-	url = https://github.com/Comfy-Org/ComfyUI.git
-[submodule "501-human-dexterous-teleop"]
-	path = 501-human-dexterous-teleop
-	url = https://gitee.com/zgrxmm/hand_gesture_recognition.git
-[submodule "105-damo/RynnBrain"]
-	path = 105-damo/RynnBrain
-	url = https://github.com/xiaoxiaomengmeng/RynnBrain.git
-[submodule "103-lingbot/lingbot-depth"]
-	path = 103-lingbot/lingbot-depth
-	url = https://github.com/Robbyant/lingbot-depth.git
-[submodule "103-lingbot/lingbot-world-v2"]
-	path = 103-lingbot/lingbot-world-v2
-	url = https://github.com/xiaoxiaomengmeng/lingbot-world-v2.git
 [submodule "100-openVLA/repos/LIBERO"]
 	path = 100-openVLA/repos/LIBERO
 	url = https://github.com/Lifelong-Robot-Learning/LIBERO.git
@@ -22,42 +7,60 @@
 [submodule "101-pi-serial-models/repos/lerobot-main"]
 	path = 101-pi-serial-models/repos/lerobot-main
 	url = https://github.com/huggingface/lerobot.git
-[submodule "104-unitreerobotics/repos/unifolm-world-model-action"]
-	path = 104-unitreerobotics/repos/unifolm-world-model-action
-	url = https://github.com/xiaoxiaomengmeng/unifolm-world-model-action.git
-[submodule "105-damo/RynnWorld-4D"]
-	path = 105-damo/RynnWorld-4D
-	url = https://github.com/Alibaba-DAMO-Academy/RynnWorld-4D.git
-[submodule "103-lingbot/lingbot-video"]
-	path = 103-lingbot/lingbot-video
-	url = https://github.com/xiaoxiaomengmeng/lingbot-video.git
-[submodule "201-colibri"]
-	path = 201-colibri
-	url = https://github.com/xiaoxiaomengmeng/colibri.git
-[submodule "assets/mujoco/mujoco_menagerie"]
-	path = assets/mujoco/mujoco_menagerie
-	url = https://github.com/google-deepmind/mujoco_menagerie.git
-[submodule "301-microduck/microduck"]
-	path = 301-microduck/microduck
-	url = https://github.com/pollen-robotics/microduck.git
-[submodule "301-microduck/microduck_rl"]
-	path = 301-microduck/microduck_rl
-	url = https://github.com/pollen-robotics/microduck_rl.git
-[submodule "500-umr/UMR"]
-	path = 500-umr/UMR
-	url = https://github.com/hanyang9/UMR.git
-[submodule "docs/every-embodied"]
-	path = docs/every-embodied
-	url = https://github.com/datawhalechina/every-embodied.git
-[submodule "302-kingkongrobotics/jumper"]
-	path = 302-kingkongrobotics/jumper
-	url = https://github.com/KingKongRobotics/jumper.git
 [submodule "102-cosmos/3rd/RoboLab"]
 	path = 102-cosmos/3rd/RoboLab
 	url = https://github.com/NVlabs/RoboLab.git
 [submodule "102-cosmos/3rd/cosmos-framework"]
 	path = 102-cosmos/3rd/cosmos-framework
 	url = https://github.com/NVIDIA/cosmos-framework.git
+[submodule "103-lingbot/lingbot-depth"]
+	path = 103-lingbot/lingbot-depth
+	url = https://github.com/Robbyant/lingbot-depth.git
+[submodule "103-lingbot/lingbot-video"]
+	path = 103-lingbot/lingbot-video
+	url = https://github.com/xiaoxiaomengmeng/lingbot-video.git
 [submodule "103-lingbot/lingbot-vla-v2"]
 	path = 103-lingbot/lingbot-vla-v2
 	url = https://github.com/Robbyant/lingbot-vla-v2.git
+[submodule "103-lingbot/lingbot-world-v2"]
+	path = 103-lingbot/lingbot-world-v2
+	url = https://github.com/xiaoxiaomengmeng/lingbot-world-v2.git
+[submodule "104-unitreerobotics/repos/unifolm-world-model-action"]
+	path = 104-unitreerobotics/repos/unifolm-world-model-action
+	url = https://github.com/xiaoxiaomengmeng/unifolm-world-model-action.git
+[submodule "104-unitreerobotics/repos/unitree_rl_mjlab"]
+	path = 104-unitreerobotics/repos/unitree_rl_mjlab
+	url = https://github.com/unitreerobotics/unitree_rl_mjlab.git
+[submodule "105-damo/RynnBrain"]
+	path = 105-damo/RynnBrain
+	url = https://github.com/xiaoxiaomengmeng/RynnBrain.git
+[submodule "105-damo/RynnWorld-4D"]
+	path = 105-damo/RynnWorld-4D
+	url = https://github.com/Alibaba-DAMO-Academy/RynnWorld-4D.git
+[submodule "200-video/ComfyUI"]
+	path = 200-video/ComfyUI
+	url = https://github.com/Comfy-Org/ComfyUI.git
+[submodule "201-colibri"]
+	path = 201-colibri
+	url = https://github.com/xiaoxiaomengmeng/colibri.git
+[submodule "301-microduck/microduck"]
+	path = 301-microduck/microduck
+	url = https://github.com/pollen-robotics/microduck.git
+[submodule "301-microduck/microduck_rl"]
+	path = 301-microduck/microduck_rl
+	url = https://github.com/pollen-robotics/microduck_rl.git
+[submodule "302-kingkongrobotics/jumper"]
+	path = 302-kingkongrobotics/jumper
+	url = https://github.com/KingKongRobotics/jumper.git
+[submodule "500-umr/UMR"]
+	path = 500-umr/UMR
+	url = https://github.com/hanyang9/UMR.git
+[submodule "501-human-dexterous-teleop"]
+	path = 501-human-dexterous-teleop
+	url = https://gitee.com/zgrxmm/hand_gesture_recognition.git
+[submodule "assets/mujoco/mujoco_menagerie"]
+	path = assets/mujoco/mujoco_menagerie
+	url = https://github.com/google-deepmind/mujoco_menagerie.git
+[submodule "docs/every-embodied"]
+	path = docs/every-embodied
+	url = https://github.com/datawhalechina/every-embodied.git
