@@ -42,7 +42,7 @@ MJCF 机器人模型 ──► MuJoCo Warp（2048 envs GPU 并行仿真）──
 | commands | 指令采样 | velocity: 均匀速度指令；tracking: motion 参考帧（三模式，§5） |
 | events | 域随机化 / 扰动 | `foot_friction`、`base_com`、`push_robot`（§4） |
 | terminations | 终止条件 | velocity: 摔倒 / 超时；tracking: 跟踪误差超阈值（§5） |
-| curriculum | 课程学习 | velocity G1-Flat 明确置空 `cfg.curriculum = {}`（全程固定难度） |
+| curriculum | 课程学习 | velocity G1-Flat 明确置空 `cfg.curriculum = {}`（全程固定难度；三形态拆解见 §4 末） |
 
 - **任务注册机制（源码）**：`src/tasks/__init__.py` 用 `import_packages` 动态导入子包，各机型 `config/<robot>/__init__.py` 调用 `register_mjlab_task` 注册四件套（env_cfg / play_env_cfg / rl_cfg / runner_cls）。无 entry-point，train/play 须在仓库根目录执行。
 - **插件复用模式**：Unitree 任务基于 mjlab 内置 velocity 模板（`make_velocity_env_cfg()`）做机型覆盖——换机器人 = 换 entity 配置 + 微调 reward/events 参数，任务骨架不重写。
@@ -67,6 +67,16 @@ MJCF 机器人模型 ──► MuJoCo Warp（2048 envs GPU 并行仿真）──
 **域随机化（events，Sim-to-Real 核心手段）**：`foot_friction`（脚底 14 个 collision 几何摩擦随机）、`base_com`（torso 质心扰动）、`push_robot`（推扰，play 模式移除）；配合观测噪声（`enable_corruption`）。让策略在训练时就见过「物理参数漂移」的世界。
 
 **Flat 与 Rough 的差异**：Rough 启用地形课程（`terrain_generator.curriculum = True`）+ `terrain_scan` 射线传感器（pelvis 高度扫描进观测）；Flat 是纯平面并删掉 height_scan 观测与地形课程——先用 Flat 跑通链路，再上 Rough 练感知。
+
+**课程学习三形态与本仓库的取舍（源码）**：课程学习 = 难度循序渐进——随机初始化的策略直接面对最难场景时样本效率极低，先在简单情形学会基本盘、达标后自动加码，每一级都是下一级的好起点。「课程」不是一种机制，是三类机制的统称：
+
+| 形态 | 机制 | 本仓库开关 | 曲线含义 |
+|---|---|---|---|
+| 地形课程 | 机器人分散在地形网格不同难度砖块，env 侧按表现移动难度级别（走得稳升级、老摔降级） | Rough ✅ `curriculum=True`；Flat ❌（`=False`） | 台阶下行 = 合法难度升级，会爬回 |
+| 命令课程 | 速度指令范围从窄到宽逐步放开 | velocity 全系 ❌（`cfg.curriculum = {}` 显式清空，范围全程固定） | 排除「指令突然变难」归因 |
+| motion 采样课程 | 参考动作采样策略随训练调整（start/uniform/adaptive，详见 §5） | tracking dance 用 start（固定起点；adaptive 未启用） | 严格说是采样策略，非难度课程 |
+
+课程开关直接决定 reward 曲线的判读方式——同样的下跌，在无课程任务上是失稳信号（回退 checkpoint），在有课程任务上可能是难度升级（继续训），见 §6 诊断方法论。rough（带课程）训完后优先区分这两种情形。
 
 ## 5. tracking 任务：动作模仿（G1 舞蹈实测通过）
 
