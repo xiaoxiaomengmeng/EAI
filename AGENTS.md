@@ -72,7 +72,7 @@ NNN-project/
 - **上游子模块不改源码**；兼容问题在封装层（shim）解决；装源码包用 `--no-deps`，保护已验证的 torch/CUDA 栈。
 - 外部仓库一律不向其内部写文件、不动其 git 状态。
 - **不可逆操作**（删除、覆盖、强推）先确认；改重要文件前留副本（可放 `.git/` 下如 `.git/restructure-backup/`，不污染工作区）。
-- **git 提交**：工作区未配置提交身份，用一次性 `git -c user.name=... -c user.email=...`（身份由用户确认）；提交用 pathspec 限定范围（注意 CWD 在子目录时 pathspec 相对解析）；**提交后必须核对新 hash 与暂存区状态**，不能只看 `git log` 回显（身份缺失时 commit 会静默中止，log 显示的是旧提交）。
+- **git 提交**：commit message 先经用户确认；工作区未配置提交身份，用一次性 `git -c user.name=... -c user.email=...`（身份由用户确认）；提交用 pathspec 限定范围（注意 CWD 在子目录时 pathspec 相对解析）；**提交后必须核对新 hash 与暂存区状态**，不能只看 `git log` 回显（身份缺失时 commit 会静默中止，log 显示的是旧提交）。
 - **大文件**：视频、权重、数据集、运行产物不入库；训练 checkpoint 只保留关键节点（如首/峰/末）。
 - **文档与实测同步**：验证完成后立即更新 START_HERE 状态行与根 README 状态列；实测数据标注时间与来源，与推测明确区分（标「实测」/「待核」）。
 
