@@ -1,6 +1,6 @@
 # unitree_rl_mjlab 环境搭建与验证（RTX 5090）
 
-> 状态（2026-10-19）：环境搭建完成，§3 三判据验证通过；§6 阶段 1 smoke train 实测通过，阶段 2 起（play / 正式训练 / tracking）待验证。
+> 状态（2026-10-20）：全链路验证完成——环境三判据 ✓ / smoke train ✓ / play ✓ / velocity 正式训练 ✓（含塌陷诊断与最佳 checkpoint 定位）/ tracking 舞蹈模仿 ✓，实测数据均见 §6。C++ 实机部署（deploy/simulate）未涉及。
 > 仓库：`repos/unitree_rl_mjlab` — Unitree 官方 RL 运动控制库，基于 mjlab 1.2.0 插件式扩展，链路：训练（PPO / MuJoCo Warp）→ play 回放 → C++ 实机部署。
 > 任务注册表实测 29 个：mjlab 内置 9（Yam / Go1 / 内置 G1）+ Unitree 插件 20（velocity 8 机型 × Flat/Rough，tracking G1、G1-23Dof × 有/无状态估计）。
 
@@ -98,7 +98,7 @@ pip uninstall -y cuda-bindings cuda-pathfinder cuda-toolkit cwevals pyvers \
 
 注意：无后缀的 `nvidia-*` 是 cu13 时代孤儿；带 `-cu12` 后缀的（torch 2.9.1 在用）**不能动**。
 
-## 6. 训练与 play（待验证）
+## 6. 训练与 play（全链路已验证）
 
 命令均须在 `repos/unitree_rl_mjlab` 目录下、conda 环境已激活时执行（`import src` 与 `logs/` 均依赖当前目录）。
 
@@ -128,16 +128,41 @@ python scripts/play.py Unitree-G1-Flat \
 python scripts/train.py Unitree-G1-Flat --env.scene.num-envs 2048 --agent.logger tensorboard
 # 中断续训：追加 --agent.resume True（自动取最新 checkpoint，写入新时间戳目录，不覆盖旧目录）
 # 看曲线：tensorboard --logdir logs/rsl_rl --port 6006
+cd ~/ws/104-unitreerobotics/repos/unitree_rl_mjlab
+python scripts/play.py Unitree-G1-Flat \
+  --checkpoint-file logs/rsl_rl/g1_velocity/2026-10-19_17-23-46/model_10000.pt \
+  --viewer viser
 
-# 阶段 4（可选）：G1 动作模仿（动作数据仓库自带）
+# better（实测最佳 checkpoint：峰值在 iter 4965 而非末位）
+python scripts/play.py Unitree-G1-Flat \
+  --checkpoint-file logs/rsl_rl/g1_velocity/2026-10-19_17-23-46/model_5000.pt \
+  --viewer viser
+# ✅ 实测（2026-10-19，run: 2026-10-19_17-23-46）：跑满 10000 iters，94 分钟（0.56s/iter、约 87k steps/s）；
+#    曲线诊断：mean_reward 峰值 39.4 @ iter 4965，iter 5000→6000 策略塌陷（reward -14、error_vel 恶化 75%）
+#    后仅恢复至峰值七成——train cfg.curriculum = {} 全程无课程，属 PPO 长跑失稳（adaptive lr）；
+#    最佳 checkpoint = model_5000（上面 better 命令），非末位 model_10000；
+#    velocity 任务充分收敛点约 5000 iters，重跑可直接 --agent.max-iterations 5500 省一半时间；
+#    play 现象：稳定行走不倒、在 ±0.5~1.0 随机指令内自主变速换向（play 无遥杆）
+
+# 阶段 4：G1 动作模仿（动作数据仓库自带；csv_to_npz ✅ 已执行，1.3M CSV → 12M NPZ）
 python scripts/csv_to_npz.py --input-file src/assets/motions/g1/dance1_subject2.csv \
   --output-name dance1_subject2.npz --input-fps 30 --output-fps 50 --robot g1
+
 python scripts/train.py Unitree-G1-Tracking-No-State-Estimation \
   --motion-file src/assets/motions/g1/dance1_subject2.npz \
   --env.scene.num-envs 2048 --agent.logger tensorboard
+
+# play 须同时给 --motion-file 与 --checkpoint-file（完整相对路径）
 python scripts/play.py Unitree-G1-Tracking-No-State-Estimation \
   --motion-file src/assets/motions/g1/dance1_subject2.npz \
-  --checkpoint-file logs/rsl_rl/g1_tracking/<时间戳>/model_XX.pt --viewer viser
+  --checkpoint-file logs/rsl_rl/g1_tracking/2026-10-19_20-01-54/model_29000.pt \
+  --viewer viser
+# ✅ 实测（2026-10-19 夜，run: 2026-10-19_20-01-54）：跑满 30000 iters（4.35h，0.52s/iter，61 个 checkpoint）；
+#    健康单调爬升无塌陷：mean_reward -2.0 → 峰值 26.2 @ iter 29079 → 最佳 checkpoint = model_29000（非末位）；
+#    Episode_Termination/ee_body_pos 400 → 0.29（末端跟踪超差终止基本消失）、episode 长度 462/500；
+#    与 velocity 对比：tracking 带 motion 采样 curriculum，收敛慢但曲线稳，后半程仍有增益
+#    坑：run 目录的 <时间戳>.onnx（7MB，内含 motion 数据）是末位 30000 权重导出——
+#        C++ 部署要用峰值权重须从 model_29000.pt 重新导出 ONNX
 ```
 
 注：默认 logger 是 wandb（首次 init 触发云认证，无效 key 会在训练开始时报 401），验证阶段一律 `--agent.logger tensorboard` 绕开；想用 wandb 云监控时先 `wandb login --relogin` 并用 `python -c "import wandb; print(wandb.Api().viewer.entity)"` 端到端确认登录有效。

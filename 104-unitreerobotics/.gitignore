@@ -1,2 +1,4 @@
 # 训练输出
 outputs/
+pics/*.mp4
+pics/*.webm

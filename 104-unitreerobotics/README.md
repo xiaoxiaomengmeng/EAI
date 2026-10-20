@@ -1,5 +1,7 @@
 # 104-unitreerobotics — UnifoLM-WMA-0 本地推理
 
+> 定位：本文档仅覆盖子项目 A（UnifoLM-WMA-0 世界模型推理）。RL 训练子项目（unitree_rl_mjlab）见 [docs/02-unitree_rl_mjlab环境搭建与验证.md](docs/02-unitree_rl_mjlab环境搭建与验证.md)，总入口见 [START_HERE.md](START_HERE.md)。
+>
 > 相关文档：
 > - [WMA 推理脚本](scripts/run_wma_interaction.sh) — 世界模型交互推理（支持切换数据集）
 > - [学习笔记](docs/01-UnifoLM-WMA学习笔记.md) — 原理架构、输入输出、核心概念、WMA/VLA/OmniA 关系
@@ -34,7 +36,7 @@ sudo apt update
 sudo apt install nvidia-driver-580-open nvidia-utils-580
 # 重启后验证：nvidia-smi 应显示 RTX 5090
 
-cd /home/creator/ws/104-unitreerobotics
+cd ~/ws/104-unitreerobotics
 python3.10 -m venv --clear .venv
 source .venv/bin/activate
 python -m pip install -U pip
@@ -45,9 +47,9 @@ python -m pip install -U pip
 复用工作区顶层部署脚本（PyTorch 2.11.0 + cu128）：
 
 ```bash
-cd /home/creator/ws/104-unitreerobotics
+cd ~/ws/104-unitreerobotics
 source .venv/bin/activate
-bash /home/creator/ws/scripts/setup_py310_cu128_rtx5090_torch2110.sh
+bash ~/ws/scripts/setup_py310_cu128_rtx5090_torch2110.sh
 ```
 
 验证：
@@ -63,9 +65,9 @@ python -c "import torch; print(torch.__version__, torch.cuda.is_available(), tor
 > 必须使用 `--no-deps` 安装主包，再手动安装其余依赖。
 
 ```bash
-source /home/creator/ws/104-unitreerobotics/.venv/bin/activate
+source ~/ws/104-unitreerobotics/.venv/bin/activate
 
-cd /home/creator/ws/104-unitreerobotics/repos/
+cd ~/ws/104-unitreerobotics/repos/
 
 # 官方上游仓库：https://github.com/unitreerobotics/unifolm-world-model-action
 # 本地使用 fork（已包含 RTX 5090 兼容性修复）：
@@ -75,7 +77,7 @@ cd /home/creator/ws/104-unitreerobotics/repos/
 #   修复 commit: 9e82896 (feat: adapt UnifoLM-WMA inference for RTX 5090)
 git clone --recurse-submodules git@github.com:xiaoxiaomengmeng/unifolm-world-model-action.git
 
-cd /home/creator/ws/104-unitreerobotics/repos/unifolm-world-model-action
+cd ~/ws/104-unitreerobotics/repos/unifolm-world-model-action
 
 # ① 初始化子模块（external/dlimp）
 #    如果 GitHub 访问慢，可先配置代理或手动 clone
@@ -139,24 +141,24 @@ sudo apt install ffmpeg
 
 ```bash
 # 默认跑 unitree_z1_stackbox
-bash /home/creator/ws/104-unitreerobotics/scripts/run_wma_interaction.sh
+bash ~/ws/104-unitreerobotics/scripts/run_wma_interaction.sh
 
 # 指定其他数据集
-bash /home/creator/ws/104-unitreerobotics/scripts/run_wma_interaction.sh unitree_g1_pack_camera
+bash ~/ws/104-unitreerobotics/scripts/run_wma_interaction.sh unitree_g1_pack_camera
 
 # 或用独立脚本
-bash /home/creator/ws/104-unitreerobotics/scripts/run_g1_pack_camera.sh
-bash /home/creator/ws/104-unitreerobotics/scripts/run_z1_dual_arm_stackbox.sh
-bash /home/creator/ws/104-unitreerobotics/scripts/run_z1_dual_arm_stackbox_v2.sh
-bash /home/creator/ws/104-unitreerobotics/scripts/run_z1_dual_arm_cleanup_pencils.sh
+bash ~/ws/104-unitreerobotics/scripts/run_g1_pack_camera.sh
+bash ~/ws/104-unitreerobotics/scripts/run_z1_dual_arm_stackbox.sh
+bash ~/ws/104-unitreerobotics/scripts/run_z1_dual_arm_stackbox_v2.sh
+bash ~/ws/104-unitreerobotics/scripts/run_z1_dual_arm_cleanup_pencils.sh
 ```
 
 ### 手动执行
 
 ```bash
-source /home/creator/ws/104-unitreerobotics/.venv/bin/activate
-cd /home/creator/ws/104-unitreerobotics/repos/unifolm-world-model-action
-mkdir -p /home/creator/ws/104-unitreerobotics/outputs
+source ~/ws/104-unitreerobotics/.venv/bin/activate
+cd ~/ws/104-unitreerobotics/repos/unifolm-world-model-action
+mkdir -p ~/ws/104-unitreerobotics/outputs
 
 export HF_ENDPOINT=https://hf-mirror.com
 
@@ -164,7 +166,7 @@ CUDA_VISIBLE_DEVICES=0 python3 scripts/evaluation/world_model_interaction.py \
     --seed 123 \
     --ckpt_path ~/.cache/modelscope/models/unitreerobotics--UnifoLM-WMA-0-Dual/snapshots/master/unifolm_wma_dual.ckpt \
     --config configs/inference/world_model_interaction.yaml \
-    --savedir /home/creator/ws/104-unitreerobotics/outputs/interaction \
+    --savedir ~/ws/104-unitreerobotics/outputs/interaction \
     --bs 1 --height 320 --width 512 \
     --unconditional_guidance_scale 1.0 \
     --ddim_steps 50 --ddim_eta 1.0 \
@@ -302,7 +304,7 @@ imageio.mimwrite(filename, grid.numpy(), fps=fps, quality=9)
 修改 `.py` 文件后，如果存在旧的 `__pycache__`，Python 可能仍加载旧字节码：
 
 ```bash
-find /home/creator/ws/104-unitreerobotics/repos/unifolm-world-model-action/src \
+find ~/ws/104-unitreerobotics/repos/unifolm-world-model-action/src \
     -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null
 ```
 

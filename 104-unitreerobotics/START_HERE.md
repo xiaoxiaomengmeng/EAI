@@ -29,4 +29,4 @@ conda activate unitree_rl_mjlab
   - 常用入口（无需先激活环境）：
     - `bash scripts/run_z1_dual_arm_stackbox.sh`（另有 `run_g1_pack_camera.sh` 等，按数据集各一个）
     - `bash scripts/run_wma_interaction.sh <dataset>`，结果写入 `outputs/interaction/<dataset>/`
-- **unitree_rl_mjlab**：[docs/02-unitree_rl_mjlab环境搭建与验证.md](docs/02-unitree_rl_mjlab环境搭建与验证.md)（已验证安装命令、三判据、踩坑记录、训练与 play 命令）
+- **unitree_rl_mjlab**：[docs/02-unitree_rl_mjlab环境搭建与验证.md](docs/02-unitree_rl_mjlab环境搭建与验证.md)（已验证安装命令、三判据、踩坑记录；2026-10-20 全链路验证完成，含 velocity/tracking 训练实测与最佳 checkpoint 结论）
