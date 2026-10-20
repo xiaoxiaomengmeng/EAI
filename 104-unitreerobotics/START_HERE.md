@@ -25,8 +25,8 @@ conda activate unitree_rl_mjlab
 
 ## 从这里开始
 
-- **UnifoLM-WMA-0**：[README.md](README.md)（环境初始化、推理参数、5090 适配记录）→ [docs/01-UnifoLM-WMA学习笔记.md](docs/01-UnifoLM-WMA学习笔记.md)（原理与输入输出）
+- **UnifoLM-WMA-0**：[README.md](README.md)（环境初始化、推理参数、5090 适配记录）→ [docs/01-UnifoLM-WMA学习笔记.md](docs/01-UnifoLM-WMA学习笔记.md)（原理与输入输出）→ [docs/04-UnifoLM-WMA架构与关键技术解析.md](docs/04-UnifoLM-WMA架构与关键技术解析.md)（工程视角技术拆解；含资产清理现状与恢复路径）
   - 常用入口（无需先激活环境）：
     - `bash scripts/run_z1_dual_arm_stackbox.sh`（另有 `run_g1_pack_camera.sh` 等，按数据集各一个）
     - `bash scripts/run_wma_interaction.sh <dataset>`，结果写入 `outputs/interaction/<dataset>/`
-- **unitree_rl_mjlab**：[docs/02-unitree_rl_mjlab环境搭建与验证.md](docs/02-unitree_rl_mjlab环境搭建与验证.md)（已验证安装命令、三判据、踩坑记录；2026-10-20 全链路验证完成，含 velocity/tracking 训练实测与最佳 checkpoint 结论）
+- **unitree_rl_mjlab**：[docs/02-unitree_rl_mjlab环境搭建与验证.md](docs/02-unitree_rl_mjlab环境搭建与验证.md)（已验证安装命令、三判据、踩坑记录；2026-10-20 全链路验证完成，含 velocity/tracking 训练实测与最佳 checkpoint 结论）→ [docs/03-unitree_rl_mjlab架构与关键技术解析.md](docs/03-unitree_rl_mjlab架构与关键技术解析.md)（架构与关键技术拆解、PPO 曲线诊断方法论）

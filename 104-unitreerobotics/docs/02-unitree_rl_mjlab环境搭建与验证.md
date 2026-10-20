@@ -102,6 +102,8 @@ pip uninstall -y cuda-bindings cuda-pathfinder cuda-toolkit cwevals pyvers \
 
 命令均须在 `repos/unitree_rl_mjlab` 目录下、conda 环境已激活时执行（`import src` 与 `logs/` 均依赖当前目录）。
 
+> 训练曲线怎么读（塌陷诊断、最佳 checkpoint 选择）与 reward / 终止条件的设计逻辑，见 [docs/03-unitree_rl_mjlab架构与关键技术解析.md](03-unitree_rl_mjlab架构与关键技术解析.md)。
+
 ```bash
 # 阶段 1：smoke train（验证链路，预期几分钟；首次跑 mujoco-warp JIT 编译内核需等待）
 python scripts/train.py Unitree-G1-Flat \
