@@ -1,0 +1,12 @@
+# 运行输出（dexagent.yaml 的 run.output_dir 指向此处）
+runs/
+out_prompt/
+
+# 本地配置（含 API key；从 repos/DexAgent/dexagent.yaml 拷贝修改）
+config/dexagent.yaml
+*.key
+
+# Python
+__pycache__/
+*.pyc
+.venv/

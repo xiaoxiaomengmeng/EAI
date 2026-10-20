@@ -1,0 +1,13 @@
+# 自定义视频与其管线产物（reconstruction 输出落视频同目录，放 data/ 自然外置）
+data/
+
+# 权重与缓存
+weights/
+*.pt
+*.pth
+*.npz
+
+# Python
+__pycache__/
+*.pyc
+.venv/

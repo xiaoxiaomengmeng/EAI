@@ -64,3 +64,9 @@
 [submodule "docs/every-embodied"]
 	path = docs/every-embodied
 	url = https://github.com/datawhalechina/every-embodied.git
+[submodule "502-DexAgent/repos/DexAgent"]
+	path = 502-DexAgent/repos/DexAgent
+	url = https://github.com/dexagent1/DexAgent.git
+[submodule "503-do-as-i-do/repos/do-as-i-do"]
+	path = 503-do-as-i-do/repos/do-as-i-do
+	url = https://github.com/malik-group/do-as-i-do.git
