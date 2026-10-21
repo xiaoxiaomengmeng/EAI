@@ -128,7 +128,7 @@ python scripts/play.py Unitree-G1-Flat \
 
 # 阶段 3：正式训练（默认 10001 iters、每 100 iter 存 checkpoint+ONNX；另开终端 watch -n 5 nvidia-smi 盯显存，2048 起步）
 python scripts/train.py Unitree-G1-Flat --env.scene.num-envs 2048 --agent.logger tensorboard
-# 中断续训：追加 --agent.resume True（自动取最新 checkpoint，写入新时间戳目录，不覆盖旧目录）
+# 中断续训：追加 --agent.resume True（自动取最新 checkpoint，写入新时间戳目录，不覆盖旧目录；max-iterations 是增量不是终点，详见阶段 5）
 # 看曲线：tensorboard --logdir logs/rsl_rl --port 6006
 cd ~/ws/104-unitreerobotics/repos/unitree_rl_mjlab
 python scripts/play.py Unitree-G1-Flat \
@@ -165,6 +165,34 @@ python scripts/play.py Unitree-G1-Tracking-No-State-Estimation \
 #    与 velocity 对比：tracking 带 motion 采样 curriculum，收敛慢但曲线稳，后半程仍有增益
 #    坑：run 目录的 <时间戳>.onnx（7MB，内含 motion 数据）是末位 30000 权重导出——
 #        C++ 部署要用峰值权重须从 model_29000.pt 重新导出 ONNX
+
+# 阶段 5：中断续训 / 增量加训（2026-10-21 源码核实；以 rough 10000→13000 试探为例）
+cd ~/ws/104-unitreerobotics/repos/unitree_rl_mjlab
+python scripts/train.py Unitree-G1-Rough --env.scene.num-envs 2048 \
+  --agent.max-iterations 3000 --agent.logger tensorboard \
+  --agent.experiment-name g1_velocity_rough --agent.resume True
+# 机制（三个隐式环节拼出「从 10000 开始」，源码级核实）：
+#   ① resume=True 触发 get_checkpoint_path(log_path, run_dir=".*", checkpoint="model_.*.pt")：
+#      两个默认正则 → 字母序最新 run 目录 → model_<iter> 补零 15 位后数值排序取最大 → model_10000.pt
+#   ② runner.load() 把 checkpoint 内存的 iter 字段（=10000）写回 current_learning_iteration，
+#      同时恢复 actor/critic 权重 + optimizer 状态 + 观测归一化统计量
+#   ③ learn() 语义：start_it = current_learning_iteration；total_it = start_it + max_iterations →
+#      --agent.max-iterations 是【增量】不是【终点】——想跑到 13000 要传 3000（约 65 分钟）；
+#      误传 13000 会从 10000 跑到 23000（4.7 小时）
+# 行为与判读：
+#   resume 不写旧目录：在 <experiment>/ 下新建 <新时间戳>/ 存续训 checkpoint（首个即 model_10000.pt），
+#   play 脚本「取最新 run」逻辑天然命中续训目录
+#   curriculum 状态不随 checkpoint 保存，且新会话从头重放（2026-10-21 续训实测修正）：
+#   terrain_levels 重爬（实测 3.5 随机初始化→按能力回落稳定 ~1.7）；command_vel 的课程计数器
+#   env.common_step_counter 是会话内计数，resume 后归零 → stage0 小范围 (-0.5,1.0) 立即重新生效
+#   （注意：模板默认 ranges 本身就是 (-1.0,2.0) 大范围，旧 run iter 5000 的「翻倍跳变」
+#    实为 stage1 把 stage0 的临时小范围改回模板默认值，不是「升级」）
+#   【试探结果】3000 iters 后 track_linear 0.245~0.263 与旧平台 0.25 逐位重叠、error_vel 维持
+#   ~2.0（该指标 = episode 内逐步 ||cmd-actual|| 均值，量级指向 ~2 m/s 的指令无关速度习惯）
+#   → 加 iter 无效实锤：平台是策略 attractor，要突破需改 reward 权重/指令课程配置重训
+#   判读口径：只盯 Episode_Reward/track_linear_velocity 是否脱离 0.21~0.25 平台，别看总 reward
+#   （rough 10000 iter 实测：该项在 iter 5000 指令范围翻倍处从 0.48 腰斩到 0.21 后 4000 iter 平台，
+#    总 reward 的爬升来自 pose/foot_gait 等姿态项——续训试探就是为了验证这个平台是否真饱和）
 ```
 
 注：默认 logger 是 wandb（首次 init 触发云认证，无效 key 会在训练开始时报 401），验证阶段一律 `--agent.logger tensorboard` 绕开；想用 wandb 云监控时先 `wandb login --relogin` 并用 `python -c "import wandb; print(wandb.Api().viewer.entity)"` 端到端确认登录有效。
