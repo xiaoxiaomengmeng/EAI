@@ -61,6 +61,7 @@
 | [`501-human-dexterous-teleop`](501-human-dexterous-teleop/) | 人体姿态 / 手势识别、灵巧手遥操作、动捕数据采集（MediaPipe / MuJoCo / ROS2） | 多套：3 个 `.venv`（3.10）+ conda `4D-humans` | 🟡 | [START_HERE](501-human-dexterous-teleop/START_HERE.md) |
 | [`502-DexAgent`](502-DexAgent/) | DexAgent agentic Human2Sim2Robot 框架复现：人类操作视频 → 物理验证灵巧手轨迹 → 随机化多视角训练视频 | conda `dexagent`（3.11，待建） | ⚠️ | [START_HERE](502-DexAgent/START_HERE.md) |
 | [`503-do-as-i-do`](503-do-as-i-do/) | Do as I Do 固定管线复现：手物视频重建 6DoF 跟踪 → Sharpa Wave 重定向（MuJoCo Warp MPC）→ dual UR3e 回放 | conda：doasido_retargeting / sam3 / tapnet 已建（cu128 实测），sam3d / hawor / deployment 待建 | 🟡 | [START_HERE](503-do-as-i-do/START_HERE.md) |
+| [`504-retargeting`](504-retargeting/) | 穿戴设备重定向系列：PICO 动捕 + 手套 → G1 全身（IK / SONIC）+ Wuji / Dex3 手部；MuJoCo 回放、LeRobot v2.1 录制 | 三链路 replay 全通（data/ 3 session 实测：GUI 起窗 / ZMQ 实收帧），live 待设备 | 🟡 | [START_HERE](504-retargeting/START_HERE.md) |
 
 ### 公共底座（无编号）
 
