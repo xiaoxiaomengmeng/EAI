@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "key": "orbit",
+  "title": "ORBIT",
+  "units": "meters",
+  "up_axis": "Z",
+  "bounds": [
+    [
+      -7,
+      -6,
+      0
+    ],
+    [
+      7,
+      6,
+      2.3
+    ]
+  ],
+  "floor_z": 0,
+  "spawn": [
+    0,
+    -4.7,
+    0
+  ],
+  "ordered": false,
+  "tasks": [
+    {
+      "id": "dock_cyan",
+      "label": "青色滑盘入坞",
+      "kind": "region",
+      "body": "puck_cyan",
+      "joint": "puck_cyan_free",
+      "center": [
+        -3.9,
+        2.65,
+        0.865
+      ],
+      "half_size": [
+        0.43,
+        0.6,
+        0.06
+      ],
+      "points": 30,
+      "dwell": 0.5,
+      "max_speed": 0.08
+    },
+    {
+      "id": "dock_violet",
+      "label": "紫色滑盘入坞",
+      "kind": "region",
+      "body": "puck_violet",
+      "joint": "puck_violet_free",
+      "center": [
+        0,
+        2.65,
+        0.865
+      ],
+      "half_size": [
+        0.43,
+        0.6,
+        0.06
+      ],
+      "points": 30,
+      "dwell": 0.5,
+      "max_speed": 0.08
+    },
+    {
+      "id": "dock_orange",
+      "label": "橙色滑盘入坞",
+      "kind": "region",
+      "body": "puck_orange",
+      "joint": "puck_orange_free",
+      "center": [
+        3.9,
+        2.65,
+        0.865
+      ],
+      "half_size": [
+        0.43,
+        0.6,
+        0.06
+      ],
+      "points": 30,
+      "dwell": 0.5,
+      "max_speed": 0.08
+    }
+  ],
+  "prop_joints": [
+    "puck_cyan_free",
+    "puck_violet_free",
+    "puck_orange_free"
+  ],
+  "assumptions": [
+    "Concept design, not a reconstruction of measured architecture.",
+    "14 x 12 m arena; 1.2-1.8 m humanoid; meter scale; Z up.",
+    "Infinite physical floor at z=0, finite visual tile field.",
+    "Passive props; scores are simulated-state feedback, not a learned skill guarantee.",
+    "ORBIT collision support z=.82; decorative paint has no contact."
+  ]
+}

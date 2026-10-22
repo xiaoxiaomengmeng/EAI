@@ -1,0 +1,84 @@
+<robot name="dex3_right_retarget">
+  <link name="base_link"/>
+  <link name="right_hand_palm_link"/>
+  <link name="right_hand_thumb_0_link"/>
+  <link name="right_hand_thumb_1_link"/>
+  <link name="right_hand_thumb_2_link"/>
+  <link name="right_hand_index_0_link"/>
+  <link name="right_hand_index_1_link"/>
+  <link name="right_hand_middle_0_link"/>
+  <link name="right_hand_middle_1_link"/>
+  <link name="thumb_tip"/>
+  <link name="index_tip"/>
+  <link name="middle_tip"/>
+
+  <joint name="base" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_hand_palm_link"/>
+    <origin rpy="3.14 0 -1.57" xyz="0 0 0"/>
+  </joint>
+  <joint name="right_hand_thumb_0_joint" type="revolute">
+    <parent link="right_hand_palm_link"/>
+    <child link="right_hand_thumb_0_link"/>
+    <origin xyz="0.0255 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="2.45" velocity="6.857" lower="-1.04719755" upper="1.04719755"/>
+  </joint>
+  <joint name="right_hand_thumb_1_joint" type="revolute">
+    <parent link="right_hand_thumb_0_link"/>
+    <child link="right_hand_thumb_1_link"/>
+    <origin xyz="-0.0025 0.0193 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1.4" velocity="12" lower="-0.920" upper="0.72431163"/>
+  </joint>
+  <joint name="right_hand_thumb_2_joint" type="revolute">
+    <parent link="right_hand_thumb_1_link"/>
+    <child link="right_hand_thumb_2_link"/>
+    <origin xyz="0 0.0458 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1.4" velocity="12" lower="-1.74532925" upper="0"/>
+  </joint>
+  <joint name="right_hand_index_0_joint" type="revolute">
+    <parent link="right_hand_palm_link"/>
+    <child link="right_hand_index_0_link"/>
+    <origin xyz="0.0777 -0.0016 0.0285" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1.4" velocity="12" lower="0" upper="1.57079632"/>
+  </joint>
+  <joint name="right_hand_index_1_joint" type="revolute">
+    <parent link="right_hand_index_0_link"/>
+    <child link="right_hand_index_1_link"/>
+    <origin xyz="0.0458 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1.4" velocity="12" lower="0" upper="1.74532925"/>
+  </joint>
+  <joint name="right_hand_middle_0_joint" type="revolute">
+    <parent link="right_hand_palm_link"/>
+    <child link="right_hand_middle_0_link"/>
+    <origin xyz="0.0777 -0.0016 -0.0285" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1.4" velocity="12" lower="0" upper="1.57079632"/>
+  </joint>
+  <joint name="right_hand_middle_1_joint" type="revolute">
+    <parent link="right_hand_middle_0_link"/>
+    <child link="right_hand_middle_1_link"/>
+    <origin xyz="0.0458 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="1.4" velocity="12" lower="0" upper="1.74532925"/>
+  </joint>
+  <joint name="thumb_tip_joint" type="fixed">
+    <parent link="right_hand_thumb_2_link"/>
+    <child link="thumb_tip"/>
+    <origin xyz="0 0.05 0" rpy="0 0 0"/>
+  </joint>
+  <joint name="index_tip_joint" type="fixed">
+    <parent link="right_hand_index_1_link"/>
+    <child link="index_tip"/>
+    <origin xyz="0.05 0 0" rpy="0 0 0"/>
+  </joint>
+  <joint name="middle_tip_joint" type="fixed">
+    <parent link="right_hand_middle_1_link"/>
+    <child link="middle_tip"/>
+    <origin xyz="0.05 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>

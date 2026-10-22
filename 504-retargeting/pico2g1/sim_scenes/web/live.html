@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G1 · 实时视角</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,"PingFang SC",sans-serif;background:#090d12;color:#e6edf5}
+*{box-sizing:border-box}body{margin:0;padding:0 24px;height:100dvh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:20px;min-height:86px;flex-wrap:wrap;padding:16px 0}
+h1{font-size:20px;font-weight:600;margin:0;letter-spacing:-.5px}h1 span{color:#6b8297;font-weight:400;margin-left:10px;font-size:14px}
+.status{font-size:12px;color:#a5b6c7;display:flex;align-items:center;gap:8px}.dot{width:7px;height:7px;border-radius:50%;background:#d7a54f}.live .dot{background:#55dfb4;box-shadow:0 0 12px #55dfb455}
+.tools{margin-left:auto;display:flex;gap:8px}button,a{font:inherit}button{border:1px solid #293440;background:#141c25;color:#b9cadb;border-radius:7px;cursor:pointer;padding:8px 12px;font-size:12px}button:hover{background:#243445;color:#fff}button:focus-visible,a:focus-visible{outline:2px solid #55dfb4;outline-offset:3px}
+main{min-height:0;flex:1;display:grid;grid-template-columns:minmax(0,2.2fr) minmax(320px,1fr);grid-template-rows:minmax(0,1fr);gap:12px}
+.simulation-views,.source-views{min-height:0;min-width:0;display:grid;gap:12px}
+.simulation-views{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:minmax(0,3fr) minmax(0,2fr)}
+.simulation-views>.view:first-child{grid-column:1 / -1}
+.source-views{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,3fr) minmax(0,2fr)}
+.source-views .bar{gap:6px;padding:0 8px}.source-views .resolution{display:none}.source-views .bar button{margin-left:auto}.source-views .bar h2{font-size:11px}
+.view{min-height:0;min-width:0;border:1px solid #25313d;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;background:#070a0e}
+.bar{height:40px;flex-shrink:0;display:flex;align-items:center;gap:10px;padding:0 12px;background:#111923}.number{font-size:10px;color:#63d9bb;font-variant-numeric:tabular-nums}.bar h2{font-size:12px;font-weight:500;margin:0}.resolution{color:#6f859b;font-size:10px;margin-left:auto}.bar button{background:none;border:none;font-size:16px;padding:4px 8px}
+.image{min-height:0;flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}canvas{display:block;width:100%;height:100%;object-fit:contain}.waiting{position:absolute;color:#52667a;font-size:13px;pointer-events:none}.view.ready .waiting{display:none}
+main.focus{grid-template-columns:1fr;grid-template-rows:1fr}main.focus .view:not(.selected){display:none}
+main.focus .simulation-views,main.focus .source-views{display:contents}main.focus .view{grid-column:1;grid-row:1}
+footer{min-height:49px;display:flex;align-items:center;gap:22px;color:#71879c;font-size:11px;flex-wrap:wrap;padding:12px 0}footer span{white-space:nowrap}footer a{margin-left:auto;color:#8ca4ba;text-decoration:none}footer b{font-weight:500;color:#b4c6d6;font-variant-numeric:tabular-nums}
+@media(max-width:900px){body{height:auto;min-height:100dvh}main{flex:none;grid-template-columns:minmax(0,1fr);grid-template-rows:auto}.simulation-views{height:65dvh;min-height:400px}.source-views{height:70dvh;min-height:420px}main.focus{height:75dvh}}
+@media(max-width:650px){body{padding:0 12px}header{gap:12px;min-height:76px}h1 span{display:none}.tools{gap:4px}main,.simulation-views,.source-views{gap:6px}.bar{gap:4px;padding:0 6px}.bar h2{font-size:10px}.bar button{margin-left:auto;font-size:14px;padding:0}.number,.resolution{display:none}footer{gap:12px}}
+:fullscreen{background:#090d12;padding:12px}
+</style>
+<header>
+  <h1>G1 <span>实时视角</span></h1>
+  <div class="status" role="status" id="status"><i class="dot"></i><span id="message">正在连接仿真…</span></div>
+  <div class="tools"><button id="layout">全部画面</button><button id="fullscreen">全屏预览</button></div>
+</header>
+<main id="views" aria-label="机器人与原始关键点同步画面">
+  <div class="simulation-views" role="group" aria-label="仿真画面"></div>
+  <div class="source-views" role="group" aria-label="原始关键点画面"></div>
+</main>
+<footer>
+  <span>接收帧率 <b id="fps">—</b> fps</span>
+  <span>帧龄估计 <b id="age">—</b> ms</span>
+  <span>本次下载 <b id="transfer">—</b> ms</span>
+  <span id="hint">等待本机画面</span>
+  <a href="/api/streams" target="_blank" rel="noopener">推流接口 ↗</a>
+</footer>
+<script>
+'use strict';
+const streams = [['main','主画面'],['robot_head','头部视角'],['robot_left_wrist','左腕部相机'],['robot_right_wrist','右腕部相机'],
+  ['source_body_front','身体正视'],['source_body_side','身体侧视'],['source_left_hand','左手原始关键点'],['source_right_hand','右手原始关键点']];
+const views = document.querySelector('#views');
+const cards = new Map();
+for (const [index,[id,title]] of streams.entries()) {
+  const card = document.createElement('section');
+  card.className = 'view';
+  card.innerHTML = `<div class="bar"><span class="number">0${index+1}</span><h2>${title}</h2><span class="resolution">等待画面</span><button aria-label="放大${title}" title="单路放大">⛶</button></div><div class="image"><canvas aria-label="${title}实时画面"></canvas><span class="waiting">等待画面接入</span></div>`;
+  card.querySelector('button').onclick = () => {
+    const focused = card.classList.contains('selected') && views.classList.contains('focus');
+    for (const other of cards.values()) other.card.classList.remove('selected');
+    card.classList.toggle('selected', !focused);
+    views.classList.toggle('focus', !focused);
+  };
+  const canvas = card.querySelector('canvas');
+  cards.set(id, {card, canvas, context:canvas.getContext('2d', {alpha:false})});
+  views.querySelector(index < 4 ? '.simulation-views' : '.source-views').append(card);
+}
+document.querySelector('#layout').onclick = () => views.classList.remove('focus');
+document.querySelector('#fullscreen').onclick = async () => {
+  try { if (document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); }
+  catch { setStatus('浏览器不支持全屏，请使用窗口最大化', false); }
+};
+const status = document.querySelector('#status');
+const message = document.querySelector('#message');
+const ageLabel = document.querySelector('#age');
+const fpsLabel = document.querySelector('#fps');
+let after = 0, controller, lastReceived = 0, ageAtReceipt = 0, receivedTimes = [];
+function setStatus(text, live) { message.textContent = text; status.classList.toggle('live', live); }
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { controller?.abort(); setStatus('页面已暂停接收', false); }
+  else { after = 0; receivedTimes = []; }
+});
+setInterval(() => {
+  if (!lastReceived || document.hidden) return;
+  const elapsed = performance.now() - lastReceived;
+  ageLabel.textContent = Math.round(ageAtReceipt + elapsed);
+  if (elapsed > 1500) {
+    fpsLabel.textContent = '0';
+    setStatus('画面未更新 · 等待本机回放或连接恢复', false);
+  }
+}, 500);
+async function receive() {
+  while (true) {
+    if (document.hidden) { await sleep(250); continue; }
+    controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    let bitmaps = [];
+    try {
+      const response = await fetch(`/api/frames?after=${after}`, {cache:'no-store', signal:controller.signal});
+      const headersAt = performance.now();
+      if (response.status === 204) continue;
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const buffer = await response.arrayBuffer();
+      const downloadedAt = performance.now();
+      const headerSize = new DataView(buffer).getUint32(0);
+      const meta = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer, 4, headerSize)));
+      if (meta.frames.length !== streams.length || new Set(meta.frames.map(f => f.id)).size !== streams.length) throw new Error('Invalid view set');
+      let offset = 4 + headerSize;
+      const blobs = meta.frames.map(frame => {
+        if (!cards.has(frame.id) || frame.size <= 0 || offset + frame.size > buffer.byteLength) throw new Error('Invalid frame');
+        const blob = new Blob([new Uint8Array(buffer, offset, frame.size)], {type:'image/jpeg'});
+        offset += frame.size;
+        return blob;
+      });
+      const decoded = await Promise.allSettled(blobs.map(blob => createImageBitmap(blob)));
+      bitmaps = decoded.filter(result => result.status === 'fulfilled').map(result => result.value);
+      if (bitmaps.length !== streams.length) throw new Error('JPEG decode failed');
+      if (document.hidden) continue;
+      // Draw the complete set in one JS task; the browser paints all views together.
+      meta.frames.forEach((frame,index) => {
+        const {card,canvas,context} = cards.get(frame.id), bitmap = bitmaps[index];
+        if (canvas.width !== bitmap.width || canvas.height !== bitmap.height) {
+          canvas.width = bitmap.width; canvas.height = bitmap.height;
+          card.querySelector('.resolution').textContent = `${bitmap.width} × ${bitmap.height}`;
+        }
+        context.drawImage(bitmap,0,0);
+        card.classList.add('ready');
+      });
+      after = meta.sequence;
+      lastReceived = performance.now();
+      ageAtReceipt = meta.age_ms + lastReceived - headersAt;
+      receivedTimes.push(lastReceived);
+      receivedTimes = receivedTimes.filter(t => lastReceived - t < 2000);
+      fpsLabel.textContent = receivedTimes.length > 1 ? ((receivedTimes.length-1)*1000/(lastReceived-receivedTimes[0])).toFixed(1) : '—';
+      ageLabel.textContent = Math.round(ageAtReceipt);
+      document.querySelector('#transfer').textContent = (downloadedAt - headersAt).toFixed(1);
+      document.querySelector('#hint').textContent = '八路同步 · 自动跳过旧帧';
+      setStatus(ageAtReceipt < 1500 ? '实时连接' : '画面未更新 · 等待本机回放', ageAtReceipt < 1500);
+    } catch (error) {
+      if (!document.hidden) {
+        setStatus('连接中断 · 正在重连…', false);
+        after = 0;
+        receivedTimes = [];
+        await sleep(500);
+      }
+    } finally {
+      clearTimeout(timeout);
+      for (const bitmap of bitmaps) bitmap.close();
+    }
+  }
+}
+receive();
+</script>
+</html>

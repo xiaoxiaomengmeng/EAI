@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujocoinclude>
+  <worldbody>
+    <body name="play_scene_orbit" />
+    <body name="puck_cyan" pos="-3.9 -1.65 0.86">
+      <freejoint name="puck_cyan_free" />
+      <geom name="puck_cyan_visual_0" type="cylinder" size="0.12 0.035" pos="0 0 0" group="1" contype="0" conaffinity="0" mass="0" rgba="0.04 0.72 0.76 1" />
+      <geom name="puck_cyan_collision_0" type="cylinder" size="0.12 0.035" pos="0 0 0" group="3" contype="1" conaffinity="1" mass="0.22" rgba="1 .35 .08 .65" friction="0.16 0.001 1e-05" condim="4" solref=".008 1" />
+    </body>
+    <body name="puck_violet" pos="0 -1.65 0.86">
+      <freejoint name="puck_violet_free" />
+      <geom name="puck_violet_visual_0" type="cylinder" size="0.12 0.035" pos="0 0 0" group="1" contype="0" conaffinity="0" mass="0" rgba="0.5 0.32 0.87 1" />
+      <geom name="puck_violet_collision_0" type="cylinder" size="0.12 0.035" pos="0 0 0" group="3" contype="1" conaffinity="1" mass="0.22" rgba="1 .35 .08 .65" friction="0.16 0.001 1e-05" condim="4" solref=".008 1" />
+    </body>
+    <body name="puck_orange" pos="3.9 -1.65 0.86">
+      <freejoint name="puck_orange_free" />
+      <geom name="puck_orange_visual_0" type="cylinder" size="0.12 0.035" pos="0 0 0" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="puck_orange_collision_0" type="cylinder" size="0.12 0.035" pos="0 0 0" group="3" contype="1" conaffinity="1" mass="0.22" rgba="1 .35 .08 .65" friction="0.16 0.001 1e-05" condim="4" solref=".008 1" />
+    </body>
+    <site name="robot_spawn" pos="0 -4.7 0" size=".04" group="4" rgba="0 0 0 0" />
+  </worldbody>
+</mujocoinclude>

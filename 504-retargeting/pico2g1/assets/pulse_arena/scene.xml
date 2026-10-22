@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="pulse_humanoid_arena">
+  <compiler angle="radian" meshdir="assets" />
+  <option timestep=".002" integrator="implicitfast" cone="elliptic" iterations="60" />
+  <statistic center="0 0 1.28750002" extent="18" />
+  <visual>
+    <global offwidth="1600" offheight="1200" />
+    <headlight active="0" />
+  </visual>
+  <include file="environment.xml" />
+  <include file="interactive.xml" />
+</mujoco>

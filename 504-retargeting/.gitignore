@@ -1,0 +1,12 @@
+
+# 子工程内部运行产物由各自 .gitignore 自管：
+#   pico2g1/.gitignore — session_*/、.venv/、3rd/、SONIC onnx、recordings/、tuning.json 等
+
+# 设备采集 session（parquet + mp4，数百 MB 一包）
+data/
+
+# 重构前 tar 备份与切割脚本等临时产物，仅本地留档
+/tmp/
+
+# torch 编译缓存残留目录（以本目录为 CWD 跑 torch 时产生，当前为空）
+/torchinductor_*/

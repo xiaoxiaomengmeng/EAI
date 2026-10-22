@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujocoinclude>
+  <worldbody>
+    <body name="play_scene_strike" />
+    <body name="strike_ball" pos="0 -2.1 0.245">
+      <freejoint name="strike_ball_free" />
+      <geom name="strike_ball_visual_0" type="sphere" size="0.23" pos="0 0 0" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="strike_ball_collision_0" type="sphere" size="0.23" pos="0 0 0" group="3" contype="1" conaffinity="1" mass="1.1" rgba="1 .35 .08 .65" friction="0.65 0.008 0.0002" condim="4" solref=".008 1" />
+    </body>
+    <body name="pin_1" pos="0 2.8 0.015">
+      <freejoint name="pin_1_free" />
+      <geom name="pin_1_visual_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_1_collision_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="3" contype="1" conaffinity="1" mass="0.25" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_1_visual_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="pin_1_collision_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="3" contype="1" conaffinity="1" mass="0.07" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_1_visual_2" type="sphere" size="0.082" pos="0 0 0.53" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_1_collision_2" type="sphere" size="0.082" pos="0 0 0.53" group="3" contype="1" conaffinity="1" mass="0.06" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+    </body>
+    <body name="pin_2" pos="-0.34 3.4 0.015">
+      <freejoint name="pin_2_free" />
+      <geom name="pin_2_visual_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_2_collision_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="3" contype="1" conaffinity="1" mass="0.25" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_2_visual_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="pin_2_collision_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="3" contype="1" conaffinity="1" mass="0.07" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_2_visual_2" type="sphere" size="0.082" pos="0 0 0.53" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_2_collision_2" type="sphere" size="0.082" pos="0 0 0.53" group="3" contype="1" conaffinity="1" mass="0.06" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+    </body>
+    <body name="pin_3" pos="0.34 3.4 0.015">
+      <freejoint name="pin_3_free" />
+      <geom name="pin_3_visual_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_3_collision_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="3" contype="1" conaffinity="1" mass="0.25" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_3_visual_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="pin_3_collision_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="3" contype="1" conaffinity="1" mass="0.07" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_3_visual_2" type="sphere" size="0.082" pos="0 0 0.53" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_3_collision_2" type="sphere" size="0.082" pos="0 0 0.53" group="3" contype="1" conaffinity="1" mass="0.06" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+    </body>
+    <body name="pin_4" pos="-0.68 4.0 0.015">
+      <freejoint name="pin_4_free" />
+      <geom name="pin_4_visual_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_4_collision_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="3" contype="1" conaffinity="1" mass="0.25" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_4_visual_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="pin_4_collision_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="3" contype="1" conaffinity="1" mass="0.07" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_4_visual_2" type="sphere" size="0.082" pos="0 0 0.53" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_4_collision_2" type="sphere" size="0.082" pos="0 0 0.53" group="3" contype="1" conaffinity="1" mass="0.06" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+    </body>
+    <body name="pin_5" pos="0 4.0 0.015">
+      <freejoint name="pin_5_free" />
+      <geom name="pin_5_visual_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_5_collision_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="3" contype="1" conaffinity="1" mass="0.25" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_5_visual_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="pin_5_collision_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="3" contype="1" conaffinity="1" mass="0.07" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_5_visual_2" type="sphere" size="0.082" pos="0 0 0.53" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_5_collision_2" type="sphere" size="0.082" pos="0 0 0.53" group="3" contype="1" conaffinity="1" mass="0.06" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+    </body>
+    <body name="pin_6" pos="0.68 4.0 0.015">
+      <freejoint name="pin_6_free" />
+      <geom name="pin_6_visual_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_6_collision_0" type="cylinder" size="0.11 0.17" pos="0 0 0.17" group="3" contype="1" conaffinity="1" mass="0.25" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_6_visual_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="1" contype="0" conaffinity="0" mass="0" rgba="1 0.35 0.06 1" />
+      <geom name="pin_6_collision_1" type="cylinder" size="0.062 0.075" pos="0 0 0.415" group="3" contype="1" conaffinity="1" mass="0.07" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+      <geom name="pin_6_visual_2" type="sphere" size="0.082" pos="0 0 0.53" group="1" contype="0" conaffinity="0" mass="0" rgba="0.93 0.95 0.89 1" />
+      <geom name="pin_6_collision_2" type="sphere" size="0.082" pos="0 0 0.53" group="3" contype="1" conaffinity="1" mass="0.06" rgba="1 .35 .08 .65" friction="0.65 0.005 0.0001" condim="4" solref=".008 1" />
+    </body>
+    <site name="robot_spawn" pos="0 -4.7 0" size=".04" group="4" rgba="0 0 0 0" />
+  </worldbody>
+</mujocoinclude>

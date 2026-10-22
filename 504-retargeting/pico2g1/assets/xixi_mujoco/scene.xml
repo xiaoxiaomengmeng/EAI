@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="xixi_office">
+  <compiler angle="radian" meshdir="assets" autolimits="true" />
+  <option timestep=".002" gravity="0 0 -9.81" />
+  <statistic center="0 0 1" extent="65" />
+  <visual>
+    <global offwidth="1600" offheight="1200" />
+    <map znear=".001" zfar="5" />
+    <quality shadowsize="4096" />
+    <headlight active="0" />
+  </visual>
+  <include file="environment.xml" />
+</mujoco>

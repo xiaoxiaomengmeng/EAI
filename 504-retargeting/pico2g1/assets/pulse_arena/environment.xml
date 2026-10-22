@@ -1,0 +1,96 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujocoinclude>
+  <asset>
+    <mesh name="mesh_0" file="visual_000.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_0" rgba="0.109999999 0.140000001 0.150000006 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_1" file="visual_001.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_1" rgba="0.779999971 0.829999983 0.819999993 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_2" file="visual_002.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_2" rgba="0.119999997 0.170000002 0.189999998 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_3" file="visual_003.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_3" rgba="0.280000001 0.330000013 0.349999994 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_4" file="visual_004.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_4" rgba="0.0399999991 0.649999976 0.720000029 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_5" file="visual_005.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_5" rgba="0.159999996 0.289999992 0.319999993 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_6" file="visual_006.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_6" rgba="0.389999986 0.25 0.189999998 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_7" file="visual_007.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_7" rgba="0.939999998 0.949999988 0.870000005 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_8" file="visual_008.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_8" rgba="1 0.310000002 0.0599999987 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_9" file="visual_009.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_9" rgba="0.0350000001 0.061999999 0.0790000036 1" specular="0.036" shininess="0.12" reflectance="0" />
+    <mesh name="mesh_10" file="visual_010.msh" inertia="shell" maxhullvert="16" />
+    <material name="material_10" rgba="0.569999993 0.779999971 0.159999996 1" specular="0.036" shininess="0.12" reflectance="0" />
+  </asset>
+  <worldbody>
+    <body name="environment_visual">
+      <geom name="visual_0" type="mesh" mesh="mesh_0" material="material_0" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_1" type="mesh" mesh="mesh_1" material="material_1" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_2" type="mesh" mesh="mesh_2" material="material_2" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_3" type="mesh" mesh="mesh_3" material="material_3" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_4" type="mesh" mesh="mesh_4" material="material_4" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_5" type="mesh" mesh="mesh_5" material="material_5" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_6" type="mesh" mesh="mesh_6" material="material_6" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_7" type="mesh" mesh="mesh_7" material="material_7" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_8" type="mesh" mesh="mesh_8" material="material_8" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_9" type="mesh" mesh="mesh_9" material="material_9" group="1" contype="0" conaffinity="0" density="0" />
+      <geom name="visual_10" type="mesh" mesh="mesh_10" material="material_10" group="1" contype="0" conaffinity="0" density="0" />
+    </body>
+    <body name="environment_collision">
+      <geom name="collision_00000" type="box" pos="0 6.9000001 1.39999998" quat="1 0 0 0" size="9 0.100000001 1.39999998" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00001" type="box" pos="-8.89999962 0 0.379999995" quat="1 0 0 0" size="0.100000001 6.9000001 0.379999995" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00002" type="box" pos="8.89999962 0 0.379999995" quat="1 0 0 0" size="0.100000001 6.9000001 0.379999995" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00003" type="box" pos="-5.05000019 -6.9000001 0.230000004" quat="1 0 0 0" size="3.8499999 0.100000001 0.230000004" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00004" type="box" pos="5.05000019 -6.9000001 0.230000004" quat="1 0 0 0" size="3.8499999 0.100000001 0.230000004" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00005" type="box" pos="-8 6.75 1.25" quat="1 0 0 0" size="0.0350000001 0.0700000003 1.25" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00006" type="box" pos="-4 6.75 1.25" quat="1 0 0 0" size="0.0350000001 0.0700000003 1.25" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00007" type="box" pos="4 6.75 1.25" quat="1 0 0 0" size="0.0350000001 0.0700000003 1.25" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00008" type="box" pos="8 6.75 1.25" quat="1 0 0 0" size="0.0350000001 0.0700000003 1.25" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00009" type="box" pos="0 6.76499987 2.21000004" quat="1 0 0 0" size="3.5 0.0375000015 0.430000007" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00010" type="box" pos="0 5.8499999 0.850000024" quat="1 0 0 0" size="2.1500001 0.140000001 0.850000024" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00011" type="cylinder" pos="-7.3499999 4.38000011 0.680000007" quat="1 0 0 0" size="0.0649999976 0.680000007" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00012" type="cylinder" pos="-4.6500001 4.38000011 0.680000007" quat="1 0 0 0" size="0.0649999976 0.680000007" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00013" type="box" pos="-6 4.38000011 1.36000001" quat="1 0 0 0" size="1.41499996 0.0649999976 0.0649999976" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00014" type="box" pos="-7.3499999 4.94999981 0.0700000003" quat="1 0 0 0" size="0.0500000007 0.600000024 0.0700000003" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00015" type="box" pos="-4.6500001 4.94999981 0.0700000003" quat="1 0 0 0" size="0.0500000007 0.600000024 0.0700000003" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00016" type="box" pos="-6 5.5 0.0799999982" quat="1 0 0 0" size="1.39999998 0.0500000007 0.0799999982" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00017" type="box" pos="6 2.54999995 0.774999976" quat="1 0 0 0" size="1.42499995 0.550000012 0.0450000018" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00018" type="box" pos="4.80000019 2.1500001 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00019" type="box" pos="4.80000019 2.95000005 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00020" type="box" pos="7.19999981 2.1500001 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00021" type="box" pos="7.19999981 2.95000005 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00022" type="box" pos="6 3.04999995 0.569999993" quat="1 0 0 0" size="1.375 0.0199999996 0.140000001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00023" type="box" pos="6 -1.60000002 0.774999976" quat="1 0 0 0" size="1.42499995 0.550000012 0.0450000018" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00024" type="box" pos="4.80000019 -2 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00025" type="box" pos="4.80000019 -1.20000005 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00026" type="box" pos="7.19999981 -2 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00027" type="box" pos="7.19999981 -1.20000005 0.36500001" quat="1 0 0 0" size="0.0399999991 0.0399999991 0.36500001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00028" type="box" pos="6 -1.10000002 0.569999993" quat="1 0 0 0" size="1.375 0.0199999996 0.140000001" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00029" type="box" pos="4.88999987 -1.60000002 0.839999974" quat="1 0 0 0" size="0.00999999978 0.319999993 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00030" type="box" pos="5.51000023 -1.60000002 0.839999974" quat="1 0 0 0" size="0.00999999978 0.319999993 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00031" type="box" pos="5.19999981 -1.28999996 0.839999974" quat="1 0 0 0" size="0.300000012 0.00999999978 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00032" type="box" pos="5.19999981 -1.90999997 0.839999974" quat="1 0 0 0" size="0.300000012 0.00999999978 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00033" type="box" pos="5.69000006 -1.60000002 0.839999974" quat="1 0 0 0" size="0.00999999978 0.319999993 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00034" type="box" pos="6.30999994 -1.60000002 0.839999974" quat="1 0 0 0" size="0.00999999978 0.319999993 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00035" type="box" pos="6 -1.28999996 0.839999974" quat="1 0 0 0" size="0.300000012 0.00999999978 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00036" type="box" pos="6 -1.90999997 0.839999974" quat="1 0 0 0" size="0.300000012 0.00999999978 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00037" type="box" pos="6.48999977 -1.60000002 0.839999974" quat="1 0 0 0" size="0.00999999978 0.319999993 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00038" type="box" pos="7.11000013 -1.60000002 0.839999974" quat="1 0 0 0" size="0.00999999978 0.319999993 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00039" type="box" pos="6.80000019 -1.28999996 0.839999974" quat="1 0 0 0" size="0.300000012 0.00999999978 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00040" type="box" pos="6.80000019 -1.90999997 0.839999974" quat="1 0 0 0" size="0.300000012 0.00999999978 0.0199999996" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00041" type="cylinder" pos="-4.5999999 -4.1500001 0.319999993" quat="1 0 0 0" size="0.230000004 0.319999993" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00042" type="cylinder" pos="-1.79999995 -5.9000001 0.319999993" quat="1 0 0 0" size="0.230000004 0.319999993" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00043" type="cylinder" pos="1.79999995 -4.1500001 0.319999993" quat="1 0 0 0" size="0.230000004 0.319999993" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="collision_00044" type="cylinder" pos="4.5999999 -5.9000001 0.319999993" quat="1 0 0 0" size="0.230000004 0.319999993" group="3" contype="1" conaffinity="1" rgba=".9 .25 .07 .35" friction="0.8 0.005 0.0001" />
+      <geom name="ground_collision" type="plane" pos="0 0 0.0" size="40 30 .1" group="3" contype="1" conaffinity="1" rgba=".5 .55 .6 .35" friction="0.9 0.005 0.0001" />
+    </body>
+    <light name="key" pos="-5.4000001 -9 19.2875004" dir="0.259160548 0.431934237 -0.863868475" directional="true" diffuse=".7 .7 .7" ambient=".15 .15 .15" castshadow="true" />
+    <light name="fill" pos="9 9 17.4874992" dir="-0.436852038 -0.436852038 -0.786333621" directional="true" diffuse=".3 .3 .3" ambient=".15 .15 .15" castshadow="false" />
+    <camera name="overview" pos="17 -23 24" xyaxes="0.8041761414663254 0.5943910610838058 -0.0 -0.38207808145142375 0.5169291690225145 0.7660290946746682" fovy="42" />
+    <camera name="top" pos="0 0 27" xyaxes="1.0 0.0 0.0 0.0 1.0 0.0" fovy="42" />
+    <camera name="detail" pos="10 -9 8" xyaxes="0.8574929257125442 0.5144957554275266 -0.0 -0.2756575291522316 0.45942921525371927 0.8443563956014299" fovy="48" />
+    <camera name="reach" pos="3 1 2.6" xyaxes="0.8376105968386142 0.5462677805469224 -0.0 -0.15279844033655562 0.23429094184938526 0.9600835334480244" fovy="48" />
+  </worldbody>
+</mujocoinclude>

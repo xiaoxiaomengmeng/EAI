@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="orbit_humanoid_play">
+  <compiler angle="radian" meshdir="assets" />
+  <option timestep=".002" integrator="implicitfast" iterations="60" />
+  <statistic center="0 0 1.04499996" extent="14.01" />
+  <visual>
+    <global offwidth="1440" offheight="1080" />
+    <headlight active="0" />
+    <quality shadowsize="0" />
+  </visual>
+  <include file="environment.xml" />
+  <include file="interactive.xml" />
+</mujoco>

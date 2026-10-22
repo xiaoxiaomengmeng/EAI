@@ -1,0 +1,30 @@
+# Recorded capture sessions (parquet + mp4, hundreds of MB each)
+/session_*/
+
+# macOS Finder metadata
+.DS_Store
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Project-local Python environments and runtime tuning
+.venv/
+
+# External checkouts fetched by the env scripts (create_env.sh / setup.sh)
+/3rd/
+
+# SONIC ONNX policy downloaded by g1_sonic/setup.sh (~191 MB), plus the
+# chunk staging dir and partial files an interrupted download leaves behind
+/g1_sonic/models/*.onnx
+/g1_sonic/models/.seg/
+/g1_sonic/models/*.part
+data/
+
+# Local IK tuning results written by the GUI sliders (g1_ik README)
+/g1_ik/tuning.json
+
+.superpowers/
+# 上游 zip 交付的 AI 工具计划文档（主题已由 docs/ 正式文档覆盖），本地保留不入库
+/docs/superpowers/
+recordings/

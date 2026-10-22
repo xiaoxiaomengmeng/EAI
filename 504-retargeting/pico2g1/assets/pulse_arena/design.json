@@ -1,0 +1,27 @@
+{
+  "name": "PULSE / Humanoid Play Lab",
+  "extent_m": [18, 14],
+  "clear_center_m": [6, 6],
+  "spawn": [0, -3.8, 0],
+  "buttons": [
+    {"name":"cyan", "pos":[-1.2,5.48,0.85],"color":[0.04,0.65,0.72,1]},
+    {"name":"orange", "pos":[0,5.48,1.05],"color":[1,0.31,0.06,1]},
+    {"name":"lime", "pos":[1.2,5.48,1.25],"color":[0.57,0.78,0.16,1]}
+  ],
+  "cubes": [
+    {"name":"cyan", "pos":[5.2,2.55,0.9], "target":[5.2,-1.6,0.9],"color":[0.04,0.65,0.72,1]},
+    {"name":"orange", "pos":[6,2.55,0.9], "target":[6,-1.6,0.9],"color":[1,0.31,0.06,1]},
+    {"name":"lime", "pos":[6.8,2.55,0.9], "target":[6.8,-1.6,0.9],"color":[0.57,0.78,0.16,1]}
+  ],
+  "cube_half_size": 0.07,
+  "ball": {"pos":[-6,-0.8,0.23], "radius":0.22,"mass":0.45},
+  "goal": {"center":[-6,4.9,0.3], "half_size":[1.1,0.55,0.3]},
+  "waypoints": [[-6,-4.6],[-3.5,-5.5],[0,-4.8],[3.5,-5.5],[6,-4.6]],
+  "assumptions": [
+    "Conceptual 18 x 14 m arena, not reconstructed from a measured plan.",
+    "Target robot is an unspecified 1.2-1.8 m humanoid; actual hand reach and controller still need calibration.",
+    "Central 6 x 6 m is unobstructed; floor markings are visual only.",
+    "Ground collision is an infinite plane. Perimeter has a 2.4 m open entrance.",
+    "No robot/controller included. All props have actual MuJoCo dynamics; mocap test tool is demo only."
+  ]
+}

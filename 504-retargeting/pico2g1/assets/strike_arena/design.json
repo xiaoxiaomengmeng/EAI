@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "key": "strike",
+  "title": "STRIKE",
+  "units": "meters",
+  "up_axis": "Z",
+  "bounds": [
+    [
+      -7,
+      -6,
+      0
+    ],
+    [
+      7,
+      6,
+      2.3
+    ]
+  ],
+  "floor_z": 0,
+  "spawn": [
+    0,
+    -4.7,
+    0
+  ],
+  "ordered": false,
+  "tasks": [
+    {
+      "id": "pin_1",
+      "label": "击倒球瓶 1",
+      "kind": "topple",
+      "body": "pin_1",
+      "tilt_degrees": 55,
+      "max_height": 0.5,
+      "dwell": 0.25,
+      "points": 10
+    },
+    {
+      "id": "pin_2",
+      "label": "击倒球瓶 2",
+      "kind": "topple",
+      "body": "pin_2",
+      "tilt_degrees": 55,
+      "max_height": 0.5,
+      "dwell": 0.25,
+      "points": 10
+    },
+    {
+      "id": "pin_3",
+      "label": "击倒球瓶 3",
+      "kind": "topple",
+      "body": "pin_3",
+      "tilt_degrees": 55,
+      "max_height": 0.5,
+      "dwell": 0.25,
+      "points": 10
+    },
+    {
+      "id": "pin_4",
+      "label": "击倒球瓶 4",
+      "kind": "topple",
+      "body": "pin_4",
+      "tilt_degrees": 55,
+      "max_height": 0.5,
+      "dwell": 0.25,
+      "points": 10
+    },
+    {
+      "id": "pin_5",
+      "label": "击倒球瓶 5",
+      "kind": "topple",
+      "body": "pin_5",
+      "tilt_degrees": 55,
+      "max_height": 0.5,
+      "dwell": 0.25,
+      "points": 10
+    },
+    {
+      "id": "pin_6",
+      "label": "击倒球瓶 6",
+      "kind": "topple",
+      "body": "pin_6",
+      "tilt_degrees": 55,
+      "max_height": 0.5,
+      "dwell": 0.25,
+      "points": 10
+    }
+  ],
+  "prop_joints": [
+    "strike_ball_free",
+    "pin_1_free",
+    "pin_2_free",
+    "pin_3_free",
+    "pin_4_free",
+    "pin_5_free",
+    "pin_6_free"
+  ],
+  "assumptions": [
+    "Concept design, not a reconstruction of measured architecture.",
+    "14 x 12 m arena; 1.2-1.8 m humanoid; meter scale; Z up.",
+    "Infinite physical floor at z=0, finite visual tile field.",
+    "Passive props; scores are simulated-state feedback, not a learned skill guarantee.",
+    "ORBIT collision support z=.82; decorative paint has no contact."
+  ]
+}
